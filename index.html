@@ -3,262 +3,317 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#8b5cf6">
-  <title>Jom Kenal! | Misi Membaca Ceria</title>
+
+  <meta
+    name="description"
+    content="Jom Kenal: Pengembaraan Dunia Kata, BBM digital untuk kemahiran membaca, lisan dan pemahaman murid Pemulihan Khas."
+  >
+
+  <title>Jom Kenal | Pengembaraan Dunia Kata</title>
+
   <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
 
-<body>
-  <div class="app-shell">
+<body data-theme="hutan">
 
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="Jom Kenal halaman utama">
-        <span class="brand-icon">🌈</span>
-        <span>
-          <strong>Jom Kenal!</strong>
-          <small>Misi Membaca Ceria</small>
-        </span>
-      </a>
+  <header class="topbar">
+    <a href="#" class="brand" aria-label="Jom Kenal">
+      <span class="brand-icon">📚</span>
+      <span>
+        <strong>Jom Kenal!</strong>
+        <small>Pengembaraan Dunia Kata</small>
+      </span>
+    </a>
 
-      <button id="teacherOpenBtn" class="teacher-button" type="button">
-        👩‍🏫 Guru
-      </button>
-    </header>
+    <button id="teacherOpenBtn" class="teacher-button" type="button">
+      👩‍🏫 Guru
+    </button>
+  </header>
 
-    <main>
-      <!-- HALAMAN UTAMA -->
-      <section id="homeScreen" class="screen active">
-        <div class="hero-card">
-          <div class="hero-decoration" aria-hidden="true">
-            <span>⭐</span>
-            <span>🦋</span>
-            <span>🌼</span>
-            <span>☁️</span>
-          </div>
+  <main class="main-container">
 
-          <p class="eyebrow">✨ SELAMAT DATANG, WIRA MEMBACA!</p>
-          <h1>Jom membaca<br><span>sambil bermain!</span></h1>
-          <p class="hero-description">
-            Kenali suku kata, cantumkan perkataan dan kumpulkan bintang
-            dalam tiga misi yang menyeronokkan.
+    <!-- HALAMAN UTAMA -->
+    <section id="homeScreen" class="screen active">
+      <div class="hero-card">
+        <div class="hero-decoration decoration-one">⭐</div>
+        <div class="hero-decoration decoration-two">🌈</div>
+        <div class="hero-decoration decoration-three">🦋</div>
+
+        <div class="hero-content">
+          <span class="eyebrow">KIT BBM DIGITAL PEMULIHAN KHAS</span>
+
+          <h1>Jom Kenal!</h1>
+
+          <h2>Pengembaraan Dunia Kata</h2>
+
+          <p>
+            Mari membaca perkataan, mencantum suku kata dan memahami makna
+            melalui empat misi yang menyeronokkan!
           </p>
 
-          <div class="mascot" aria-hidden="true">🦊📚</div>
+          <div class="hero-mascot" aria-hidden="true">🧒🏻📖</div>
         </div>
+      </div>
 
-        <div class="panel student-panel">
-          <h2>🌟 Siapa nama kamu?</h2>
-          <label for="studentName">Nama murid</label>
-          <input
-            id="studentName"
-            type="text"
-            maxlength="60"
-            placeholder="Taip nama kamu di sini..."
-            autocomplete="given-name"
-          >
+      <section class="panel">
+        <h2>🌟 Sediakan diri untuk mengembara</h2>
 
-          <h3>🎨 Pilih dunia pengembaraan</h3>
-          <div class="theme-grid">
-            <button class="theme-option selected" type="button"
-              data-theme="hutan" aria-pressed="true">
-              <span class="theme-art">🌳🦋</span>
-              <span>Hutan</span>
-            </button>
+        <label for="studentName">Nama murid</label>
+        <input
+          id="studentName"
+          type="text"
+          maxlength="60"
+          autocomplete="name"
+          placeholder="Masukkan nama kamu"
+        >
 
-            <button class="theme-option" type="button"
-              data-theme="space" aria-pressed="false">
-              <span class="theme-art">🚀🪐</span>
-              <span>Angkasa Lepas</span>
-            </button>
+        <p class="small-note">
+          Gunakan nama panggilan atau kod murid jika kamu tidak mahu
+          memaparkan nama penuh.
+        </p>
 
-            <button class="theme-option" type="button"
-              data-theme="garden" aria-pressed="false">
-              <span class="theme-art">🌳🌷</span>
-              <span>Taman Bunga</span>
-            </button>
+        <label for="themeSelect">Pilih dunia pengembaraan</label>
 
-            <button class="theme-option" type="button"
-              data-theme="underwater" aria-pressed="false">
-              <span class="theme-art">🐠🫧</span>
-              <span>Alam Bawah Laut</span>
-            </button>
-          </div>
+        <select id="themeSelect">
+          <option value="hutan">🌳 Hutan Ceria</option>
+          <option value="space">🚀 Angkasa Lepas</option>
+          <option value="garden">🌼 Taman Ceria</option>
+          <option value="underwater">🐠 Dunia Bawah Laut</option>
+        </select>
 
-          <button id="startMissionBtn" class="primary-button" type="button">
-            🚀 Mula Misi!
+        <div class="theme-preview">
+          <button class="theme-option selected" data-theme="hutan"
+            type="button" aria-pressed="true">
+            🌳 Hutan
           </button>
-          <p id="homeMessage" class="message" role="status"></p>
+
+          <button class="theme-option" data-theme="space"
+            type="button" aria-pressed="false">
+            🚀 Angkasa
+          </button>
+
+          <button class="theme-option" data-theme="garden"
+            type="button" aria-pressed="false">
+            🌼 Taman
+          </button>
+
+          <button class="theme-option" data-theme="underwater"
+            type="button" aria-pressed="false">
+            🐠 Laut
+          </button>
         </div>
 
-        <div class="mission-preview">
-          <h2>🗺️ Tiga misi menanti kamu!</h2>
-          <div class="mission-grid">
-            <article class="mission-card mission-one">
-              <span class="mission-number">MISI 1</span>
-              <span class="mission-art">🖼️</span>
-              <h3>Kenal Perkataan</h3>
-              <p>Padankan perkataan dengan gambar.</p>
-            </article>
+        <p id="homeMessage" class="message" aria-live="polite"></p>
 
-            <article class="mission-card mission-two">
-              <span class="mission-number">MISI 2</span>
-              <span class="mission-art">🧩</span>
-              <h3>Cantum Suku Kata</h3>
-              <p>Cantumkan suku kata menjadi perkataan.</p>
-            </article>
-
-            <article class="mission-card mission-three">
-              <span class="mission-number">MISI 3</span>
-              <span class="mission-art">🎤</span>
-              <h3>Jom Baca!</h3>
-              <p>Baca perkataan dengan suara sendiri.</p>
-            </article>
-          </div>
-        </div>
+        <button id="startBtn" class="primary-button full-button" type="button">
+          🚀 Mula Pengembaraan!
+        </button>
       </section>
 
-      <!-- RUANG PERMAINAN -->
-      <section id="gameScreen" class="screen" hidden>
-        <div class="game-topline">
-          <button id="homeBtn" class="secondary-button" type="button">
-            ← Menu Utama
-          </button>
-          <span id="playerLabel" class="player-label">👧 Murid</span>
+      <section class="mission-overview">
+        <h2>🗺️ Empat misi kamu</h2>
+
+        <div class="mission-grid">
+          <article class="mission-card">
+            <span>🔎</span>
+            <h3>Misi 1</h3>
+            <p>Kenal dan Baca</p>
+            <small>Aras mudah</small>
+          </article>
+
+          <article class="mission-card">
+            <span>🧩</span>
+            <h3>Misi 2</h3>
+            <p>Cantum dan Baca</p>
+            <small>Aras asas</small>
+          </article>
+
+          <article class="mission-card">
+            <span>💡</span>
+            <h3>Misi 3</h3>
+            <p>Baca dan Faham</p>
+            <small>Aras sederhana</small>
+          </article>
+
+          <article class="mission-card">
+            <span>🏆</span>
+            <h3>Misi 4</h3>
+            <p>Cabaran Baca Sendiri</p>
+            <small>Aras mencabar</small>
+          </article>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- HALAMAN PERMAINAN -->
+    <section id="gameScreen" class="screen" hidden>
+
+      <div class="game-header">
+        <button id="homeBtn" class="secondary-button" type="button">
+          ← Halaman Utama
+        </button>
+
+        <div id="playerLabel" class="player-label"></div>
+      </div>
+
+      <div class="progress-panel">
+        <div class="progress-labels">
+          <span id="gameStage">MISI 1 DARIPADA 4</span>
+          <span id="questionValue">1/5</span>
         </div>
 
-        <div class="game-heading">
-          <p id="gameStage" class="eyebrow">MISI 1 DARIPADA 3</p>
-          <h1 id="gameTitle">Kenal Perkataan</h1>
-          <p id="gameInstruction">Padankan perkataan dengan gambar.</p>
-        </div>
-
-        <div class="progress-track" aria-label="Kemajuan misi">
+        <div class="progress-track">
           <div id="progressBar" class="progress-bar"></div>
         </div>
 
-        <div class="score-strip">
-          <span>⭐ Bintang: <strong id="scoreValue">0</strong></span>
-          <span>📍 Soalan: <strong id="questionValue">1</strong></span>
+        <div class="score-pill">
+          ⭐ Markah: <strong id="scoreValue">0</strong>
         </div>
+      </div>
 
-        <div id="gameContent" class="game-content">
-          <!-- Kandungan permainan akan dimasukkan oleh app.js -->
-        </div>
+      <section class="panel game-panel">
+        <span id="missionBadge" class="mission-badge">🔎 MISI 1</span>
 
-        <p id="gameMessage" class="message" role="status"></p>
+        <h1 id="gameTitle">Kenal dan Baca</h1>
 
-        <div class="game-actions">
-          <button id="checkAnswerBtn" class="primary-button" type="button">
-            Semak Jawapan ✓
-          </button>
-          <button id="nextQuestionBtn" class="primary-button" type="button" hidden>
-            Seterusnya →
-          </button>
-        </div>
-      </section>
+        <p id="gameInstruction" class="game-instruction"></p>
 
-      <!-- TAMAT PERMAINAN -->
-      <section id="resultScreen" class="screen" hidden>
-        <div class="result-card">
-          <div class="result-mascot" aria-hidden="true">🏆🦊🎉</div>
-          <p class="eyebrow">MISI SELESAI!</p>
-          <h1>Syabas, pembaca hebat!</h1>
-          <p id="resultStudentName">Kamu telah menamatkan misi.</p>
+        <div id="gameContent"></div>
 
-          <div class="result-score">
-            <span>Jumlah bintang</span>
-            <strong id="finalScore">0</strong>
-            <span>⭐</span>
-          </div>
+        <p id="gameMessage" class="message" aria-live="polite"></p>
 
-          <button id="finishMissionBtn" class="primary-button" type="button">
-            🏡 Kembali ke Menu Utama
-          </button>
-        </div>
-      </section>
-
-      <!-- RUANG GURU -->
-      <section id="teacherScreen" class="screen" hidden>
-        <div class="game-topline">
-          <button id="teacherBackBtn" class="secondary-button" type="button">
-            ← Kembali
-          </button>
-        </div>
-
-        <div class="teacher-heading">
-          <span class="teacher-icon">👩‍🏫</span>
-          <p class="eyebrow">RUANG GURU</p>
-          <h1>Rekod Pembacaan Murid</h1>
-          <p>Semak skor dan dengar rakaman bacaan murid.</p>
-        </div>
-
-        <div id="teacherLoginPanel" class="panel">
-          <h2>🔐 Log masuk guru</h2>
-          <label for="teacherPassword">Kata laluan</label>
-          <input
-            id="teacherPassword"
-            type="password"
-            placeholder="Masukkan kata laluan"
-            autocomplete="current-password"
+        <div class="game-controls">
+          <button
+            id="checkAnswerBtn"
+            class="primary-button"
+            type="button"
           >
-          <button id="teacherLoginBtn" class="primary-button" type="button">
-            Log Masuk
+            Semak Jawapan
           </button>
-          <p id="teacherLoginMessage" class="message" role="status"></p>
+
+          <button
+            id="nextQuestionBtn"
+            class="primary-button"
+            type="button"
+            hidden
+          >
+            Soalan Seterusnya →
+          </button>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- HALAMAN KEPUTUSAN -->
+    <section id="resultScreen" class="screen" hidden>
+      <div class="result-card">
+        <div class="result-mascot">🏆</div>
+
+        <span class="eyebrow">PENGEMBARAAN SELESAI</span>
+
+        <h1>Syabas!</h1>
+
+        <p id="resultStudentName"></p>
+
+        <div class="final-score-box">
+          <span>Markah kamu</span>
+          <strong id="finalScore">0/20</strong>
         </div>
 
-        <div id="teacherDashboard" class="panel" hidden>
+        <p id="resultFeedback"></p>
+
+        <div class="result-actions">
+          <button id="replayBtn" class="primary-button" type="button">
+            🔄 Main Semula
+          </button>
+
+          <button id="resultHomeBtn" class="secondary-button" type="button">
+            🏠 Halaman Utama
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- HALAMAN GURU -->
+    <section id="teacherScreen" class="screen" hidden>
+      <div class="game-header">
+        <button id="teacherBackBtn" class="secondary-button" type="button">
+          ← Kembali
+        </button>
+
+        <span class="player-label">👩‍🏫 Ruang Guru</span>
+      </div>
+
+      <section class="panel teacher-panel">
+        <h1>👩‍🏫 Ruang Guru</h1>
+
+        <p>
+          Masukkan kata laluan untuk melihat rekod pembelajaran yang
+          disimpan pada peranti ini.
+        </p>
+
+        <label for="teacherPassword">Kata laluan</label>
+
+        <input
+          id="teacherPassword"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Masukkan kata laluan"
+        >
+
+        <button id="teacherLoginBtn" class="primary-button full-button"
+          type="button">
+          Log Masuk
+        </button>
+
+        <p id="teacherLoginMessage" class="message" aria-live="polite"></p>
+
+        <div id="teacherDashboard" hidden>
           <div class="dashboard-heading">
-            <h2>📊 Ringkasan pencapaian</h2>
-            <button id="logoutTeacherBtn" class="secondary-button" type="button">
-              Log Keluar
+            <h2>📊 Rekod Murid</h2>
+
+            <button id="refreshRecordsBtn" class="secondary-button"
+              type="button">
+              🔄 Muat Semula
             </button>
           </div>
 
-          <div class="stats-grid">
-            <article class="stat-card">
-              <span>👧</span>
-              <p>Jumlah rekod</p>
-              <strong id="totalRecords">0</strong>
-            </article>
-            <article class="stat-card">
-              <span>🥇</span>
-              <p>Skor tertinggi</p>
-              <strong id="highestScore">—</strong>
-            </article>
-            <article class="stat-card">
-              <span>🌱</span>
-              <p>Skor terendah</p>
-              <strong id="lowestScore">—</strong>
-            </article>
-          </div>
-
-          <div class="records-heading">
-            <h2>📝 Rekod murid</h2>
-            <button id="refreshRecordsBtn" class="secondary-button" type="button">
-              ↻ Muat Semula
-            </button>
-          </div>
-
-          <p class="record-note">
-            Rekod akan dipaparkan mengikut skor tertinggi ke terendah.
+          <p class="small-note">
+            Rekod disusun daripada markah tertinggi kepada terendah.
           </p>
 
-          <div id="studentRecords" class="student-records">
-            <p>Belum ada rekod murid.</p>
-          </div>
+          <p id="recordSummary" class="record-summary"></p>
 
-          <p id="teacherMessage" class="message" role="status"></p>
+          <div id="recordsList" class="records-list"></div>
+
+          <button id="exportRecordsBtn" class="secondary-button full-button"
+            type="button">
+            📥 Eksport Rekod Markah CSV
+          </button>
+
+          <button id="teacherLogoutBtn" class="secondary-button full-button"
+            type="button">
+            Log Keluar
+          </button>
+
+          <p class="privacy-note">
+            Rakaman suara dan markah dalam versi ini disimpan pada peranti
+            yang digunakan. Untuk mengumpulkan rekod daripada peranti berlainan,
+            kit perlu disambungkan kepada pangkalan data dalam talian.
+          </p>
         </div>
       </section>
-    </main>
+    </section>
 
-    <footer class="app-footer">
-      <p>🌈 Jom Kenal! — Belajar membaca dengan ceria.</p>
-      <small>Kit digital Bahasa Melayu Pemulihan Khas Tahun 1</small>
-    </footer>
-  </div>
+  </main>
 
-  <script src="app.js"></script>
+  <footer class="footer">
+    <p>🌟 Jom Kenal! — Belajar membaca langkah demi langkah.</p>
+    <p>BBM Digital Pendidikan Pemulihan Khas</p>
+  </footer>
+
 </body>
 </html>
