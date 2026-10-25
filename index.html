@@ -1,319 +1,1575 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jom Kenal: Pengembaraan Dunia Kata</title>
 
-  <meta
-    name="description"
-    content="Jom Kenal: Pengembaraan Dunia Kata, BBM digital untuk kemahiran membaca, lisan dan pemahaman murid Pemulihan Khas."
-  >
+<style>
+/* ==================================================
+   1. TETAPAN ASAS
+================================================== */
+* {
+  box-sizing: border-box;
+}
 
-  <title>Jom Kenal | Pengembaraan Dunia Kata</title>
+:root {
+  --main: #25844c;
+  --dark: #155b35;
+  --light: #e5f8e9;
+  --panel: rgba(255,255,255,.88);
+  --ink: #173b2b;
+}
 
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: #e5f8e9;
+  color: var(--ink);
+  overflow-x: hidden;
+  transition: background .5s, color .5s;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 4px solid #ffca28;
+  outline-offset: 3px;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ==================================================
+   2. EMPAT TEMA DUNIA
+================================================== */
+
+/* HUTAN */
+body.forest {
+  --main: #238447;
+  --dark: #104b2c;
+  --light: #d8f5dc;
+  --panel: rgba(226,255,225,.93);
+  --ink: #153d25;
+  background: linear-gradient(180deg,#a5e6a5,#e5f8d9 60%,#8bcf81);
+}
+
+/* ANGKASA */
+body.space {
+  --main: #4268d9;
+  --dark: #101338;
+  --light: #dbe4ff;
+  --panel: rgba(20,27,73,.91);
+  --ink: #ffffff;
+  background: linear-gradient(180deg,#05071d,#111447 55%,#25245c);
+}
+
+/* TAMAN */
+body.garden {
+  --main: #bd4fa4;
+  --dark: #74366f;
+  --light: #ffe1f5;
+  --panel: rgba(255,235,250,.94);
+  --ink: #56284f;
+  background: linear-gradient(180deg,#f9d3f0,#fce8fb 55%,#e9c6ff);
+}
+
+/* LAUT */
+body.ocean {
+  --main: #087fa8;
+  --dark: #034a75;
+  --light: #d3f5ff;
+  --panel: rgba(218,249,255,.93);
+  --ink: #063d59;
+  background: linear-gradient(180deg,#0575a6,#27b6d2 55%,#a2eff0);
+}
+
+/* ==================================================
+   3. LATAR BELAKANG ANIMASI
+================================================== */
+#ambient {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.float-item {
+  position: absolute;
+  bottom: -100px;
+  opacity: .7;
+  animation: floatUp linear infinite;
+  user-select: none;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: .75;
+  }
+  85% {
+    opacity: .75;
+  }
+  100% {
+    transform: translateY(-120vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.twinkle {
+  position: absolute;
+  color: white;
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: .25; transform: scale(.7); }
+  to { opacity: 1; transform: scale(1.3); }
+}
+
+.tree-decoration {
+  position: fixed;
+  bottom: -10px;
+  font-size: clamp(45px,8vw,90px);
+  opacity: .45;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.tree-left { left: 0; }
+.tree-right { right: 0; }
+
+/* ==================================================
+   4. KANDUNGAN UTAMA
+================================================== */
+.app {
+  width: min(1100px, 94%);
+  margin: auto;
+  padding: 20px 0 45px;
+}
+
+header {
+  text-align: center;
+  padding: 18px 12px;
+  border-radius: 25px;
+  background: var(--panel);
+  border: 3px solid rgba(255,255,255,.8);
+  box-shadow: 0 8px 25px rgba(0,0,0,.13);
+  transition: background .4s;
+}
+
+.logo {
+  font-size: clamp(42px,8vw,70px);
+  animation: bob 3s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+h1 {
+  margin: 5px 0;
+  font-size: clamp(25px,5vw,42px);
+}
+
+header p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+h1, h2, h3, p, label, .question, .word {
+  color: var(--ink);
+}
+
+.panel {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 23px;
+  background: var(--panel);
+  border: 3px solid rgba(255,255,255,.8);
+  box-shadow: 0 7px 20px rgba(0,0,0,.12);
+  transition: background .4s, transform .3s;
+  backdrop-filter: blur(5px);
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+}
+
+.theme-button {
+  min-height: 120px;
+  padding: 15px 8px;
+  border-radius: 18px;
+  border: 3px solid transparent;
+  font-weight: bold;
+  font-size: 16px;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.theme-button:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.theme-button.selected {
+  border-color: #ffb300;
+  box-shadow: 0 0 0 3px white, 0 5px 15px #0002;
+}
+
+.theme-emoji {
+  display: block;
+  font-size: 38px;
+  margin-bottom: 8px;
+}
+
+.forest-option { background: #c5f0bd; color: #174c25; }
+.space-option { background: #151a49; color: white; }
+.garden-option { background: #f8d1f0; color: #6b2865; }
+.ocean-option { background: #b6f0ff; color: #064968; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 7px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  border-radius: 13px;
+  border: 2px solid var(--main);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.primary-button,
+.secondary-button,
+.option-button {
+  border-radius: 14px;
+  padding: 13px 17px;
+  font-weight: bold;
+  transition: transform .2s, filter .2s;
+}
+
+.primary-button {
+  background: var(--main);
+  color: white;
+  box-shadow: 0 4px 0 var(--dark);
+}
+
+.secondary-button {
+  background: var(--light);
+  color: var(--ink);
+  border: 2px solid var(--main);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.option-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.full-button {
+  width: 100%;
+  margin-top: 17px;
+  font-size: 19px;
+  padding: 16px;
+}
+
+.small-button {
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==================================================
+   5. PAPARAN PERMAINAN
+================================================== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 9px 13px;
+  border-radius: 30px;
+  background: var(--light);
+  border: 2px solid var(--main);
+  font-weight: bold;
+  color: var(--ink);
+}
+
+.progress-track {
+  width: 100%;
+  height: 16px;
+  margin-top: 13px;
+  background: rgba(120,120,120,.2);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--main);
+  transition: width .4s;
+  border-radius: 20px;
+}
+
+.question {
+  font-size: clamp(20px,4vw,28px);
+  line-height: 1.4;
+  font-weight: bold;
+  text-align: center;
+}
+
+.word-card {
+  position: relative;
+  margin: 20px auto;
+  padding: 25px 12px;
+  max-width: 600px;
+  border-radius: 22px;
+  border: 3px dashed var(--main);
+  background: var(--panel);
+  text-align: center;
+  overflow: hidden;
+}
+
+.word {
+  font-size: clamp(38px,8vw,64px);
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.picture {
+  display: block;
+  font-size: clamp(65px,13vw,105px);
+  margin-bottom: 8px;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.option-button {
+  min-height: 95px;
+  background: var(--panel);
+  border: 3px solid var(--main);
+  color: var(--ink);
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.option-button .option-emoji {
+  display: block;
+  font-size: 35px;
+  margin-bottom: 7px;
+}
+
+.option-button.correct {
+  background: #c9f7c9;
+  border-color: #218838;
+  color: #145522;
+}
+
+.option-button.wrong {
+  background: #ffe0e0;
+  border-color: #c62828;
+  color: #7c1717;
+}
+
+.feedback {
+  min-height: 40px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px 0 0;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.mission-tabs {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+}
+
+.mission-tab {
+  padding: 11px 5px;
+  border-radius: 12px;
+  background: var(--light);
+  color: var(--ink);
+  border: 2px solid transparent;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.mission-tab.active {
+  border-color: var(--main);
+  box-shadow: 0 0 0 2px white;
+}
+
+.syllable-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.syllable-button {
+  min-width: 85px;
+  min-height: 70px;
+  padding: 12px;
+  background: var(--light);
+  color: var(--ink);
+  border: 3px solid var(--main);
+  border-radius: 15px;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.syllable-button.picked {
+  background: var(--main);
+  color: white;
+}
+
+.answer-box {
+  min-height: 58px;
+  padding: 12px;
+  border: 2px dashed var(--main);
+  border-radius: 14px;
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  color: var(--ink);
+  background: var(--panel);
+}
+
+/* ==================================================
+   6. RAKAMAN SUARA
+================================================== */
+.voice-box {
+  padding: 16px;
+  border-radius: 17px;
+  border: 2px solid var(--main);
+  background: var(--panel);
+  margin-top: 15px;
+}
+
+.voice-box p {
+  line-height: 1.5;
+}
+
+.status {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* ==================================================
+   7. HASIL TAMAT
+================================================== */
+.result-score {
+  font-size: clamp(40px,9vw,75px);
+  font-weight: 900;
+  text-align: center;
+  color: var(--main);
+}
+
+.result-message {
+  font-size: 21px;
+  font-weight: bold;
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding: 20px 5px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* ==================================================
+   8. RESPONSIF UNTUK TELEFON
+================================================== */
+@media (max-width: 650px) {
+  .theme-grid {
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-tabs {
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .panel {
+    padding: 15px;
+  }
+
+  .options {
+    gap: 8px;
+  }
+
+  .option-button {
+    font-size: 17px;
+    padding: 10px 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
 </head>
 
-<body data-theme="hutan">
+<body class="forest">
 
-  <header class="topbar">
-    <a href="#" class="brand" aria-label="Jom Kenal">
-      <span class="brand-icon">📚</span>
-      <span>
-        <strong>Jom Kenal!</strong>
-        <small>Pengembaraan Dunia Kata</small>
-      </span>
-    </a>
+<div id="ambient" aria-hidden="true"></div>
+<div class="tree-decoration tree-left" id="treeLeft">🌳</div>
+<div class="tree-decoration tree-right" id="treeRight">🌲</div>
 
-    <button id="teacherOpenBtn" class="teacher-button" type="button">
-      👩‍🏫 Guru
-    </button>
-  </header>
+<div class="app">
 
-  <main class="main-container">
+<header>
+  <div class="logo" id="mainLogo">🌳</div>
+  <h1>Jom Kenal: Pengembaraan Dunia Kata</h1>
+  <p id="subtitle">Teroka dunia yang menyeronokkan sambil belajar membaca!</p>
+</header>
 
-    <!-- HALAMAN UTAMA -->
-    <section id="homeScreen" class="screen active">
-      <div class="hero-card">
-        <div class="hero-decoration decoration-one">⭐</div>
-        <div class="hero-decoration decoration-two">🌈</div>
-        <div class="hero-decoration decoration-three">🦋</div>
+<!-- ==================================================
+     PAPARAN UTAMA
+================================================== -->
+<section id="homeScreen">
 
-        <div class="hero-content">
-          <span class="eyebrow">KIT BBM DIGITAL PEMULIHAN KHAS</span>
+  <div class="panel">
+    <h2>🌈 Pilih Dunia Pengembaraan</h2>
+    <p>Pilih dunia kegemaran kamu. Latar belakang, warna kotak dan hiasan akan berubah mengikut dunia pilihan.</p>
 
-          <h1>Jom Kenal!</h1>
+    <div class="theme-grid">
+      <button class="theme-button forest-option selected"
+              data-theme="forest" type="button">
+        <span class="theme-emoji">🌳</span>
+        Hutan Ceria
+      </button>
 
-          <h2>Pengembaraan Dunia Kata</h2>
+      <button class="theme-button space-option"
+              data-theme="space" type="button">
+        <span class="theme-emoji">🚀</span>
+        Angkasa Lepas
+      </button>
 
-          <p>
-            Mari membaca perkataan, mencantum suku kata dan memahami makna
-            melalui empat misi yang menyeronokkan!
-          </p>
+      <button class="theme-button garden-option"
+              data-theme="garden" type="button">
+        <span class="theme-emoji">🌸</span>
+        Taman Ceria
+      </button>
 
-          <div class="hero-mascot" aria-hidden="true">🧒🏻📖</div>
-        </div>
+      <button class="theme-button ocean-option"
+              data-theme="ocean" type="button">
+        <span class="theme-emoji">🐠</span>
+        Dunia Bawah Laut
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>👋 Sediakan Diri, Pengembara!</h2>
+
+    <div class="form-row">
+      <div>
+        <label for="playerName">Nama murid</label>
+        <input id="playerName" type="text"
+               maxlength="40" placeholder="Masukkan nama kamu">
       </div>
 
-      <section class="panel">
-        <h2>🌟 Sediakan diri untuk mengembara</h2>
-
-        <label for="studentName">Nama murid</label>
-        <input
-          id="studentName"
-          type="text"
-          maxlength="60"
-          autocomplete="name"
-          placeholder="Masukkan nama kamu"
-        >
-
-        <p class="small-note">
-          Gunakan nama panggilan atau kod murid jika kamu tidak mahu
-          memaparkan nama penuh.
-        </p>
-
-        <label for="themeSelect">Pilih dunia pengembaraan</label>
-
-        <select id="themeSelect">
-          <option value="hutan">🌳 Hutan Ceria</option>
-          <option value="space">🚀 Angkasa Lepas</option>
-          <option value="garden">🌼 Taman Ceria</option>
-          <option value="underwater">🐠 Dunia Bawah Laut</option>
+      <div>
+        <label for="missionSelect">Pilih misi</label>
+        <select id="missionSelect"
+          style="width:100%;padding:14px;border:2px solid var(--main);border-radius:13px;background:var(--panel);color:var(--ink);">
+          <option value="0">Misi 1: Kenal dan Baca</option>
+          <option value="1">Misi 2: Cantum dan Baca</option>
+          <option value="2">Misi 3: Baca dan Faham</option>
+          <option value="3">Misi 4: Cabaran Baca Sendiri</option>
         </select>
+      </div>
+    </div>
 
-        <div class="theme-preview">
-          <button class="theme-option selected" data-theme="hutan"
-            type="button" aria-pressed="true">
-            🌳 Hutan
-          </button>
+    <button id="startBtn" class="primary-button full-button" type="button">
+      🚀 Mula Pengembaraan!
+    </button>
 
-          <button class="theme-option" data-theme="space"
-            type="button" aria-pressed="false">
-            🚀 Angkasa
-          </button>
+    <p id="homeMessage" class="feedback" role="status"></p>
+  </div>
 
-          <button class="theme-option" data-theme="garden"
-            type="button" aria-pressed="false">
-            🌼 Taman
-          </button>
+  <div class="panel">
+    <h2>📚 Apa yang akan kamu pelajari?</h2>
+    <p>🌟 Mengenal dan membaca perkataan.</p>
+    <p>🌟 Mencantum suku kata untuk membentuk perkataan.</p>
+    <p>🌟 Memahami maksud perkataan berdasarkan gambar.</p>
+    <p>🌟 Membaca perkataan dengan sebutan sendiri.</p>
+  </div>
 
-          <button class="theme-option" data-theme="underwater"
-            type="button" aria-pressed="false">
-            🐠 Laut
-          </button>
-        </div>
+</section>
 
-        <p id="homeMessage" class="message" aria-live="polite"></p>
+<!-- ==================================================
+     PAPARAN PERMAINAN
+================================================== -->
+<section id="gameScreen" class="hidden">
 
-        <button id="startBtn" class="primary-button full-button" type="button">
-          🚀 Mula Pengembaraan!
+  <div class="panel">
+    <div class="top-bar">
+      <button id="homeBtn" class="secondary-button small-button" type="button">
+        🏠 Menu Utama
+      </button>
+      <span class="badge" id="playerBadge">👤 Murid</span>
+      <span class="badge" id="scoreBadge">⭐ Skor: 0</span>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <p id="progressText" style="text-align:center;font-weight:bold;">
+      Soalan 1
+    </p>
+
+    <div class="mission-tabs">
+      <button class="mission-tab active" data-mission="0" type="button">🌱 Kenal dan Baca</button>
+      <button class="mission-tab" data-mission="1" type="button">🧩 Cantum dan Baca</button>
+      <button class="mission-tab" data-mission="2" type="button">💡 Baca dan Faham</button>
+      <button class="mission-tab" data-mission="3" type="button">🏆 Cabaran Sendiri</button>
+    </div>
+  </div>
+
+  <div class="panel" id="questionPanel">
+    <h2 id="missionHeading">🌱 Misi 1: Kenal dan Baca</h2>
+    <p class="question" id="questionText">Lihat gambar dan baca perkataan.</p>
+
+    <div class="word-card">
+      <span class="picture" id="mainPicture">🧼</span>
+      <div class="word" id="mainWord">sabun</div>
+      <p id="wordHint">Dengar sebutan dan baca perkataan.</p>
+
+      <button id="listenBtn" class="secondary-button" type="button">
+        🔊 Dengar Sebutan
+      </button>
+    </div>
+
+    <div id="syllableArea" class="syllable-area hidden"></div>
+    <div id="answerBox" class="answer-box hidden">Pilih suku kata</div>
+
+    <div id="options" class="options"></div>
+
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+
+    <div class="action-row">
+      <button id="checkBtn" class="primary-button hidden" type="button">
+        ✅ Semak Jawapan
+      </button>
+      <button id="nextBtn" class="primary-button hidden" type="button">
+        ➡️ Soalan Seterusnya
+      </button>
+    </div>
+
+    <div class="voice-box">
+      <h3>🎤 Sudut Bacaan Suara</h3>
+      <p>Baca perkataan yang dipaparkan. Jika mahu, tekan butang rakaman untuk merakam suara kamu.</p>
+
+      <div class="action-row">
+        <button id="recordBtn" class="secondary-button" type="button">
+          🎙️ Mula Rakaman
         </button>
-      </section>
-
-      <section class="mission-overview">
-        <h2>🗺️ Empat misi kamu</h2>
-
-        <div class="mission-grid">
-          <article class="mission-card">
-            <span>🔎</span>
-            <h3>Misi 1</h3>
-            <p>Kenal dan Baca</p>
-            <small>Aras mudah</small>
-          </article>
-
-          <article class="mission-card">
-            <span>🧩</span>
-            <h3>Misi 2</h3>
-            <p>Cantum dan Baca</p>
-            <small>Aras asas</small>
-          </article>
-
-          <article class="mission-card">
-            <span>💡</span>
-            <h3>Misi 3</h3>
-            <p>Baca dan Faham</p>
-            <small>Aras sederhana</small>
-          </article>
-
-          <article class="mission-card">
-            <span>🏆</span>
-            <h3>Misi 4</h3>
-            <p>Cabaran Baca Sendiri</p>
-            <small>Aras mencabar</small>
-          </article>
-        </div>
-      </section>
-    </section>
-
-
-    <!-- HALAMAN PERMAINAN -->
-    <section id="gameScreen" class="screen" hidden>
-
-      <div class="game-header">
-        <button id="homeBtn" class="secondary-button" type="button">
-          ← Halaman Utama
+        <button id="stopRecordBtn" class="secondary-button hidden" type="button">
+          ⏹️ Hentikan Rakaman
         </button>
-
-        <div id="playerLabel" class="player-label"></div>
+        <button id="playRecordBtn" class="secondary-button hidden" type="button">
+          ▶️ Dengar Rakaman
+        </button>
       </div>
 
-      <div class="progress-panel">
-        <div class="progress-labels">
-          <span id="gameStage">MISI 1 DARIPADA 4</span>
-          <span id="questionValue">1/5</span>
-        </div>
+      <p id="recordStatus" class="status" role="status">
+        Rakaman belum dimulakan.
+      </p>
+      <audio id="audioPlayback" class="hidden" controls></audio>
+      <p style="font-size:12px;">Nota: Rakaman disimpan sementara dalam sesi pelayar ini. Muat turun rakaman jika mahu menyimpannya.</p>
+      <button id="downloadRecordBtn" class="secondary-button small-button hidden" type="button">
+        💾 Muat Turun Rakaman
+      </button>
+    </div>
+  </div>
 
-        <div class="progress-track">
-          <div id="progressBar" class="progress-bar"></div>
-        </div>
+</section>
 
-        <div class="score-pill">
-          ⭐ Markah: <strong id="scoreValue">0</strong>
-        </div>
-      </div>
+<!-- ==================================================
+     PAPARAN KEPUTUSAN
+================================================== -->
+<section id="resultScreen" class="hidden">
+  <div class="panel">
+    <h2 style="text-align:center;">🎉 Pengembaraan Selesai!</h2>
+    <p id="resultName" class="result-message"></p>
+    <div id="resultScore" class="result-score">0</div>
+    <p id="resultMessage" class="result-message"></p>
 
-      <section class="panel game-panel">
-        <span id="missionBadge" class="mission-badge">🔎 MISI 1</span>
+    <div class="action-row">
+      <button id="retryBtn" class="primary-button" type="button">
+        🔁 Cuba Lagi
+      </button>
+      <button id="resultHomeBtn" class="secondary-button" type="button">
+        🏠 Kembali ke Menu
+      </button>
+    </div>
+  </div>
+</section>
 
-        <h1 id="gameTitle">Kenal dan Baca</h1>
+<footer>
+  🌟 Jom Kenal: Pengembaraan Dunia Kata 🌟<br>
+  Belajar membaca sambil meneroka dunia imaginasi!
+</footer>
 
-        <p id="gameInstruction" class="game-instruction"></p>
+</div>
 
-        <div id="gameContent"></div>
+<script>
+"use strict";
 
-        <p id="gameMessage" class="message" aria-live="polite"></p>
+/* ==================================================
+   1. DATA TEMA
+================================================== */
+const themes = {
+  forest: {
+    name: "Hutan Ceria",
+    logo: "🌳",
+    subtitle: "Teroka hutan hijau sambil belajar membaca!",
+    background: ["🌳","🌲","🌿","🍃","🦋","🌼","🍀","🐿️"],
+    left: "🌳",
+    right: "🌲"
+  },
+  space: {
+    name: "Angkasa Lepas",
+    logo: "🚀",
+    subtitle: "Terbang ke angkasa dan jelajahi dunia kata!",
+    background: ["⭐","✨","🪐","🌟","☄️","🌙","🛸","💫"],
+    left: "🪐",
+    right: "🚀"
+  },
+  garden: {
+    name: "Taman Ceria",
+    logo: "🌸",
+    subtitle: "Baca perkataan sambil menikmati taman bunga!",
+    background: ["🌸","🌺","🌷","🌼","💮","🌹","🦋","🍃"],
+    left: "🌷",
+    right: "🌸"
+  },
+  ocean: {
+    name: "Dunia Bawah Laut",
+    logo: "🐠",
+    subtitle: "Selami lautan biru dan temui perkataan baharu!",
+    background: ["🫧","🐠","🐟","🐬","🪸","🐚","🫧","🐙"],
+    left: "🪸",
+    right: "🐠"
+  }
+};
 
-        <div class="game-controls">
-          <button
-            id="checkAnswerBtn"
-            class="primary-button"
-            type="button"
-          >
-            Semak Jawapan
-          </button>
+let currentTheme = "forest";
+let playerName = "";
+let currentMission = 0;
+let questionIndex = 0;
+let score = 0;
+let answered = false;
+let selectedSyllables = [];
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingBlob = null;
+let recordingUrl = null;
+let recordStream = null;
+let lastQuestion = null;
 
-          <button
-            id="nextQuestionBtn"
-            class="primary-button"
-            type="button"
-            hidden
-          >
-            Soalan Seterusnya →
-          </button>
-        </div>
-      </section>
-    </section>
+/* ==================================================
+   2. DATA SOALAN
+================================================== */
 
+/* Misi 1: Kenal dan Baca */
+const mission1 = [
+  {
+    word: "sabun",
+    picture: "🧼",
+    question: "Perhatikan gambar. Apakah nama benda ini?",
+    options: [
+      {text:"sabun", emoji:"🧼", correct:true},
+      {text:"sapu", emoji:"🧹", correct:false},
+      {text:"baju", emoji:"👕", correct:false},
+      {text:"buku", emoji:"📘", correct:false}
+    ]
+  },
+  {
+    word: "sapu",
+    picture: "🧹",
+    question: "Apakah nama alat yang ditunjukkan?",
+    options: [
+      {text:"sapu", emoji:"🧹", correct:true},
+      {text:"sabun", emoji:"🧼", correct:false},
+      {text:"sudu", emoji:"🥄", correct:false},
+      {text:"baju", emoji:"👕", correct:false}
+    ]
+  },
+  {
+    word: "baju",
+    picture: "👕",
+    question: "Baca perkataan dan pilih gambar yang betul.",
+    options: [
+      {text:"baju", emoji:"👕", correct:true},
+      {text:"buku", emoji:"📘", correct:false},
+      {text:"bola", emoji:"⚽", correct:false},
+      {text:"sapu", emoji:"🧹", correct:false}
+    ]
+  },
+  {
+    word: "bola",
+    picture: "⚽",
+    question: "Apakah perkataan yang sepadan dengan gambar?",
+    options: [
+      {text:"bola", emoji:"⚽", correct:true},
+      {text:"baju", emoji:"👕", correct:false},
+      {text:"buku", emoji:"📘", correct:false},
+      {text:"susu", emoji:"🥛", correct:false}
+    ]
+  },
+  {
+    word: "buku",
+    picture: "📘",
+    question: "Pilih perkataan yang betul.",
+    options: [
+      {text:"buku", emoji:"📘", correct:true},
+      {text:"bola", emoji:"⚽", correct:false},
+      {text:"sapu", emoji:"🧹", correct:false},
+      {text:"sabun", emoji:"🧼", correct:false}
+    ]
+  }
+];
 
-    <!-- HALAMAN KEPUTUSAN -->
-    <section id="resultScreen" class="screen" hidden>
-      <div class="result-card">
-        <div class="result-mascot">🏆</div>
+/* Misi 2: Cantum dan Baca */
+const mission2 = [
+  {word:"sapu", picture:"🧹", syllables:["sa","pu"], question:"Cantumkan suku kata untuk membentuk perkataan."},
+  {word:"baju", picture:"👕", syllables:["ba","ju"], question:"Pilih suku kata mengikut urutan yang betul."},
+  {word:"bola", picture:"⚽", syllables:["bo","la"], question:"Cantumkan suku kata untuk membaca perkataan."},
+  {word:"buku", picture:"📘", syllables:["bu","ku"], question:"Pilih suku kata pertama, kemudian suku kata kedua."},
+  {word:"susu", picture:"🥛", syllables:["su","su"], question:"Cantumkan kedua-dua suku kata."}
+];
 
-        <span class="eyebrow">PENGEMBARAAN SELESAI</span>
+/* Misi 3: Baca dan Faham */
+const mission3 = [
+  {
+    word:"sabun",
+    picture:"🧼",
+    question:"Apakah kegunaan sabun?",
+    options:[
+      {text:"Mencuci tangan",emoji:"🧼",correct:true},
+      {text:"Menulis buku",emoji:"✏️",correct:false},
+      {text:"Bermain bola",emoji:"⚽",correct:false},
+      {text:"Memakai kasut",emoji:"👟",correct:false}
+    ]
+  },
+  {
+    word:"sapu",
+    picture:"🧹",
+    question:"Apakah yang boleh dilakukan menggunakan penyapu?",
+    options:[
+      {text:"Menyapu lantai",emoji:"🧹",correct:true},
+      {text:"Minum air",emoji:"🥛",correct:false},
+      {text:"Membaca buku",emoji:"📘",correct:false},
+      {text:"Menyiram bunga",emoji:"🌷",correct:false}
+    ]
+  },
+  {
+    word:"baju",
+    picture:"👕",
+    question:"Apakah yang kita pakai pada badan?",
+    options:[
+      {text:"Baju",emoji:"👕",correct:true},
+      {text:"Buku",emoji:"📘",correct:false},
+      {text:"Bola",emoji:"⚽",correct:false},
+      {text:"Sabun",emoji:"🧼",correct:false}
+    ]
+  },
+  {
+    word:"buku",
+    picture:"📘",
+    question:"Apakah yang digunakan untuk membaca?",
+    options:[
+      {text:"Buku",emoji:"📘",correct:true},
+      {text:"Penyapu",emoji:"🧹",correct:false},
+      {text:"Bola",emoji:"⚽",correct:false},
+      {text:"Baju",emoji:"👕",correct:false}
+    ]
+  },
+  {
+    word:"susu",
+    picture:"🥛",
+    question:"Minuman manakah yang ditunjukkan oleh gambar?",
+    options:[
+      {text:"Susu",emoji:"🥛",correct:true},
+      {text:"Air sabun",emoji:"🧼",correct:false},
+      {text:"Jus oren",emoji:"🧃",correct:false},
+      {text:"Sup",emoji:"🍲",correct:false}
+    ]
+  }
+];
 
-        <h1>Syabas!</h1>
+/* Misi 4: Cabaran Baca Sendiri */
+const mission4 = [
+  {word:"sapu",picture:"🧹",options:[
+    {text:"sapu",emoji:"🧹",correct:true},
+    {text:"susu",emoji:"🥛",correct:false},
+    {text:"buku",emoji:"📘",correct:false},
+    {text:"baju",emoji:"👕",correct:false}
+  ]},
+  {word:"buku",picture:"📘",options:[
+    {text:"buku",emoji:"📘",correct:true},
+    {text:"bola",emoji:"⚽",correct:false},
+    {text:"sapu",emoji:"🧹",correct:false},
+    {text:"susu",emoji:"🥛",correct:false}
+  ]},
+  {word:"susu",picture:"🥛",options:[
+    {text:"susu",emoji:"🥛",correct:true},
+    {text:"sabun",emoji:"🧼",correct:false},
+    {text:"baju",emoji:"👕",correct:false},
+    {text:"buku",emoji:"📘",correct:false}
+  ]},
+  {word:"bola",picture:"⚽",options:[
+    {text:"bola",emoji:"⚽",correct:true},
+    {text:"buku",emoji:"📘",correct:false},
+    {text:"sapu",emoji:"🧹",correct:false},
+    {text:"sabun",emoji:"🧼",correct:false}
+  ]},
+  {word:"baju",picture:"👕",options:[
+    {text:"baju",emoji:"👕",correct:true},
+    {text:"bola",emoji:"⚽",correct:false},
+    {text:"susu",emoji:"🥛",correct:false},
+    {text:"sapu",emoji:"🧹",correct:false}
+  ]}
+];
 
-        <p id="resultStudentName"></p>
+const missionNames = [
+  "🌱 Misi 1: Kenal dan Baca",
+  "🧩 Misi 2: Cantum dan Baca",
+  "💡 Misi 3: Baca dan Faham",
+  "🏆 Misi 4: Cabaran Baca Sendiri"
+];
 
-        <div class="final-score-box">
-          <span>Markah kamu</span>
-          <strong id="finalScore">0/20</strong>
-        </div>
+const allMissions = [mission1, mission2, mission3, mission4];
 
-        <p id="resultFeedback"></p>
+/* ==================================================
+   3. PILIH TEMA DAN ANIMASI
+================================================== */
+function makeBackground() {
+  const ambient = document.getElementById("ambient");
+  ambient.innerHTML = "";
 
-        <div class="result-actions">
-          <button id="replayBtn" class="primary-button" type="button">
-            🔄 Main Semula
-          </button>
+  const theme = themes[currentTheme];
 
-          <button id="resultHomeBtn" class="secondary-button" type="button">
-            🏠 Halaman Utama
-          </button>
-        </div>
-      </div>
-    </section>
+  if (currentTheme === "space") {
+    for (let i = 0; i < 35; i++) {
+      const star = document.createElement("span");
+      star.className = "twinkle";
+      star.textContent = Math.random() > .5 ? "✦" : "·";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.fontSize = (10 + Math.random() * 18) + "px";
+      star.style.animationDelay = Math.random() * 3 + "s";
+      ambient.appendChild(star);
+    }
+  }
 
+  for (let i = 0; i < 24; i++) {
+    const item = document.createElement("span");
+    item.className = "float-item";
+    item.textContent = theme.background[
+      Math.floor(Math.random() * theme.background.length)
+    ];
+    item.style.left = Math.random() * 100 + "%";
+    item.style.fontSize = (20 + Math.random() * 32) + "px";
+    item.style.animationDuration = (9 + Math.random() * 15) + "s";
+    item.style.animationDelay = (-Math.random() * 20) + "s";
 
-    <!-- HALAMAN GURU -->
-    <section id="teacherScreen" class="screen" hidden>
-      <div class="game-header">
-        <button id="teacherBackBtn" class="secondary-button" type="button">
-          ← Kembali
-        </button>
+    if (currentTheme === "space") {
+      item.style.opacity = ".8";
+    }
+    ambient.appendChild(item);
+  }
 
-        <span class="player-label">👩‍🏫 Ruang Guru</span>
-      </div>
+  document.getElementById("treeLeft").textContent = theme.left;
+  document.getElementById("treeRight").textContent = theme.right;
 
-      <section class="panel teacher-panel">
-        <h1>👩‍🏫 Ruang Guru</h1>
+  document.getElementById("treeLeft").style.display =
+    currentTheme === "space" ? "none" : "block";
+  document.getElementById("treeRight").style.display =
+    currentTheme === "space" ? "none" : "block";
 
-        <p>
-          Masukkan kata laluan untuk melihat rekod pembelajaran yang
-          disimpan pada peranti ini.
-        </p>
+  document.getElementById("mainLogo").textContent = theme.logo;
+  document.getElementById("subtitle").textContent = theme.subtitle;
+}
 
-        <label for="teacherPassword">Kata laluan</label>
+function chooseTheme(themeName) {
+  if (!themes[themeName]) return;
 
-        <input
-          id="teacherPassword"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Masukkan kata laluan"
-        >
+  currentTheme = themeName;
+  document.body.className = themeName;
 
-        <button id="teacherLoginBtn" class="primary-button full-button"
-          type="button">
-          Log Masuk
-        </button>
+  document.querySelectorAll(".theme-button").forEach(button => {
+    button.classList.toggle(
+      "selected",
+      button.dataset.theme === themeName
+    );
+  });
 
-        <p id="teacherLoginMessage" class="message" aria-live="polite"></p>
+  makeBackground();
+}
 
-        <div id="teacherDashboard" hidden>
-          <div class="dashboard-heading">
-            <h2>📊 Rekod Murid</h2>
+/* ==================================================
+   4. NAVIGASI PAPARAN
+================================================== */
+function showScreen(screenId) {
+  ["homeScreen","gameScreen","resultScreen"].forEach(id => {
+    const element = document.getElementById(id);
+    element.classList.toggle("hidden", id !== screenId);
+  });
 
-            <button id="refreshRecordsBtn" class="secondary-button"
-              type="button">
-              🔄 Muat Semula
-            </button>
-          </div>
+  window.scrollTo({top:0, behavior:"smooth"});
+}
 
-          <p class="small-note">
-            Rekod disusun daripada markah tertinggi kepada terendah.
-          </p>
+function startMission() {
+  const nameInput = document.getElementById("playerName");
+  playerName = nameInput.value.trim();
 
-          <p id="recordSummary" class="record-summary"></p>
+  if (!playerName) {
+    document.getElementById("homeMessage").textContent =
+      "😊 Sila masukkan nama kamu dahulu.";
+    nameInput.focus();
+    return;
+  }
 
-          <div id="recordsList" class="records-list"></div>
+  currentMission = Number(
+    document.getElementById("missionSelect").value
+  );
 
-          <button id="exportRecordsBtn" class="secondary-button full-button"
-            type="button">
-            📥 Eksport Rekod Markah CSV
-          </button>
+  questionIndex = 0;
+  score = 0;
+  answered = false;
 
-          <button id="teacherLogoutBtn" class="secondary-button full-button"
-            type="button">
-            Log Keluar
-          </button>
+  document.getElementById("homeMessage").textContent = "";
+  document.getElementById("playerBadge").textContent =
+    "👤 " + playerName;
 
-          <p class="privacy-note">
-            Rakaman suara dan markah dalam versi ini disimpan pada peranti
-            yang digunakan. Untuk mengumpulkan rekod daripada peranti berlainan,
-            kit perlu disambungkan kepada pangkalan data dalam talian.
-          </p>
-        </div>
-      </section>
-    </section>
+  showScreen("gameScreen");
+  renderQuestion();
+}
 
-  </main>
+/* ==================================================
+   5. PAPAR SOALAN
+================================================== */
+function renderQuestion() {
+  const questions = allMissions[currentMission];
 
-  <footer class="footer">
-    <p>🌟 Jom Kenal! — Belajar membaca langkah demi langkah.</p>
-    <p>BBM Digital Pendidikan Pemulihan Khas</p>
-  </footer>
+  if (questionIndex >= questions.length) {
+    showResult();
+    return;
+  }
+
+  answered = false;
+  selectedSyllables = [];
+  lastQuestion = questions[questionIndex];
+
+  document.getElementById("missionHeading").textContent =
+    missionNames[currentMission];
+
+  document.getElementById("questionText").textContent =
+    lastQuestion.question ||
+    "Lihat gambar dan baca perkataan yang dipaparkan.";
+
+  document.getElementById("mainPicture").textContent =
+    lastQuestion.picture;
+
+  document.getElementById("mainWord").textContent =
+    lastQuestion.word;
+
+  document.getElementById("wordHint").textContent =
+    currentMission === 1
+      ? "Cantumkan suku kata untuk membentuk perkataan."
+      : "Dengar sebutan dan baca perkataan.";
+
+  document.getElementById("scoreBadge").textContent =
+    "⭐ Skor: " + score;
+
+  document.getElementById("progressText").textContent =
+    "Soalan " + (questionIndex + 1) + " daripada " + questions.length;
+
+  document.getElementById("progressFill").style.width =
+    (questionIndex / questions.length * 100) + "%";
+
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("nextBtn").classList.add("hidden");
+  document.getElementById("checkBtn").classList.add("hidden");
+
+  document.getElementById("options").innerHTML = "";
+  document.getElementById("syllableArea").innerHTML = "";
+  document.getElementById("answerBox").textContent =
+    "Pilih suku kata";
+  document.getElementById("answerBox").classList.add("hidden");
+  document.getElementById("syllableArea").classList.add("hidden");
+
+  document.querySelectorAll(".mission-tab").forEach(button => {
+    button.classList.toggle(
+      "active",
+      Number(button.dataset.mission) === currentMission
+    );
+  });
+
+  if (currentMission === 1) {
+    renderSyllables(lastQuestion);
+  } else {
+    renderOptions(lastQuestion);
+  }
+
+  resetRecordingUI();
+}
+
+/* ==================================================
+   6. PILIH JAWAPAN
+================================================== */
+function renderOptions(question) {
+  const optionsElement = document.getElementById("options");
+  const shuffled = question.options
+    .map(option => ({...option}))
+    .sort(() => Math.random() - .5);
+
+  shuffled.forEach(option => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "option-button";
+
+    const emoji = document.createElement("span");
+    emoji.className = "option-emoji";
+    emoji.textContent = option.emoji || "📖";
+
+    const text = document.createElement("span");
+    text.textContent = option.text;
+
+    button.appendChild(emoji);
+    button.appendChild(text);
+
+    button.addEventListener("click", () => {
+      if (answered) return;
+
+      answered = true;
+
+      if (option.correct) {
+        score += 10;
+        button.classList.add("correct");
+        document.getElementById("feedback").textContent =
+          "🎉 Syabas! Jawapan kamu betul. +10 markah";
+      } else {
+        button.classList.add("wrong");
+        document.getElementById("feedback").textContent =
+          "💪 Belum tepat. Jawapan yang betul ialah: " +
+          question.options.find(item => item.correct).text;
+      }
+
+      Array.from(optionsElement.children).forEach(child => {
+        child.disabled = true;
+      });
+
+      document.getElementById("scoreBadge").textContent =
+        "⭐ Skor: " + score;
+
+      document.getElementById("nextBtn").classList.remove("hidden");
+    });
+
+    optionsElement.appendChild(button);
+  });
+}
+
+/* ==================================================
+   7. CANTUM SUKU KATA
+================================================== */
+function renderSyllables(question) {
+  const area = document.getElementById("syllableArea");
+  const answerBox = document.getElementById("answerBox");
+
+  area.classList.remove("hidden");
+  answerBox.classList.remove("hidden");
+
+  const mixed = [...question.syllables].sort(() => Math.random() - .5);
+
+  mixed.forEach((syllable, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "syllable-button";
+    button.textContent = syllable;
+
+    button.addEventListener("click", () => {
+      if (answered || button.classList.contains("picked")) return;
+
+      button.classList.add("picked");
+      selectedSyllables.push({syllable, button});
+
+      answerBox.textContent = selectedSyllables
+        .map(item => item.syllable)
+        .join(" ");
+
+      if (selectedSyllables.length === question.syllables.length) {
+        document.getElementById("checkBtn").classList.remove("hidden");
+      }
+    });
+
+    area.appendChild(button);
+  });
+}
+
+function checkSyllables() {
+  if (answered) return;
+
+  const answer = selectedSyllables
+    .map(item => item.syllable)
+    .join("");
+
+  const correctAnswer = lastQuestion.syllables.join("");
+
+  answered = true;
+
+  if (answer === correctAnswer) {
+    score += 10;
+    document.getElementById("feedback").textContent =
+      "🌟 Bagus! Kamu berjaya mencantumkan suku kata. +10 markah";
+  } else {
+    document.getElementById("feedback").textContent =
+      "💡 Cuba ingat semula urutan suku kata. Jawapan: " +
+      correctAnswer;
+  }
+
+  document.getElementById("scoreBadge").textContent =
+    "⭐ Skor: " + score;
+
+  document.getElementById("checkBtn").classList.add("hidden");
+  document.getElementById("nextBtn").classList.remove("hidden");
+
+  document.querySelectorAll(".syllable-button").forEach(button => {
+    button.disabled = true;
+  });
+}
+
+/* ==================================================
+   8. SEBUTAN PERKATAAN
+================================================== */
+function speakWord() {
+  if (!("speechSynthesis" in window)) {
+    document.getElementById("feedback").textContent =
+      "Pelayar ini tidak menyokong fungsi suara automatik. Cuba baca perkataan dengan bimbingan guru.";
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(
+    document.getElementById("mainWord").textContent
+  );
+
+  utterance.lang = "ms-MY";
+  utterance.rate = 0.75;
+  utterance.pitch = 1.05;
+
+  window.speechSynthesis.speak(utterance);
+}
+
+/* ==================================================
+   9. RAKAMAN SUARA MURID
+================================================== */
+function resetRecordingUI() {
+  stopRecordingIfNeeded();
+
+  if (recordingUrl) {
+    URL.revokeObjectURL(recordingUrl);
+  }
+
+  recordingUrl = null;
+  recordingBlob = null;
+  recordedChunks = [];
+
+  document.getElementById("recordStatus").textContent =
+    "Rakaman belum dimulakan.";
+
+  document.getElementById("audioPlayback").classList.add("hidden");
+  document.getElementById("playRecordBtn").classList.add("hidden");
+  document.getElementById("downloadRecordBtn").classList.add("hidden");
+  document.getElementById("stopRecordBtn").classList.add("hidden");
+  document.getElementById("recordBtn").classList.remove("hidden");
+}
+
+async function startRecording() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia ||
+      typeof MediaRecorder === "undefined") {
+    document.getElementById("recordStatus").textContent =
+      "Rakaman suara tidak disokong oleh pelayar ini. Cuba Chrome dengan sambungan HTTPS.";
+    return;
+  }
+
+  try {
+    recordStream = await navigator.mediaDevices.getUserMedia({audio:true});
+
+    recordedChunks = [];
+
+    let options = {};
+    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+      options.mimeType = "audio/webm;codecs=opus";
+    }
+
+    mediaRecorder = new MediaRecorder(recordStream, options);
+
+    mediaRecorder.ondataavailable = event => {
+      if (event.data && event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      recordingBlob = new Blob(recordedChunks, {
+        type: mediaRecorder.mimeType || "audio/webm"
+      });
+
+      recordingUrl = URL.createObjectURL(recordingBlob);
+
+      const audio = document.getElementById("audioPlayback");
+      audio.src = recordingUrl;
+      audio.classList.remove("hidden");
+
+      document.getElementById("playRecordBtn").classList.remove("hidden");
+      document.getElementById("downloadRecordBtn").classList.remove("hidden");
+      document.getElementById("recordStatus").textContent =
+        "Rakaman siap! Kamu boleh mendengar atau memuat turunnya.";
+
+      if (recordStream) {
+        recordStream.getTracks().forEach(track => track.stop());
+        recordStream = null;
+      }
+    };
+
+    mediaRecorder.start();
+
+    document.getElementById("recordBtn").classList.add("hidden");
+    document.getElementById("stopRecordBtn").classList.remove("hidden");
+    document.getElementById("recordStatus").textContent =
+      "🔴 Sedang merakam. Baca perkataan dengan jelas.";
+
+  } catch (error) {
+    console.error("Ralat rakaman:", error);
+
+    document.getElementById("recordStatus").textContent =
+      "Mikrofon tidak dapat digunakan. Benarkan akses mikrofon pada pelayar dan cuba lagi.";
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+  }
+
+  document.getElementById("stopRecordBtn").classList.add("hidden");
+  document.getElementById("recordBtn").classList.remove("hidden");
+}
+
+function stopRecordingIfNeeded() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    try {
+      mediaRecorder.stop();
+    } catch (error) {
+      console.log("Rakaman telah dihentikan.");
+    }
+  }
+
+  if (recordStream) {
+    recordStream.getTracks().forEach(track => track.stop());
+    recordStream = null;
+  }
+}
+
+function playRecording() {
+  const audio = document.getElementById("audioPlayback");
+  audio.play().catch(() => {
+    document.getElementById("recordStatus").textContent =
+      "Tekan butang main pada pemain audio untuk mendengar rakaman.";
+  });
+}
+
+function downloadRecording() {
+  if (!recordingBlob || !recordingUrl) return;
+
+  const link = document.createElement("a");
+  link.href = recordingUrl;
+  link.download = "rakaman-" +
+    document.getElementById("mainWord").textContent + ".webm";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+/* ==================================================
+   10. KEPUTUSAN
+================================================== */
+function showResult() {
+  showScreen("resultScreen");
+
+  const total = allMissions[currentMission].length * 10;
+  const percent = Math.round((score / total) * 100);
+
+  document.getElementById("resultName").textContent =
+    "Tahniah, " + playerName + "!";
+
+  document.getElementById("resultScore").textContent =
+    score + " / " + total;
+
+  let message = "";
+
+  if (percent === 100) {
+    message = "🏆 Hebat sekali! Semua jawapan kamu betul!";
+  } else if (percent >= 60) {
+    message = "🌟 Bagus! Teruskan usaha dan rajin membaca!";
+  } else {
+    message = "💪 Terus berlatih. Kamu pasti boleh melakukannya!";
+  }
+
+  document.getElementById("resultMessage").textContent = message;
+  document.getElementById("progressFill").style.width = "100%";
+}
+
+function returnHome() {
+  stopRecordingIfNeeded();
+  showScreen("homeScreen");
+}
+
+function retryMission() {
+  questionIndex = 0;
+  score = 0;
+  answered = false;
+  showScreen("gameScreen");
+  renderQuestion();
+}
+
+/* ==================================================
+   11. BUTANG DAN ACARA
+================================================== */
+function setupEvents() {
+  document.querySelectorAll(".theme-button").forEach(button => {
+    button.addEventListener("click", () => {
+      chooseTheme(button.dataset.theme);
+    });
+  });
+
+  document.getElementById("startBtn").addEventListener("click", startMission);
+
+  document.getElementById("homeBtn").addEventListener("click", returnHome);
+  document.getElementById("resultHomeBtn").addEventListener("click", returnHome);
+  document.getElementById("retryBtn").addEventListener("click", retryMission);
+
+  document.getElementById("listenBtn").addEventListener("click", speakWord);
+  document.getElementById("checkBtn").addEventListener("click", checkSyllables);
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    questionIndex++;
+    renderQuestion();
+  });
+
+  document.getElementById("recordBtn").addEventListener("click", startRecording);
+  document.getElementById("stopRecordBtn").addEventListener("click", stopRecording);
+  document.getElementById("playRecordBtn").addEventListener("click", playRecording);
+  document.getElementById("downloadRecordBtn").addEventListener("click", downloadRecording);
+
+  document.querySelectorAll(".mission-tab").forEach(button => {
+    button.addEventListener("click", () => {
+      currentMission = Number(button.dataset.mission);
+      questionIndex = 0;
+      score = 0;
+      answered = false;
+      renderQuestion();
+    });
+  });
+
+  document.getElementById("playerName").addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      startMission();
+    }
+  });
+}
+
+/* ==================================================
+   12. MULAKAN APLIKASI
+================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    setupEvents();
+    chooseTheme("forest");
+    showScreen("homeScreen");
+    console.log("Jom Kenal berjaya dimulakan.");
+  } catch (error) {
+    console.error("Ralat aplikasi:", error);
+    alert("Aplikasi menghadapi masalah. Sila muat semula halaman.");
+  }
+});
+</script>
 
 </body>
 </html>
