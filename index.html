@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -30,12 +31,18 @@
           <span class="pill">BAHASA MELAYU • PEMULIHAN KHAS TAHUN 2</span>
           <h1>Pengembaraan<br><span>Dunia Kata!</span></h1>
           <p>Jom kenal, cantum dan baca perkataan KV + KV melalui pengembaraan yang menyeronokkan!</p>
+
           <label for="studentName" class="field-label">Nama pengembara</label>
           <input id="studentName" type="text" maxlength="60" placeholder="Masukkan nama kamu" autocomplete="given-name">
-          <button id="startButton" class="primary-button start-button" type="button">🚀 Jom Mula!</button>
+
+          <button id="startButton" class="primary-button start-button" type="button">
+            🚀 Jom Mula!
+          </button>
+
           <p id="homeMessage" class="message" role="status" aria-live="polite"></p>
           <p class="small-note">Masukkan nama sebelum memulakan aktiviti.</p>
         </div>
+
         <div class="hero-art" aria-hidden="true">
           <div class="sun">☀️</div>
           <div class="book">📚</div>
@@ -53,36 +60,55 @@
           <p>Empat Misi Menarik</p>
           <p>Lengkapkan setiap misi untuk menjadi Pengembara Kata Hebat!</p>
         </div>
+
         <div class="mission-grid">
+
           <article class="mission-card card-one">
             <div class="mission-icon">🖼️</div>
             <span class="mission-label">MISI 1</span>
             <h3>Kenal dan Baca</h3>
             <p>Kenal perkataan dan pilih gambar yang betul.</p>
             <span class="mission-tag">Pilih gambar</span>
+            <button class="mission-open-button" data-mission="1" type="button">
+              🚀 Mula Misi 1
+            </button>
           </article>
+
           <article class="mission-card card-two">
             <div class="mission-icon">🧩</div>
             <span class="mission-label">MISI 2</span>
             <h3>Cantum dan Baca</h3>
             <p>Cantum suku kata untuk membentuk perkataan.</p>
             <span class="mission-tag">Cantum suku kata</span>
+            <button class="mission-open-button" data-mission="2" type="button" disabled>
+              🔒 Selesaikan Misi 1 dahulu
+            </button>
           </article>
+
           <article class="mission-card card-three">
             <div class="mission-icon">🎤</div>
             <span class="mission-label">MISI 3</span>
             <h3>Baca dan Faham</h3>
             <p>Baca petikan pendek, rakam suara dan jawab soalan.</p>
             <span class="mission-tag">Baca dan faham</span>
+            <button class="mission-open-button" data-mission="3" type="button" disabled>
+              🔒 Selesaikan Misi 2 dahulu
+            </button>
           </article>
+
           <article class="mission-card card-four">
             <div class="mission-icon">🏆</div>
             <span class="mission-label">MISI 4</span>
             <h3>Cabaran Baca Sendiri</h3>
             <p>Rakam suara dan dengar semula bacaan kamu.</p>
             <span class="mission-tag">Cabaran kendiri</span>
+            <button class="mission-open-button" data-mission="4" type="button" disabled>
+              🔒 Selesaikan Misi 3 dahulu
+            </button>
           </article>
+
         </div>
+
         <div class="home-progress">
           <div class="progress-label">
             <strong>Kemajuan pengembaraan</strong>
@@ -97,23 +123,36 @@
 
     <section id="missionScreen" class="screen" hidden>
       <div class="game-top">
-        <button id="backToMissions" class="secondary-button" type="button">← Kembali ke halaman utama</button>
+        <button id="backToMissions" class="secondary-button" type="button">
+          ← Kembali ke halaman utama
+        </button>
         <span id="activeStudent" class="student-chip">Pengembara</span>
       </div>
+
       <div class="game-heading">
         <span id="missionNumber" class="pill">MISI 1</span>
         <h1 id="missionTitle">Kenal dan Baca</h1>
-        <div class="score-chip">⭐ Markah: <strong id="scoreDisplay">0</strong>/5</div>
+        <div class="score-chip">
+          ⭐ Markah: <strong id="scoreDisplay">0</strong>/5
+        </div>
       </div>
+
       <div class="progress-track game-progress">
         <div id="progressBar" class="progress-fill"></div>
       </div>
+
       <div id="missionContent" class="mission-content"></div>
       <div id="missionFeedback" class="feedback" role="status" aria-live="polite"></div>
+
       <div class="next-row">
-        <button id="nextQuestionButton" class="primary-button" type="button" hidden>Soalan seterusnya →</button>
+        <button id="nextQuestionButton" class="primary-button" type="button" hidden>
+          Soalan seterusnya →
+        </button>
       </div>
-      <button id="homeButton" class="text-button" type="button">🏡 Keluar ke halaman utama</button>
+
+      <button id="homeButton" class="text-button" type="button">
+        🏡 Keluar ke halaman utama
+      </button>
     </section>
 
     <section id="teacherScreen" class="screen" hidden>
@@ -123,16 +162,23 @@
           <h1>Ruang Guru <span>📚</span></h1>
           <p>Rekod pencapaian dan rakaman bacaan murid.</p>
         </div>
-        <button id="teacherHomeButton" class="secondary-button" type="button">Tutup</button>
+        <button id="teacherHomeButton" class="secondary-button" type="button">
+          Tutup
+        </button>
       </div>
 
       <div id="teacherLogin" class="login-card">
         <div class="login-icon">🔐</div>
         <h2>Log masuk guru</h2>
         <p>Masukkan kata laluan untuk melihat rekod murid.</p>
+
         <label class="field-label" for="teacherPassword">Kata laluan</label>
         <input id="teacherPassword" type="password" placeholder="Kata laluan guru" autocomplete="current-password">
-        <button id="loginButton" class="primary-button" type="button">Masuk ke Ruang Guru</button>
+
+        <button id="loginButton" class="primary-button" type="button">
+          Masuk ke Ruang Guru
+        </button>
+
         <p id="loginMessage" class="message" role="status"></p>
         <p class="small-note">Kata laluan demonstrasi: 1234</p>
       </div>
@@ -146,21 +192,49 @@
         </div>
 
         <div class="stats-grid">
-          <article class="stat-card stat-purple"><span>📘</span><p>Jumlah rekod</p><strong id="totalRecords">0</strong></article>
-          <article class="stat-card stat-blue"><span>🧒</span><p>Bilangan murid</p><strong id="totalStudents">0</strong></article>
-          <article class="stat-card stat-green"><span>⭐</span><p>Purata peratus</p><strong id="averagePercent">0%</strong></article>
-          <article class="stat-card stat-orange"><span>🎤</span><p>Rakaman suara</p><strong id="totalRecordings">0</strong></article>
+          <article class="stat-card stat-purple">
+            <span>📘</span>
+            <p>Jumlah rekod</p>
+            <strong id="totalRecords">0</strong>
+          </article>
+          <article class="stat-card stat-blue">
+            <span>🧒</span>
+            <p>Bilangan murid</p>
+            <strong id="totalStudents">0</strong>
+          </article>
+          <article class="stat-card stat-green">
+            <span>⭐</span>
+            <p>Purata peratus</p>
+            <strong id="averagePercent">0%</strong>
+          </article>
+          <article class="stat-card stat-orange">
+            <span>🎤</span>
+            <p>Rakaman suara</p>
+            <strong id="totalRecordings">0</strong>
+          </article>
         </div>
 
         <div class="records-panel">
           <div class="records-heading">
-            <div><h2>Rekod Pencapaian</h2><p>Rekod disimpan pada pelayar dan peranti ini.</p></div>
+            <div>
+              <h2>Rekod Pencapaian</h2>
+              <p>Rekod disimpan pada pelayar dan peranti ini.</p>
+            </div>
           </div>
+
           <div id="teacherRecords" class="teacher-records">
-            <div class="empty-state"><span>🌱</span><h3>Belum ada rekod</h3><p>Rekod akan dipaparkan selepas murid menyelesaikan misi.</p></div>
+            <div class="empty-state">
+              <span>🌱</span>
+              <h3>Belum ada rekod</h3>
+              <p>Rekod akan dipaparkan selepas murid menyelesaikan misi.</p>
+            </div>
           </div>
         </div>
-        <p class="privacy-note">Nota: Rekod setempat tidak dikongsi secara automatik antara peranti. Eksport CSV untuk membuat salinan rekod.</p>
+
+        <p class="privacy-note">
+          Nota: Rekod setempat tidak dikongsi secara automatik antara peranti.
+          Eksport CSV untuk membuat salinan rekod.
+        </p>
       </div>
     </section>
   </main>
@@ -168,6 +242,7 @@
   <footer>
     <p>🌈 Pengembaraan Dunia Kata! • Belajar membaca dengan ceria.</p>
   </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
