@@ -17,55 +17,62 @@ const WORDS = {
   kuku: { word: "kuku", syllables: ["ku", "ku"], emoji: "💅" },
   mata: { word: "mata", syllables: ["ma", "ta"], emoji: "👀" },
   topi: { word: "topi", syllables: ["to", "pi"], emoji: "🧢" },
-  meja: { word: "meja", syllables: ["me", "ja"], emoji: "🪑" },
   roti: { word: "roti", syllables: ["ro", "ti"], emoji: "🍞" },
-  susu: { word: "susu", syllables: ["su", "su"], emoji: "🥛" }
+  susu: { word: "susu", syllables: ["su", "su"], emoji: "🥛" },
+  kuda: { word: "kuda", syllables: ["ku", "da"], emoji: "🐴" }
 };
 
 const MISSION_WORDS = {
   1: ["baju", "buku", "gigi", "sapu", "kuku"],
   2: ["baju", "buku", "gigi", "sapu", "kuku"],
-  3: ["mata", "topi", "roti", "buku", "susu"],
-  4: ["meja", "mata", "topi", "roti", "susu"]
+  3: ["buku", "baju", "roti", "susu", "kuda"],
+  4: ["kuda", "mata", "topi", "roti", "susu"]
 };
 
 const MISSIONS = {
   1: "Kenal dan Baca",
   2: "Cantum dan Baca",
-  3: "Baca dan Faham",
+  3: "Lengkapkan Ayat Bergambar",
   4: "Cabaran Baca Sendiri"
 };
 
-const PASSAGES = [
+/* SOALAN MISI 3: LENGKAPKAN AYAT BERGAMBAR */
+
+const SENTENCE_QUESTIONS = [
   {
-    text: "Ali memakai topi. Ali makan roti.",
-    question: "Apakah yang dipakai oleh Ali?",
-    options: ["topi", "baju", "sapu"],
-    answer: "topi"
+    word: "buku",
+    sentence: "Ini ialah ____.",
+    image: "📘",
+    question: "Pilih perkataan yang melengkapkan ayat.",
+    options: ["baju", "buku", "kuda"]
   },
   {
-    text: "Mira minum susu. Mira membaca buku.",
-    question: "Apakah yang diminum oleh Mira?",
-    options: ["roti", "susu", "buku"],
-    answer: "susu"
+    word: "baju",
+    sentence: "Ali memakai ____.",
+    image: "👕",
+    question: "Pilih perkataan yang melengkapkan ayat.",
+    options: ["baju", "susu", "roti"]
   },
   {
-    text: "Ibu membeli baju. Baju itu untuk adik.",
-    question: "Apakah yang dibeli oleh ibu?",
-    options: ["baju", "meja", "topi"],
-    answer: "baju"
+    word: "roti",
+    sentence: "Ibu membeli ____.",
+    image: "🍞",
+    question: "Pilih perkataan yang melengkapkan ayat.",
+    options: ["buku", "roti", "topi"]
   },
   {
-    text: "Amin memegang buku. Buku itu baharu.",
-    question: "Apakah yang dipegang oleh Amin?",
-    options: ["susu", "buku", "roti"],
-    answer: "buku"
+    word: "susu",
+    sentence: "Adik minum ____.",
+    image: "🥛",
+    question: "Pilih perkataan yang melengkapkan ayat.",
+    options: ["susu", "kuda", "baju"]
   },
   {
-    text: "Siti makan roti. Siti minum susu.",
-    question: "Apakah makanan yang dimakan oleh Siti?",
-    options: ["roti", "sapu", "meja"],
-    answer: "roti"
+    word: "kuda",
+    sentence: "Ini seekor ____.",
+    image: "🐴",
+    question: "Pilih perkataan yang melengkapkan ayat.",
+    options: ["mata", "kuda", "roti"]
   }
 ];
 
@@ -119,7 +126,10 @@ function shuffle(array) {
 
 function getRecords() {
   try {
-    const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+    const records = JSON.parse(
+      localStorage.getItem(RECORDS_KEY) || "[]"
+    );
+
     return Array.isArray(records) ? records : [];
   } catch (error) {
     console.error("Gagal membaca rekod:", error);
@@ -130,8 +140,14 @@ function getRecords() {
 function saveRecord(record) {
   try {
     const records = getRecords();
+
     records.push(record);
-    localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+
+    localStorage.setItem(
+      RECORDS_KEY,
+      JSON.stringify(records)
+    );
+
     return true;
   } catch (error) {
     console.error("Gagal menyimpan rekod:", error);
@@ -148,6 +164,7 @@ function showToast(message) {
   toast.classList.add("show");
 
   clearTimeout(showToast.timer);
+
   showToast.timer = setTimeout(() => {
     toast.classList.remove("show");
   }, 2800);
@@ -167,7 +184,10 @@ function showScreen(screen) {
   screen.hidden = false;
   screen.classList.add("active");
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 function showHomeMessage(message, error = false) {
@@ -175,7 +195,9 @@ function showHomeMessage(message, error = false) {
   if (!element) return;
 
   element.textContent = message;
-  element.style.color = error ? "var(--error)" : "var(--success)";
+  element.style.color = error
+    ? "var(--error)"
+    : "var(--success)";
 }
 
 function updateTheme(theme) {
@@ -204,6 +226,7 @@ function updateTheme(theme) {
 
 function getCurrentWord() {
   const words = MISSION_WORDS[state.mission];
+
   return WORDS[words[state.questionIndex]];
 }
 
@@ -290,6 +313,7 @@ function handleMissionCardClick(missionNumber) {
     showToast(
       `🔒 Selesaikan Misi ${missionNumber - 1} dahulu.`
     );
+
     return;
   }
 
@@ -329,7 +353,9 @@ function startJourney() {
   state.studentName = name;
   $("#activeStudent").textContent = name;
 
-  showHomeMessage(`Selamat datang, ${name}! Jom mulakan pengembaraan.`);
+  showHomeMessage(
+    `Selamat datang, ${name}! Jom mulakan pengembaraan.`
+  );
 
   updateMissionCards();
 
@@ -355,7 +381,11 @@ function startJourney() {
 
 function openMission(number) {
   if (!state.studentName) {
-    showHomeMessage("Masukkan nama kamu dahulu sebelum bermula.", true);
+    showHomeMessage(
+      "Masukkan nama kamu dahulu sebelum bermula.",
+      true
+    );
+
     showScreen($("#homeScreen"));
     $("#studentName").focus();
     return;
@@ -396,7 +426,9 @@ function openMission(number) {
 ========================= */
 
 function updateProgress() {
-  const completed = state.questionIndex + (state.answered ? 1 : 0);
+  const completed =
+    state.questionIndex + (state.answered ? 1 : 0);
+
   $("#progressBar").style.width =
     `${Math.min(100, completed / 5 * 100)}%`;
 }
@@ -422,7 +454,11 @@ function renderQuestion() {
   if (state.mission === 4) renderMissionFour();
 }
 
-/* MISI 1: Baca perkataan dan pilih gambar */
+/* =========================
+   MISI 1: KENAL DAN BACA
+   Baca perkataan dan pilih gambar.
+   Pilihan jawapan memaparkan gambar sahaja.
+========================= */
 
 function renderMissionOne() {
   const current = getCurrentWord();
@@ -434,51 +470,78 @@ function renderMissionOne() {
   const choices = shuffle([current.word, ...distractors]);
 
   $("#missionContent").innerHTML = `
-    <p class="instruction">Baca perkataan dan pilih gambar yang betul.</p>
-    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
-    <div class="word-display">${escapeHTML(current.word)}</div>
-    <p class="text-center">Gambar manakah yang sepadan?</p>
+    <p class="instruction">
+      Baca perkataan dan pilih gambar yang betul.
+    </p>
+
+    <p class="eyebrow">
+      SOALAN ${state.questionIndex + 1} DARIPADA 5
+    </p>
+
+    <div class="word-display">
+      ${escapeHTML(current.word)}
+    </div>
+
+    <p class="text-center">
+      Gambar manakah yang sepadan?
+    </p>
 
     <div class="picture-grid">
       ${choices.map(word => `
-        <button class="picture-option" type="button"
-          data-answer="${word}" aria-label="Pilih gambar ${word}">
-          <span class="picture-emoji">${WORDS[word].emoji}</span>
-          <span>${escapeHTML(word)}</span>
+        <button
+          class="picture-option"
+          type="button"
+          data-answer="${word}"
+          aria-label="Pilih gambar ${word}"
+        >
+          <span class="picture-emoji">
+            ${WORDS[word].emoji}
+          </span>
         </button>
       `).join("")}
     </div>
 
     <div class="action-row">
-      <button id="speakWordButton" class="secondary-button" type="button">
+      <button
+        id="speakWordButton"
+        class="secondary-button"
+        type="button"
+      >
         🔊 Dengar perkataan
       </button>
     </div>
   `;
 
-  $("#missionContent").querySelectorAll(".picture-option").forEach(button => {
-    button.addEventListener("click", () => {
-      if (state.answered) return;
+  $("#missionContent").querySelectorAll(".picture-option")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        if (state.answered) return;
 
-      $("#missionContent").querySelectorAll(".picture-option")
-        .forEach(item => item.disabled = true);
+        $("#missionContent")
+          .querySelectorAll(".picture-option")
+          .forEach(item => {
+            item.disabled = true;
+          });
 
-      checkAnswer(
-        button.dataset.answer === current.word,
-        current.word,
-        "Kenal gambar",
-        button,
-        button.dataset.answer
-      );
+        checkAnswer(
+          button.dataset.answer === current.word,
+          current.word,
+          "Kenal gambar",
+          button,
+          button.dataset.answer
+        );
+      });
     });
-  });
 
   $("#speakWordButton").addEventListener("click", () => {
     speakText(current.word);
   });
 }
 
-/* MISI 2: Cantum suku kata KV + KV */
+/* =========================
+   MISI 2: CANTUM DAN BACA
+   Cantum suku kata KV + KV.
+========================= */
 
 function renderMissionTwo() {
   const current = getCurrentWord();
@@ -488,11 +551,19 @@ function renderMissionTwo() {
     "ta", "to", "pi", "ro", "ti", "su", "me", "ja"
   ];
 
-  const choices = shuffle([...current.syllables, ...pool]).slice(0, 10);
+  const choices = shuffle([
+    ...current.syllables,
+    ...pool
+  ]).slice(0, 10);
 
   current.syllables.forEach(syllable => {
-    const required = current.syllables.filter(item => item === syllable).length;
-    const existing = choices.filter(item => item === syllable).length;
+    const required = current.syllables.filter(
+      item => item === syllable
+    ).length;
+
+    const existing = choices.filter(
+      item => item === syllable
+    ).length;
 
     for (let i = existing; i < required; i++) {
       choices.push(syllable);
@@ -500,61 +571,101 @@ function renderMissionTwo() {
   });
 
   $("#missionContent").innerHTML = `
-    <p class="instruction">Cantumkan dua suku kata untuk membentuk perkataan.</p>
-    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
-    <div class="word-display">${current.emoji}</div>
-    <p class="text-center">Pilih suku kata mengikut turutan.</p>
+    <p class="instruction">
+      Cantumkan dua suku kata untuk membentuk perkataan.
+    </p>
+
+    <p class="eyebrow">
+      SOALAN ${state.questionIndex + 1} DARIPADA 5
+    </p>
+
+    <div class="word-display">
+      ${current.emoji}
+    </div>
+
+    <p class="text-center">
+      Pilih suku kata mengikut turutan.
+    </p>
 
     <div id="syllableAnswer" class="syllable-display">
-      <span class="syllable-choice">?</span><span>+</span>
+      <span class="syllable-choice">?</span>
+      <span>+</span>
       <span class="syllable-choice">?</span>
     </div>
 
-    <p id="syllableHint" class="text-center">Pilih dua suku kata.</p>
+    <p id="syllableHint" class="text-center">
+      Pilih dua suku kata.
+    </p>
 
     <div class="picture-grid">
       ${choices.map((syllable, index) => `
-        <button class="syllable-choice syllable-option" type="button"
-          data-syllable="${syllable}" data-index="${index}">
+        <button
+          class="syllable-choice syllable-option"
+          type="button"
+          data-syllable="${syllable}"
+          data-index="${index}"
+        >
           ${syllable}
         </button>
       `).join("")}
     </div>
 
     <div class="action-row">
-      <button id="resetSyllables" class="secondary-button" type="button">
+      <button
+        id="resetSyllables"
+        class="secondary-button"
+        type="button"
+      >
         ↩ Pilih semula
       </button>
-      <button id="checkSyllables" class="primary-button" type="button">
+
+      <button
+        id="checkSyllables"
+        class="primary-button"
+        type="button"
+      >
         Semak jawapan
       </button>
-      <button id="speakTargetButton" class="secondary-button" type="button">
+
+      <button
+        id="speakTargetButton"
+        class="secondary-button"
+        type="button"
+      >
         🔊 Dengar perkataan
       </button>
     </div>
   `;
 
-  $("#missionContent").querySelectorAll(".syllable-option").forEach(button => {
-    button.addEventListener("click", () => {
-      if (state.answered || state.selectedSyllables.length >= 2) return;
+  $("#missionContent").querySelectorAll(".syllable-option")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        if (
+          state.answered ||
+          state.selectedSyllables.length >= 2
+        ) {
+          return;
+        }
 
-      state.selectedSyllables.push({
-        syllable: button.dataset.syllable,
-        index: button.dataset.index
+        state.selectedSyllables.push({
+          syllable: button.dataset.syllable,
+          index: button.dataset.index
+        });
+
+        button.disabled = true;
+        button.classList.add("selected");
+
+        updateSyllableAnswer();
       });
-
-      button.disabled = true;
-      button.classList.add("selected");
-      updateSyllableAnswer();
     });
-  });
 
   $("#resetSyllables").addEventListener("click", () => {
     if (state.answered) return;
 
     state.selectedSyllables = [];
 
-    $("#missionContent").querySelectorAll(".syllable-option")
+    $("#missionContent")
+      .querySelectorAll(".syllable-option")
       .forEach(button => {
         button.disabled = false;
         button.classList.remove("selected");
@@ -573,8 +684,11 @@ function renderMissionTwo() {
       .map(item => item.syllable)
       .join("");
 
-    $("#missionContent").querySelectorAll(".syllable-option")
-      .forEach(button => button.disabled = true);
+    $("#missionContent")
+      .querySelectorAll(".syllable-option")
+      .forEach(button => {
+        button.disabled = true;
+      });
 
     checkAnswer(
       answer === current.word,
@@ -591,12 +705,20 @@ function renderMissionTwo() {
 }
 
 function updateSyllableAnswer() {
-  const chosen = state.selectedSyllables.map(item => item.syllable);
+  const chosen = state.selectedSyllables.map(
+    item => item.syllable
+  );
 
   $("#syllableAnswer").innerHTML = `
-    <span class="syllable-choice">${escapeHTML(chosen[0] || "?")}</span>
+    <span class="syllable-choice">
+      ${escapeHTML(chosen[0] || "?")}
+    </span>
+
     <span>+</span>
-    <span class="syllable-choice">${escapeHTML(chosen[1] || "?")}</span>
+
+    <span class="syllable-choice">
+      ${escapeHTML(chosen[1] || "?")}
+    </span>
   `;
 
   $("#syllableHint").textContent = chosen.length
@@ -604,31 +726,61 @@ function updateSyllableAnswer() {
     : "Pilih dua suku kata.";
 }
 
-/* MISI 3: Baca dan faham */
+/* =========================
+   MISI 3: LENGKAPKAN AYAT BERGAMBAR
+   Lihat gambar dan pilih perkataan
+   yang melengkapkan ayat.
+========================= */
 
 function renderMissionThree() {
-  const passage = PASSAGES[state.questionIndex];
+  const item = SENTENCE_QUESTIONS[state.questionIndex];
 
   $("#missionContent").innerHTML = `
-    <p class="instruction">Baca petikan dan jawab soalan pemahaman.</p>
-    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
-    <h3>📖 Baca petikan pendek ini</h3>
-    <div class="reading-passage">${escapeHTML(passage.text)}</div>
+    <p class="instruction">
+      Perhatikan gambar dan pilih perkataan yang melengkapkan ayat.
+    </p>
+
+    <p class="eyebrow">
+      SOALAN ${state.questionIndex + 1} DARIPADA 5
+    </p>
+
+    <h3 class="text-center">
+      🖼️ Perhatikan gambar
+    </h3>
+
+    <div class="word-display" aria-label="Gambar petunjuk">
+      ${item.image}
+    </div>
+
+    <div class="reading-passage">
+      ${escapeHTML(item.sentence)}
+    </div>
+
+    <p class="text-center">
+      ${escapeHTML(item.question)}
+    </p>
 
     <div class="recording-panel">
       <h3>🎤 Rakaman bacaan kamu</h3>
-      <p>Baca petikan dengan suara yang jelas, kemudian dengar semula.</p>
+      <p>
+        Baca ayat dengan suara yang jelas, kemudian dengar semula.
+      </p>
       ${recordingControlsHTML()}
     </div>
 
     <hr>
-    <h3>💡 Soalan pemahaman</h3>
-    <p class="text-center">${escapeHTML(passage.question)}</p>
+
+    <h3 class="text-center">
+      💡 Pilih jawapan
+    </h3>
 
     <div class="question-options">
-      ${passage.options.map(option => `
-        <button class="question-option" type="button" data-answer="${option}">
-          ${WORDS[option] ? WORDS[option].emoji + " " : ""}
+      ${shuffle(item.options).map(option => `
+        <button
+          class="question-option"
+          type="button"
+          data-answer="${option}"
+        >
           ${escapeHTML(option)}
         </button>
       `).join("")}
@@ -637,37 +789,59 @@ function renderMissionThree() {
 
   bindRecordingControls();
 
-  $("#missionContent").querySelectorAll(".question-option").forEach(button => {
-    button.addEventListener("click", () => {
-      if (state.answered) return;
+  $("#missionContent")
+    .querySelectorAll(".question-option")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        if (state.answered) return;
 
-      $("#missionContent").querySelectorAll(".question-option")
-        .forEach(item => item.disabled = true);
+        $("#missionContent")
+          .querySelectorAll(".question-option")
+          .forEach(itemButton => {
+            itemButton.disabled = true;
+          });
 
-      checkAnswer(
-        button.dataset.answer === passage.answer,
-        passage.answer,
-        "Pemahaman",
-        button,
-        button.dataset.answer
-      );
+        checkAnswer(
+          button.dataset.answer === item.word,
+          item.word,
+          "Lengkapkan ayat bergambar",
+          button,
+          button.dataset.answer
+        );
+      });
     });
-  });
 }
 
-/* MISI 4: Cabaran membaca sendiri */
+/* =========================
+   MISI 4: CABARAN BACA SENDIRI
+========================= */
 
 function renderMissionFour() {
   const current = getCurrentWord();
 
   $("#missionContent").innerHTML = `
-    <p class="instruction">Baca perkataan sendiri dan rakam suara kamu.</p>
-    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
-    <div class="word-display">${escapeHTML(current.word)}</div>
-    <p class="text-center">Dengar contoh sebutan, kemudian baca dengan jelas.</p>
+    <p class="instruction">
+      Baca perkataan sendiri dan rakam suara kamu.
+    </p>
+
+    <p class="eyebrow">
+      SOALAN ${state.questionIndex + 1} DARIPADA 5
+    </p>
+
+    <div class="word-display">
+      ${escapeHTML(current.word)}
+    </div>
+
+    <p class="text-center">
+      Dengar contoh sebutan, kemudian baca dengan jelas.
+    </p>
 
     <div class="action-row">
-      <button id="modelWordButton" class="secondary-button" type="button">
+      <button
+        id="modelWordButton"
+        class="secondary-button"
+        type="button"
+      >
         🔊 Dengar contoh
       </button>
     </div>
@@ -678,7 +852,11 @@ function renderMissionFour() {
     </div>
 
     <div class="action-row">
-      <button id="selfCheckButton" class="primary-button" type="button">
+      <button
+        id="selfCheckButton"
+        class="primary-button"
+        type="button"
+      >
         ✅ Saya sudah membaca
       </button>
     </div>
@@ -707,7 +885,13 @@ function renderMissionFour() {
    SEMAKAN DAN REKOD JAWAPAN
 ========================= */
 
-function checkAnswer(correct, word, activity, selectedButton = null, studentAnswer = "") {
+function checkAnswer(
+  correct,
+  word,
+  activity,
+  selectedButton = null,
+  studentAnswer = ""
+) {
   if (state.answered) return;
 
   state.answered = true;
@@ -727,7 +911,9 @@ function checkAnswer(correct, word, activity, selectedButton = null, studentAnsw
   $("#scoreDisplay").textContent = String(state.score);
 
   if (selectedButton) {
-    selectedButton.style.borderColor = correct ? "#18794e" : "#b42318";
+    selectedButton.style.borderColor = correct
+      ? "#18794e"
+      : "#b42318";
   }
 
   showFeedback(
@@ -738,6 +924,7 @@ function checkAnswer(correct, word, activity, selectedButton = null, studentAnsw
   );
 
   $("#nextQuestionButton").hidden = false;
+
   $("#nextQuestionButton").textContent =
     state.questionIndex === 4
       ? "Lihat keputusan →"
@@ -748,6 +935,7 @@ function checkAnswer(correct, word, activity, selectedButton = null, studentAnsw
 
 function showFeedback(message, correct) {
   $("#missionFeedback").textContent = message;
+
   $("#missionFeedback").className =
     `feedback ${correct ? "correct" : "incorrect"}`;
 }
@@ -794,29 +982,51 @@ function finishMission() {
   $("#missionContent").innerHTML = `
     <div class="text-center">
       <div class="welcome-illustration">🎉 🏆 🌟</div>
+
       <h2>Tahniah, Pengembara Kata!</h2>
-      <p>Kamu telah menyelesaikan
+
+      <p>
+        Kamu telah menyelesaikan
         <strong>${escapeHTML(MISSIONS[mission])}</strong>.
       </p>
 
-      <div class="word-display">${state.score} / 5</div>
+      <div class="word-display">
+        ${state.score} / 5
+      </div>
+
       <p>Markah kamu untuk misi ini.</p>
-      <p>Peratus pencapaian: <strong>${percent}%</strong></p>
+
+      <p>
+        Peratus pencapaian:
+        <strong>${percent}%</strong>
+      </p>
 
       ${
         mission < 4
           ? `<p>🔓 Misi ${mission + 1} telah dibuka!</p>
              <p>Misi seterusnya akan dibuka secara automatik.</p>
-             <button id="nextMissionButton" class="primary-button" type="button">
+             <button
+               id="nextMissionButton"
+               class="primary-button"
+               type="button"
+             >
                Teruskan ke Misi ${mission + 1} →
              </button>`
           : `<p>Hebat! Kamu telah menyelesaikan semua misi!</p>
-             <button id="finishMissionButton" class="primary-button" type="button">
+             <button
+               id="finishMissionButton"
+               class="primary-button"
+               type="button"
+             >
                🏡 Kembali ke halaman utama
              </button>`
       }
 
-      <button id="retryMissionButton" class="secondary-button" type="button">
+      <button
+        id="retryMissionButton"
+        class="secondary-button"
+        type="button"
+      >
         🔁 Cuba lagi
       </button>
 
@@ -840,13 +1050,17 @@ function finishMission() {
 
     function continueToNextMission() {
       if (movedToNextMission) return;
+
       movedToNextMission = true;
 
       clearTimeout(missionTransitionTimer);
       openMission(mission + 1);
     }
 
-    $("#nextMissionButton").addEventListener("click", continueToNextMission);
+    $("#nextMissionButton").addEventListener(
+      "click",
+      continueToNextMission
+    );
 
     missionTransitionTimer = setTimeout(() => {
       continueToNextMission();
@@ -867,12 +1081,15 @@ function finishMission() {
 function updateHomeProgress() {
   if (!$("#homeProgressText") || !$("#homeProgressBar")) return;
 
-  const completed = [1, 2, 3, 4].filter(hasCompletedMission).length;
+  const completed = [1, 2, 3, 4].filter(
+    hasCompletedMission
+  ).length;
 
   $("#homeProgressText").textContent =
     `Misi selesai: ${completed} daripada 4`;
 
-  $("#homeProgressBar").style.width = `${completed / 4 * 100}%`;
+  $("#homeProgressBar").style.width =
+    `${completed / 4 * 100}%`;
 }
 
 /* =========================
@@ -888,6 +1105,7 @@ function speakText(text) {
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
+
   utterance.lang = "ms-MY";
   utterance.rate = 0.78;
 
@@ -901,13 +1119,29 @@ function speakText(text) {
 function recordingControlsHTML() {
   return `
     <div class="action-row">
-      <button id="startRecording" class="primary-button" type="button">
+      <button
+        id="startRecording"
+        class="primary-button"
+        type="button"
+      >
         🔴 Mula rakam
       </button>
-      <button id="stopRecording" class="secondary-button" type="button" disabled>
+
+      <button
+        id="stopRecording"
+        class="secondary-button"
+        type="button"
+        disabled
+      >
         ⏹ Henti rakaman
       </button>
-      <button id="playSpeech" class="secondary-button" type="button" disabled>
+
+      <button
+        id="playSpeech"
+        class="secondary-button"
+        type="button"
+        disabled
+      >
         ▶ Dengar semula
       </button>
     </div>
@@ -918,7 +1152,12 @@ function recordingControlsHTML() {
 
     <audio id="audioPlayback" controls hidden></audio>
 
-    <button id="saveRecording" class="secondary-button" type="button" disabled>
+    <button
+      id="saveRecording"
+      class="secondary-button"
+      type="button"
+      disabled
+    >
       💾 Simpan rakaman untuk guru
     </button>
   `;
@@ -932,7 +1171,9 @@ function bindRecordingControls() {
   const status = $("#recordingStatus");
   const audio = $("#audioPlayback");
 
-  if (!start || !stop || !play || !save || !status || !audio) return;
+  if (!start || !stop || !play || !save || !status || !audio) {
+    return;
+  }
 
   state.audioBlob = null;
   state.recordingSaved = false;
@@ -942,8 +1183,10 @@ function bindRecordingControls() {
   save.disabled = true;
 
   start.addEventListener("click", async () => {
-    if (!navigator.mediaDevices?.getUserMedia ||
-        typeof MediaRecorder === "undefined") {
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
       status.textContent =
         "Rakaman memerlukan pelayar terkini dan laman HTTPS.";
       return;
@@ -951,11 +1194,15 @@ function bindRecordingControls() {
 
     try {
       state.mediaStream =
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
 
       state.audioChunks = [];
 
-      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      const mime = MediaRecorder.isTypeSupported(
+        "audio/webm;codecs=opus"
+      )
         ? "audio/webm;codecs=opus"
         : "";
 
@@ -965,7 +1212,9 @@ function bindRecordingControls() {
       );
 
       state.recorder.ondataavailable = event => {
-        if (event.data?.size) state.audioChunks.push(event.data);
+        if (event.data?.size) {
+          state.audioChunks.push(event.data);
+        }
       };
 
       state.recorder.onstop = () => {
@@ -973,9 +1222,12 @@ function bindRecordingControls() {
           type: state.recorder.mimeType || "audio/webm"
         });
 
-        if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+        if (state.audioUrl) {
+          URL.revokeObjectURL(state.audioUrl);
+        }
 
         state.audioUrl = URL.createObjectURL(state.audioBlob);
+
         audio.src = state.audioUrl;
         audio.hidden = false;
 
@@ -983,12 +1235,16 @@ function bindRecordingControls() {
         save.disabled = false;
         start.disabled = false;
         stop.disabled = true;
+
         state.recording = false;
 
         status.textContent =
           "Rakaman selesai. Dengar semula sebelum menyimpan.";
 
-        state.mediaStream?.getTracks().forEach(track => track.stop());
+        state.mediaStream?.getTracks().forEach(track => {
+          track.stop();
+        });
+
         state.mediaStream = null;
       };
 
@@ -1000,16 +1256,21 @@ function bindRecordingControls() {
       play.disabled = true;
       save.disabled = true;
 
-      status.textContent = "🔴 Sedang merakam... Baca dengan jelas.";
+      status.textContent =
+        "🔴 Sedang merakam... Baca dengan jelas.";
     } catch (error) {
       console.error(error);
+
       status.textContent =
         "Mikrofon tidak dapat digunakan. Benarkan akses mikrofon.";
     }
   });
 
   stop.addEventListener("click", () => {
-    if (state.recorder && state.recorder.state !== "inactive") {
+    if (
+      state.recorder &&
+      state.recorder.state !== "inactive"
+    ) {
       state.recorder.stop();
     }
   });
@@ -1017,7 +1278,8 @@ function bindRecordingControls() {
   play.addEventListener("click", () => {
     if (audio.src) {
       audio.play().catch(() => {
-        status.textContent = "Tekan butang main pada pemain audio.";
+        status.textContent =
+          "Tekan butang main pada pemain audio.";
       });
     }
   });
@@ -1059,7 +1321,9 @@ function bindRecordingControls() {
       }
     } catch (error) {
       console.error(error);
-      status.textContent = "Rakaman tidak dapat diproses.";
+
+      status.textContent =
+        "Rakaman tidak dapat diproses.";
     }
   });
 }
@@ -1095,11 +1359,13 @@ function openTeacherArea() {
 
 function teacherLogin() {
   if ($("#teacherPassword").value !== PASSWORD) {
-    $("#loginMessage").textContent = "Kata laluan tidak tepat. Cuba lagi.";
+    $("#loginMessage").textContent =
+      "Kata laluan tidak tepat. Cuba lagi.";
     return;
   }
 
   state.teacherLoggedIn = true;
+
   $("#teacherLogin").hidden = true;
   $("#teacherDashboard").hidden = false;
 
@@ -1108,6 +1374,7 @@ function teacherLogin() {
 
 function teacherLogout() {
   state.teacherLoggedIn = false;
+
   $("#teacherLogin").hidden = false;
   $("#teacherDashboard").hidden = true;
   $("#teacherPassword").value = "";
@@ -1119,6 +1386,7 @@ function formatDate(value) {
   if (!value) return "-";
 
   const date = new Date(value);
+
   if (Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleString("ms-MY", {
@@ -1131,8 +1399,14 @@ function renderTeacherDashboard() {
   if (!state.teacherLoggedIn) return;
 
   const records = getRecords();
-  const sessions = records.filter(record => record.type === "session");
-  const recordings = records.filter(record => record.type === "recording");
+
+  const sessions = records.filter(
+    record => record.type === "session"
+  );
+
+  const recordings = records.filter(
+    record => record.type === "recording"
+  );
 
   const students = new Set(
     records.map(record =>
@@ -1160,10 +1434,13 @@ function renderTeacherDashboard() {
       <div class="empty-state">
         <span>🌱</span>
         <h3>Belum ada rekod</h3>
-        <p>Rekod akan dipaparkan selepas murid menyelesaikan misi
-        atau menyimpan rakaman.</p>
+        <p>
+          Rekod akan dipaparkan selepas murid menyelesaikan misi
+          atau menyimpan rakaman.
+        </p>
       </div>
     `;
+
     return;
   }
 
@@ -1171,14 +1448,36 @@ function renderTeacherDashboard() {
     if (record.type === "recording") {
       return `
         <article class="record-card">
-          <h3>🎤 Rakaman bacaan — ${escapeHTML(record.studentName || "Murid")}</h3>
-          <p><strong>Misi:</strong> ${escapeHTML(MISSIONS[record.mission] || "-")}</p>
-          <p><strong>Soalan:</strong> ${escapeHTML(String(record.question || "-"))}</p>
-          <p><strong>Perkataan:</strong> ${escapeHTML(record.word || "-")}</p>
-          <p><strong>Tarikh:</strong> ${escapeHTML(formatDate(record.createdAt))}</p>
-          ${record.audioData
-            ? `<audio controls preload="none" src="${record.audioData}"></audio>`
-            : "<p>Fail audio tiada.</p>"}
+          <h3>
+            🎤 Rakaman bacaan —
+            ${escapeHTML(record.studentName || "Murid")}
+          </h3>
+
+          <p>
+            <strong>Misi:</strong>
+            ${escapeHTML(MISSIONS[record.mission] || "-")}
+          </p>
+
+          <p>
+            <strong>Soalan:</strong>
+            ${escapeHTML(String(record.question || "-"))}
+          </p>
+
+          <p>
+            <strong>Perkataan:</strong>
+            ${escapeHTML(record.word || "-")}
+          </p>
+
+          <p>
+            <strong>Tarikh:</strong>
+            ${escapeHTML(formatDate(record.createdAt))}
+          </p>
+
+          ${
+            record.audioData
+              ? `<audio controls preload="none" src="${record.audioData}"></audio>`
+              : "<p>Fail audio tiada.</p>"
+          }
         </article>
       `;
     }
@@ -1189,21 +1488,47 @@ function renderTeacherDashboard() {
             <strong>Soalan ${Number(result.question)}:</strong>
             ${escapeHTML(result.activity || "-")} —
             Jawapan murid:
-            <strong>${escapeHTML(result.studentAnswer || "(tiada jawapan)")}</strong>;
+            <strong>
+              ${escapeHTML(result.studentAnswer || "(tiada jawapan)")}
+            </strong>;
             jawapan betul:
-            <strong>${escapeHTML(result.correctAnswer || "-")}</strong>;
-            <strong>${result.correct ? "✅ Betul" : "❌ Salah"}</strong>
+            <strong>
+              ${escapeHTML(result.correctAnswer || "-")}
+            </strong>;
+            <strong>
+              ${result.correct ? "✅ Betul" : "❌ Salah"}
+            </strong>
           </li>
         `).join("")
       : "<li>Butiran jawapan individu tiada untuk rekod lama ini.</li>";
 
     return `
       <article class="record-card">
-        <h3>📘 ${escapeHTML(record.studentName || "Murid")}</h3>
-        <p><strong>Misi:</strong> ${escapeHTML(record.missionTitle || "-")}</p>
-        <p><strong>Markah:</strong> ${Number(record.score || 0)} / ${Number(record.total || 5)}</p>
-        <p><strong>Peratus:</strong> ${Number(record.percent || 0)}%</p>
-        <p><strong>Tarikh:</strong> ${escapeHTML(formatDate(record.completedAt))}</p>
+        <h3>
+          📘 ${escapeHTML(record.studentName || "Murid")}
+        </h3>
+
+        <p>
+          <strong>Misi:</strong>
+          ${escapeHTML(record.missionTitle || "-")}
+        </p>
+
+        <p>
+          <strong>Markah:</strong>
+          ${Number(record.score || 0)} /
+          ${Number(record.total || 5)}
+        </p>
+
+        <p>
+          <strong>Peratus:</strong>
+          ${Number(record.percent || 0)}%
+        </p>
+
+        <p>
+          <strong>Tarikh:</strong>
+          ${escapeHTML(formatDate(record.completedAt))}
+        </p>
+
         <details>
           <summary>Lihat jawapan setiap soalan</summary>
           <ol>${details}</ol>
@@ -1227,9 +1552,18 @@ function exportRecords() {
   }
 
   const rows = [[
-    "Jenis rekod", "Nama murid", "Tarikh", "Misi",
-    "Soalan", "Aktiviti", "Jawapan murid", "Jawapan betul",
-    "Status jawapan", "Markah", "Jumlah", "Peratus"
+    "Jenis rekod",
+    "Nama murid",
+    "Tarikh",
+    "Misi",
+    "Soalan",
+    "Aktiviti",
+    "Jawapan murid",
+    "Jawapan betul",
+    "Status jawapan",
+    "Markah",
+    "Jumlah",
+    "Peratus"
   ]];
 
   records.forEach(record => {
@@ -1248,6 +1582,7 @@ function exportRecords() {
         "",
         ""
       ]);
+
       return;
     }
 
@@ -1270,6 +1605,7 @@ function exportRecords() {
         record.total ?? "",
         record.percent ?? ""
       ]);
+
       return;
     }
 
@@ -1318,17 +1654,20 @@ function clearRecords() {
   if (!state.teacherLoggedIn) return;
 
   const confirmed = confirm(
-    "Padam semua rekod dan rakaman pada peranti ini? Tindakan ini tidak boleh dibatalkan."
+    "Padam semua rekod dan rakaman pada peranti ini? " +
+    "Tindakan ini tidak boleh dibatalkan."
   );
 
   if (!confirmed) return;
 
   try {
     localStorage.removeItem(RECORDS_KEY);
+
     state.completedMissions = {};
 
     renderTeacherDashboard();
     updateMissionCards();
+
     showToast("Rekod telah dipadam.");
   } catch (error) {
     showToast("Rekod tidak dapat dipadam.");
@@ -1352,6 +1691,7 @@ function attachEvents() {
 
   $("#brandHome").addEventListener("click", event => {
     event.preventDefault();
+
     showScreen($("#homeScreen"));
     updateMissionCards();
   });
@@ -1376,8 +1716,15 @@ function attachEvents() {
     updateMissionCards();
   });
 
-  $("#nextQuestionButton").addEventListener("click", nextQuestion);
-  $("#teacherButton").addEventListener("click", openTeacherArea);
+  $("#nextQuestionButton").addEventListener(
+    "click",
+    nextQuestion
+  );
+
+  $("#teacherButton").addEventListener(
+    "click",
+    openTeacherArea
+  );
 
   $("#teacherHomeButton").addEventListener("click", () => {
     showScreen($("#homeScreen"));
@@ -1390,10 +1737,25 @@ function attachEvents() {
     if (event.key === "Enter") teacherLogin();
   });
 
-  $("#teacherLogoutButton").addEventListener("click", teacherLogout);
-  $("#refreshButton").addEventListener("click", renderTeacherDashboard);
-  $("#exportButton").addEventListener("click", exportRecords);
-  $("#clearRecordsButton").addEventListener("click", clearRecords);
+  $("#teacherLogoutButton").addEventListener(
+    "click",
+    teacherLogout
+  );
+
+  $("#refreshButton").addEventListener(
+    "click",
+    renderTeacherDashboard
+  );
+
+  $("#exportButton").addEventListener(
+    "click",
+    exportRecords
+  );
+
+  $("#clearRecordsButton").addEventListener(
+    "click",
+    clearRecords
+  );
 }
 
 function initialise() {
