@@ -886,4 +886,8 @@ function initialise() {
   showScreen($("#homeScreen"));
 }
 
-document.addEventListener("DOMContentLoaded", initialise);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initialise);
+} else {
+  initialise();
+}
