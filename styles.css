@@ -28,15 +28,14 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: "Trebuchet MS", Arial, sans-serif;
-  background-color: #fff4fa;
+  background-color: #e9f9df;
   background-image:
-    radial-gradient(circle at 8% 12%, #ffd9e9 0 7%, transparent 7.5%),
-    radial-gradient(circle at 90% 18%, #d9d0ff 0 8%, transparent 8.5%),
-    radial-gradient(circle at 85% 82%, #d0f6df 0 8%, transparent 8.5%),
-    radial-gradient(circle at 12% 88%, #fff0b5 0 7%, transparent 7.5%),
-    linear-gradient(135deg, #fff8fc, #f2f0ff 55%, #effff7);
+    radial-gradient(ellipse at 8% 12%, #b9e7a0 0 8%, transparent 8.5%),
+    radial-gradient(ellipse at 93% 15%, #d0efae 0 9%, transparent 9.5%),
+    radial-gradient(ellipse at 90% 85%, #a8dca0 0 10%, transparent 10.5%),
+    linear-gradient(135deg, #f4ffe9, #d8f2cc 52%, #faffdf);
   background-attachment: fixed;
-  transition: background 0.35s ease, color 0.35s ease;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 button,
@@ -59,6 +58,10 @@ button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* =========================================
+   SUSUN ATUR UTAMA
+   ========================================= */
 
 .app-shell {
   width: min(1120px, 100%);
@@ -89,9 +92,14 @@ button:disabled {
   width: 58px;
   height: 58px;
   border-radius: 19px;
-  background: linear-gradient(135deg, #ffdb7c, #ff9fc7);
+  background: linear-gradient(135deg, #ffe58a, #83d68e);
   font-size: 30px;
-  box-shadow: 0 7px 0 #e7b7df;
+  box-shadow: 0 7px 0 #9bcf91;
+  transition: background 0.4s ease, transform 0.3s ease;
+}
+
+.brand-icon:hover {
+  transform: rotate(-7deg) scale(1.04);
 }
 
 .brand strong,
@@ -147,17 +155,22 @@ button:disabled {
   }
 }
 
+/* =========================================
+   KAD UTAMA / HERO
+   ========================================= */
+
 .hero-card {
   min-height: 310px;
   padding: 38px 36px;
   position: relative;
   overflow: hidden;
   border-radius: 32px;
-  background: linear-gradient(125deg, #b9a5ff, #ffb7d4 60%, #ffe8a2);
+  background: linear-gradient(125deg, #70bd73, #b9e69b 60%, #ffe69a);
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  isolation: isolate;
 }
 
 .hero-card::before,
@@ -166,6 +179,7 @@ button:disabled {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  z-index: -1;
 }
 
 .hero-card::before {
@@ -189,7 +203,7 @@ button:disabled {
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 1.5px;
-  color: #5b3a96;
+  color: #28683b;
 }
 
 .hero-card h1,
@@ -213,14 +227,15 @@ button:disabled {
   line-height: 1.65;
   margin: 17px 0 0;
   font-size: 1rem;
-  color: #453263;
+  color: #254d31;
 }
 
 .hero-decoration span {
   position: absolute;
   z-index: 1;
   font-size: 31px;
-  animation: floaty 3s ease-in-out infinite;
+  animation: forestFloat 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .hero-decoration span:nth-child(1) {
@@ -246,9 +261,40 @@ button:disabled {
   animation-delay: 1.5s;
 }
 
-@keyframes floaty {
-  0%, 100% { transform: translateY(0) rotate(-4deg); }
-  50% { transform: translateY(-8px) rotate(4deg); }
+@keyframes forestFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-7deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(8deg);
+  }
+}
+
+@keyframes spaceFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(10deg);
+  }
+}
+
+@keyframes gardenFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(7deg);
+  }
+}
+
+@keyframes underwaterFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-13px) rotate(6deg);
+  }
 }
 
 .mascot {
@@ -258,14 +304,28 @@ button:disabled {
   z-index: 2;
   font-size: clamp(3.3rem, 8vw, 6.5rem);
   filter: drop-shadow(0 8px 5px rgba(65, 45, 91, 0.13));
+  animation: mascotBounce 3s ease-in-out infinite;
 }
+
+@keyframes mascotBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+/* =========================================
+   PANEL DAN BORANG
+   ========================================= */
 
 .panel {
   margin-top: 25px;
   padding: clamp(20px, 4vw, 32px);
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.91);
+  background: rgba(255, 255, 255, 0.93);
   box-shadow: var(--shadow);
 }
 
@@ -305,6 +365,10 @@ button:disabled {
   margin: 25px 0 12px;
 }
 
+/* =========================================
+   PILIHAN EMPAT TEMA
+   ========================================= */
+
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -321,37 +385,56 @@ button:disabled {
   gap: 9px;
   border: 3px solid transparent;
   border-radius: 19px;
-  background: #f5f0ff;
+  background: #e0f4d8;
   color: var(--ink);
   font-size: 0.84rem;
   font-weight: 800;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.4s ease,
+    box-shadow 0.25s ease;
 }
 
 .theme-option:nth-child(2) {
-  background: #e7f3ff;
+  background: #e8e6ff;
 }
 
 .theme-option:nth-child(3) {
-  background: #e5faed;
+  background: #ffe4f0;
 }
 
 .theme-option:nth-child(4) {
-  background: #dff8ff;
+  background: #d8f7fa;
 }
 
 .theme-option:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.015);
 }
 
 .theme-option.selected {
-  border-color: #895be8;
-  box-shadow: 0 0 0 3px #eee5ff;
+  border-color: #32854b;
+  box-shadow: 0 0 0 3px #c4e9b7;
+  transform: translateY(-2px);
 }
 
 .theme-art {
   font-size: 2.15rem;
+  animation: themeIconFloat 3s ease-in-out infinite;
 }
+
+@keyframes themeIconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* =========================================
+   BUTANG UTAMA
+   ========================================= */
 
 .primary-button {
   width: 100%;
@@ -360,22 +443,22 @@ button:disabled {
   margin-top: 20px;
   border: none;
   border-radius: 17px;
-  background: linear-gradient(100deg, #8054df, #b36be9);
+  background: linear-gradient(100deg, #368653, #75bf68);
   color: white;
   font-size: 1.04rem;
   font-weight: 900;
-  box-shadow: 0 6px 0 #633ab9;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 0 #24683d;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.4s ease;
 }
 
 .primary-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 0 #633ab9;
+  box-shadow: 0 8px 0 #24683d;
 }
 
 .primary-button:active {
   transform: translateY(3px);
-  box-shadow: 0 2px 0 #633ab9;
+  box-shadow: 0 2px 0 #24683d;
 }
 
 .message {
@@ -383,8 +466,12 @@ button:disabled {
   margin: 12px 0 0;
   font-size: 0.9rem;
   font-weight: 800;
-  color: #6c48bf;
+  color: #368653;
 }
+
+/* =========================================
+   KAD MISI
+   ========================================= */
 
 .mission-preview {
   padding: 30px 0 10px;
@@ -404,24 +491,51 @@ button:disabled {
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 23px;
   box-shadow: var(--shadow);
+  animation: cardBreathe 5s ease-in-out infinite;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.mission-card:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.mission-card:nth-child(3) {
+  animation-delay: 1.2s;
 }
 
 .mission-one {
-  background: linear-gradient(145deg, #fff0b5, #ffdaea);
+  background: linear-gradient(145deg, #fff0b5, #d6f0b7);
 }
 
 .mission-two {
-  background: linear-gradient(145deg, #dcd1ff, #f3dfff);
+  background: linear-gradient(145deg, #bfe8a8, #e6f5cb);
 }
 
 .mission-three {
-  background: linear-gradient(145deg, #c7f6dc, #e0f6ff);
+  background: linear-gradient(145deg, #aee5b7, #e4f7d6);
+}
+
+.mission-card:hover {
+  transform: translateY(-4px);
+}
+
+@keyframes cardBreathe {
+  0%, 100% {
+    box-shadow: 0 12px 30px rgba(71, 47, 119, 0.10);
+  }
+  50% {
+    box-shadow: 0 16px 34px rgba(71, 47, 119, 0.18);
+  }
 }
 
 .mission-number {
   display: inline-block;
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.78);
   border-radius: 99px;
   font-size: 0.72rem;
   font-weight: 900;
@@ -444,6 +558,10 @@ button:disabled {
   margin: 0;
 }
 
+/* =========================================
+   PAPARAN PERMAINAN
+   ========================================= */
+
 .game-topline,
 .dashboard-heading,
 .records-heading {
@@ -458,7 +576,7 @@ button:disabled {
   font-size: 0.9rem;
   font-weight: 900;
   padding: 10px 15px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 14px;
   box-shadow: var(--shadow);
 }
@@ -516,10 +634,11 @@ button:disabled {
 .game-content {
   min-height: 260px;
   padding: clamp(18px, 4vw, 30px);
-  background: rgba(255, 255, 255, 0.93);
-  border: 3px dashed #d8c7ff;
+  background: rgba(250, 255, 244, 0.96);
+  border: 3px dashed #91cc85;
   border-radius: 27px;
   box-shadow: var(--shadow);
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .game-actions {
@@ -532,10 +651,32 @@ button:disabled {
   margin-top: 18px;
 }
 
+/* Elemen soalan yang dijana oleh JavaScript */
+.game-content button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.game-content button:hover {
+  transform: translateY(-2px);
+}
+
+.game-content button:active {
+  transform: scale(0.98);
+}
+
+.game-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =========================================
+   PAPARAN KEPUTUSAN
+   ========================================= */
+
 .result-card {
   text-align: center;
   padding: clamp(25px, 5vw, 50px);
-  background: linear-gradient(145deg, #fff, #fff0fa 50%, #e9fff3);
+  background: linear-gradient(145deg, #ffffff, #fff0fa 50%, #e9fff3);
   border-radius: 30px;
   box-shadow: var(--shadow);
 }
@@ -543,6 +684,7 @@ button:disabled {
 .result-mascot {
   font-size: 5rem;
   margin-bottom: 10px;
+  animation: mascotBounce 3s ease-in-out infinite;
 }
 
 .result-card h1 {
@@ -591,6 +733,10 @@ button:disabled {
   margin: 5px;
 }
 
+/* =========================================
+   PAPARAN GURU
+   ========================================= */
+
 .teacher-heading {
   text-align: center;
   padding: 28px 10px 5px;
@@ -636,7 +782,8 @@ button:disabled {
   padding: 18px 12px;
   text-align: center;
   border-radius: 18px;
-  background: #f5f0ff;
+  background: #e0f4d8;
+  transition: background 0.4s ease;
 }
 
 .stat-card:nth-child(2) {
@@ -686,9 +833,10 @@ button:disabled {
   align-items: center;
   gap: 12px;
   padding: 15px;
-  border: 2px solid #eee6ff;
+  border: 2px solid #d5efc9;
   border-radius: 17px;
-  background: #fcfaff;
+  background: #fcfff8;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .student-record h3 {
@@ -720,6 +868,10 @@ button:disabled {
   margin-top: 10px;
 }
 
+/* =========================================
+   KAKI LAMAN
+   ========================================= */
+
 .app-footer {
   padding: 30px 10px 5px;
   text-align: center;
@@ -737,26 +889,94 @@ button:disabled {
   font-size: 0.76rem;
 }
 
-/* Tema Dunia Fantasi */
-body[data-theme="fantasy"] {
-  background-color: #fff4fa;
+/* =========================================
+   TEMA 1 — HUTAN
+   ========================================= */
+
+body[data-theme="hutan"] {
+  --ink: #214b35;
+  --muted: #52745e;
+  --purple: #368653;
+  color: var(--ink);
+  background-color: #e9f9df;
   background-image:
-    radial-gradient(circle at 8% 12%, #ffd9e9 0 7%, transparent 7.5%),
-    radial-gradient(circle at 90% 18%, #d9d0ff 0 8%, transparent 8.5%),
-    radial-gradient(circle at 85% 82%, #d0f6df 0 8%, transparent 8.5%),
-    linear-gradient(135deg, #fff8fc, #f2f0ff 55%, #effff7);
+    radial-gradient(ellipse at 8% 12%, #b9e7a0 0 8%, transparent 8.5%),
+    radial-gradient(ellipse at 93% 15%, #d0efae 0 9%, transparent 9.5%),
+    radial-gradient(ellipse at 90% 85%, #a8dca0 0 10%, transparent 10.5%),
+    linear-gradient(135deg, #f4ffe9, #d8f2cc 52%, #faffdf);
 }
 
-/* Tema Angkasa Lepas */
+body[data-theme="hutan"] .hero-card {
+  background: linear-gradient(125deg, #70bd73, #b9e69b 60%, #ffe69a);
+}
+
+body[data-theme="hutan"] .hero-description {
+  color: #254d31;
+}
+
+body[data-theme="hutan"] .brand-icon {
+  background: linear-gradient(135deg, #ffe58a, #83d68e);
+  box-shadow: 0 7px 0 #9bcf91;
+}
+
+body[data-theme="hutan"] .theme-option {
+  background: #e0f4d8;
+}
+
+body[data-theme="hutan"] .theme-option.selected {
+  border-color: #32854b;
+  box-shadow: 0 0 0 3px #c4e9b7;
+}
+
+body[data-theme="hutan"] .primary-button {
+  background: linear-gradient(100deg, #368653, #75bf68);
+  box-shadow: 0 6px 0 #24683d;
+}
+
+body[data-theme="hutan"] .primary-button:hover {
+  box-shadow: 0 8px 0 #24683d;
+}
+
+body[data-theme="hutan"] .primary-button:active {
+  box-shadow: 0 2px 0 #24683d;
+}
+
+body[data-theme="hutan"] .game-content {
+  border-color: #91cc85;
+}
+
+body[data-theme="hutan"] .mission-one {
+  background: linear-gradient(145deg, #fff0b5, #d6f0b7);
+}
+
+body[data-theme="hutan"] .mission-two {
+  background: linear-gradient(145deg, #bfe8a8, #e6f5cb);
+}
+
+body[data-theme="hutan"] .mission-three {
+  background: linear-gradient(145deg, #aee5b7, #e4f7d6);
+}
+
+body[data-theme="hutan"] .hero-decoration span {
+  animation-name: forestFloat;
+}
+
+/* =========================================
+   TEMA 2 — ANGKASA LEPAS
+   ========================================= */
+
 body[data-theme="space"] {
+  --ink: #30265d;
+  --muted: #77709a;
+  --purple: #7758d6;
   color: #f6f2ff;
-  background-color: #17163e;
+  background-color: #111634;
   background-image:
     radial-gradient(circle at 12% 18%, #ffffff 0 2px, transparent 3px),
-    radial-gradient(circle at 76% 30%, #f6d878 0 2px, transparent 3px),
+    radial-gradient(circle at 76% 30%, #ffe58a 0 2px, transparent 3px),
     radial-gradient(circle at 45% 70%, #b8c8ff 0 2px, transparent 3px),
     radial-gradient(circle at 88% 88%, #ffffff 0 2px, transparent 3px),
-    radial-gradient(ellipse at top, #43357f, #17163e 75%);
+    radial-gradient(ellipse at top, #383a82, #111634 76%);
 }
 
 body[data-theme="space"] .brand small,
@@ -770,51 +990,275 @@ body[data-theme="space"] .game-content,
 body[data-theme="space"] .player-label,
 body[data-theme="space"] .score-strip span,
 body[data-theme="space"] .result-card,
-body[data-theme="space"] .student-record {
-  color: #352653;
+body[data-theme="space"] .student-record,
+body[data-theme="space"] .theme-option,
+body[data-theme="space"] .stat-card,
+body[data-theme="space"] .recording-panel {
+  color: #30265d;
 }
 
 body[data-theme="space"] .hero-card {
-  background: linear-gradient(125deg, #5449a5, #9566d9 60%, #ed9fdb);
+  background: linear-gradient(125deg, #383b91, #755fd0 60%, #d58bdc);
 }
 
 body[data-theme="space"] .hero-description {
   color: #ffffff;
 }
 
-/* Tema Taman Bunga */
+body[data-theme="space"] .brand-icon {
+  background: linear-gradient(135deg, #ffe58a, #c5b7ff);
+  box-shadow: 0 7px 0 #5a4ca4;
+}
+
+body[data-theme="space"] .theme-option {
+  background: #e8e6ff;
+}
+
+body[data-theme="space"] .theme-option.selected {
+  border-color: #8067eb;
+  box-shadow: 0 0 0 3px #c9c1ff;
+}
+
+body[data-theme="space"] .primary-button {
+  background: linear-gradient(100deg, #5148bd, #a16de2);
+  box-shadow: 0 6px 0 #353078;
+}
+
+body[data-theme="space"] .primary-button:hover {
+  box-shadow: 0 8px 0 #353078;
+}
+
+body[data-theme="space"] .primary-button:active {
+  box-shadow: 0 2px 0 #353078;
+}
+
+body[data-theme="space"] .game-content {
+  border-color: #a49aff;
+  background-color: rgba(250, 248, 255, 0.97);
+}
+
+body[data-theme="space"] .progress-track {
+  background: #d8d2ff;
+}
+
+body[data-theme="space"] .progress-bar {
+  background: linear-gradient(90deg, #ff9fdf, #a69bff, #83e6d2);
+}
+
+body[data-theme="space"] .mission-one {
+  background: linear-gradient(145deg, #d9d4ff, #f3dfff);
+}
+
+body[data-theme="space"] .mission-two {
+  background: linear-gradient(145deg, #c8c6ff, #e8d9ff);
+}
+
+body[data-theme="space"] .mission-three {
+  background: linear-gradient(145deg, #b9d7ff, #eadbff);
+}
+
+body[data-theme="space"] .hero-decoration span {
+  animation-name: spaceFloat;
+}
+
+/* =========================================
+   TEMA 3 — TAMAN BUNGA
+   ========================================= */
+
 body[data-theme="garden"] {
-  background-color: #edfff1;
+  --ink: #713b62;
+  --muted: #966b8d;
+  --purple: #bd62a8;
+  color: var(--ink);
+  background-color: #fff0f7;
   background-image:
     radial-gradient(circle at 8% 18%, #ffb8d6 0 6%, transparent 6.5%),
     radial-gradient(circle at 90% 20%, #ffe994 0 7%, transparent 7.5%),
     radial-gradient(circle at 84% 85%, #b8e6a4 0 8%, transparent 8.5%),
-    linear-gradient(140deg, #f1fff0, #dcf8e5 55%, #fff8dc);
+    linear-gradient(140deg, #fff2f8, #f9dced 55%, #fff8dc);
 }
 
 body[data-theme="garden"] .hero-card {
-  background: linear-gradient(125deg, #a3e5ae, #f5e7a0 60%, #ffb8d3);
+  background: linear-gradient(125deg, #f4a6cf, #f8c7e5 55%, #ffe7a1);
 }
 
-/* Tema Alam Bawah Laut */
+body[data-theme="garden"] .eyebrow {
+  color: #9b477e;
+}
+
+body[data-theme="garden"] .hero-description {
+  color: #713b62;
+}
+
+body[data-theme="garden"] .brand-icon {
+  background: linear-gradient(135deg, #ffe58a, #ff9ecb);
+  box-shadow: 0 7px 0 #e4a1c8;
+}
+
+body[data-theme="garden"] .theme-option {
+  background: #ffe4f0;
+}
+
+body[data-theme="garden"] .theme-option.selected {
+  border-color: #d75ca1;
+  box-shadow: 0 0 0 3px #ffd0e7;
+}
+
+body[data-theme="garden"] .primary-button {
+  background: linear-gradient(100deg, #d75ca1, #ed91c7);
+  box-shadow: 0 6px 0 #a9427c;
+}
+
+body[data-theme="garden"] .primary-button:hover {
+  box-shadow: 0 8px 0 #a9427c;
+}
+
+body[data-theme="garden"] .primary-button:active {
+  box-shadow: 0 2px 0 #a9427c;
+}
+
+body[data-theme="garden"] .game-content {
+  border-color: #f0a9d0;
+  background-color: rgba(255, 250, 253, 0.97);
+}
+
+body[data-theme="garden"] .mission-one {
+  background: linear-gradient(145deg, #ffe9b0, #ffd5e8);
+}
+
+body[data-theme="garden"] .mission-two {
+  background: linear-gradient(145deg, #f6d4f0, #ffe7f4);
+}
+
+body[data-theme="garden"] .mission-three {
+  background: linear-gradient(145deg, #c9f1d2, #ffe1ef);
+}
+
+body[data-theme="garden"] .hero-decoration span {
+  animation-name: gardenFloat;
+}
+
+/* =========================================
+   TEMA 4 — ALAM BAWAH LAUT
+   ========================================= */
+
 body[data-theme="underwater"] {
-  background-color: #e4faff;
+  --ink: #174b62;
+  --muted: #47798b;
+  --purple: #247fa0;
+  color: var(--ink);
+  background-color: #c9f5f7;
   background-image:
-    radial-gradient(circle at 12% 20%, rgba(255,255,255,.8) 0 10px, transparent 11px),
-    radial-gradient(circle at 88% 38%, rgba(255,255,255,.7) 0 15px, transparent 16px),
-    radial-gradient(circle at 65% 80%, rgba(255,255,255,.6) 0 8px, transparent 9px),
-    linear-gradient(145deg, #d8f7ff, #a7e9f0 45%, #d8f4ff);
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,.85) 0 10px, transparent 11px),
+    radial-gradient(circle at 88% 38%, rgba(255,255,255,.8) 0 15px, transparent 16px),
+    radial-gradient(circle at 65% 80%, rgba(255,255,255,.75) 0 8px, transparent 9px),
+    linear-gradient(145deg, #d9fbff, #91e1e7 45%, #c7f0ff);
 }
 
 body[data-theme="underwater"] .hero-card {
-  background: linear-gradient(125deg, #7edeea, #a6d9ff 60%, #d4c3ff);
+  background: linear-gradient(125deg, #51c5d6, #85dcf0 60%, #b9c9ff);
+}
+
+body[data-theme="underwater"] .eyebrow {
+  color: #155a70;
 }
 
 body[data-theme="underwater"] .hero-description {
-  color: #254a6a;
+  color: #174b62;
 }
 
-/* Paparan telefon dan tablet */
+body[data-theme="underwater"] .brand-icon {
+  background: linear-gradient(135deg, #a6f0db, #70d8e8);
+  box-shadow: 0 7px 0 #78c8d2;
+}
+
+body[data-theme="underwater"] .theme-option {
+  background: #d8f7fa;
+}
+
+body[data-theme="underwater"] .theme-option.selected {
+  border-color: #299ab0;
+  box-shadow: 0 0 0 3px #b1edf0;
+}
+
+body[data-theme="underwater"] .primary-button {
+  background: linear-gradient(100deg, #2189a8, #4bc5ce);
+  box-shadow: 0 6px 0 #17687f;
+}
+
+body[data-theme="underwater"] .primary-button:hover {
+  box-shadow: 0 8px 0 #17687f;
+}
+
+body[data-theme="underwater"] .primary-button:active {
+  box-shadow: 0 2px 0 #17687f;
+}
+
+body[data-theme="underwater"] .game-content {
+  border-color: #72d2dc;
+  background-color: rgba(244, 255, 255, 0.97);
+}
+
+body[data-theme="underwater"] .mission-one {
+  background: linear-gradient(145deg, #fff0b5, #bdeff4);
+}
+
+body[data-theme="underwater"] .mission-two {
+  background: linear-gradient(145deg, #b5eaf2, #c9e5ff);
+}
+
+body[data-theme="underwater"] .mission-three {
+  background: linear-gradient(145deg, #a8e8dd, #d3f7ff);
+}
+
+body[data-theme="underwater"] .hero-decoration span {
+  animation-name: underwaterFloat;
+}
+
+/* =========================================
+   ANIMASI HIASAN LATAR
+   ========================================= */
+
+body[data-theme="hutan"] .hero-card::before {
+  animation: forestGlow 6s ease-in-out infinite;
+}
+
+body[data-theme="space"] .hero-card::before {
+  animation: planetGlow 5s ease-in-out infinite;
+}
+
+body[data-theme="garden"] .hero-card::before {
+  animation: gardenGlow 4s ease-in-out infinite;
+}
+
+body[data-theme="underwater"] .hero-card::before {
+  animation: bubbleGlow 5s ease-in-out infinite;
+}
+
+@keyframes forestGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-8px, 10px) scale(1.04); }
+}
+
+@keyframes planetGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10px, 8px) scale(1.08); }
+}
+
+@keyframes gardenGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+@keyframes bubbleGlow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.05); }
+}
+
+/* =========================================
+   PAPARAN TELEFON DAN TABLET
+   ========================================= */
+
 @media (max-width: 760px) {
   .app-shell {
     padding: 13px 14px 22px;
@@ -897,6 +1341,10 @@ body[data-theme="underwater"] .hero-description {
   }
 }
 
+/* =========================================
+   PAPARAN TELEFON KECIL
+   ========================================= */
+
 @media (max-width: 420px) {
   .brand strong {
     font-size: 1.15rem;
@@ -930,6 +1378,7 @@ body[data-theme="underwater"] .hero-description {
   }
 }
 
+/* Hormati tetapan pengguna yang mengurangkan animasi */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
