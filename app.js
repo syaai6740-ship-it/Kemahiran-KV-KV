@@ -1,1632 +1,750 @@
 "use strict";
 
-/*
- * JOM KENAL: PENGEMBARAAN DUNIA KATA
- * BBM Digital Pendidikan Pemulihan Khas
- *
- * Nota:
- * - Markah disimpan pada peranti yang digunakan.
- * - Rakaman suara disimpan dalam IndexedDB pada peranti tersebut.
- * - Penyimpanan merentas peranti memerlukan pangkalan data dalam talian.
- */
+/* =========================================
+   JOM KENAL: PENGEMBARAAN DUNIA KATA
+   Bahasa Melayu Pemulihan Khas Tahun 1
+========================================= */
 
-const TEACHER_PASSWORD = "1234";
-const RECORDS_KEY = "jomKenalRecordsV2";
-const PLAYER_KEY = "jomKenalPlayerV2";
+const $ = (selector) => document.querySelector(selector);
 
-const DB_NAME = "JomKenalAudioDB";
-const DB_VERSION = 1;
-const DB_STORE = "recordings";
+const homeScreen = $("#homeScreen");
+const gameScreen = $("#gameScreen");
+const resultScreen = $("#resultScreen");
+const activityContent = $("#activityContent");
+const feedback = $("#feedback");
+const checkBtn = $("#checkBtn");
+const nextBtn = $("#nextBtn");
+const themeSelect = $("#themeSelect");
 
-const $ = (id) => document.getElementById(id);
-
-const missions = [
-  {
-    title: "Kenal dan Baca",
-    badge: "🔎 MISI 1",
-    instruction:
-      "Baca perkataan yang dipaparkan. Kemudian pilih gambar yang sepadan.",
-    type: "picture",
-    questions: [
-      {
-        word: "baju",
-        syllables: ["ba", "ju"],
-        image: "👕",
-        choices: [
-          { image: "👕", label: "baju" },
-          { image: "📚", label: "buku" },
-          { image: "🍞", label: "roti" }
-        ]
-      },
-      {
-        word: "buku",
-        syllables: ["bu", "ku"],
-        image: "📚",
-        choices: [
-          { image: "🥄", label: "sudu" },
-          { image: "📚", label: "buku" },
-          { image: "⚽", label: "bola" }
-        ]
-      },
-      {
-        word: "guli",
-        syllables: ["gu", "li"],
-        image: "🔵",
-        choices: [
-          { image: "🐴", label: "kuda" },
-          { image: "🔵", label: "guli" },
-          { image: "👀", label: "mata" }
-        ]
-      },
-      {
-        word: "jari",
-        syllables: ["ja", "ri"],
-        image: "☝️",
-        choices: [
-          { image: "🍞", label: "roti" },
-          { image: "🚲", label: "roda" },
-          { image: "☝️", label: "jari" }
-        ]
-      },
-      {
-        word: "mata",
-        syllables: ["ma", "ta"],
-        image: "👀",
-        choices: [
-          { image: "👀", label: "mata" },
-          { image: "👕", label: "baju" },
-          { image: "🦷", label: "gigi" }
-        ]
-      }
-    ]
-  },
-
-  {
-    title: "Cantum dan Baca",
-    badge: "🧩 MISI 2",
-    instruction:
-      "Baca suku kata, tekan mengikut urutan yang betul dan cantumkannya menjadi perkataan.",
-    type: "syllables",
-    questions: [
-      {
-        word: "roda",
-        syllables: ["ro", "da"],
-        image: "🛞"
-      },
-      {
-        word: "roti",
-        syllables: ["ro", "ti"],
-        image: "🍞"
-      },
-      {
-        word: "kuda",
-        syllables: ["ku", "da"],
-        image: "🐴"
-      },
-      {
-        word: "bola",
-        syllables: ["bo", "la"],
-        image: "⚽"
-      },
-      {
-        word: "susu",
-        syllables: ["su", "su"],
-        image: "🥛"
-      }
-    ]
-  },
-
-  {
-    title: "Baca dan Faham",
-    badge: "💡 MISI 3",
-    instruction:
-      "Baca perkataan dan pilih gambar yang menunjukkan maksudnya.",
-    type: "comprehension",
-    questions: [
-      {
-        word: "roti",
-        image: "🍞",
-        question: "Yang manakah makanan?",
-        choices: [
-          { image: "🍞", label: "roti" },
-          { image: "🛞", label: "roda" },
-          { image: "👕", label: "baju" }
-        ]
-      },
-      {
-        word: "mata",
-        image: "👀",
-        question: "Apakah anggota badan yang digunakan untuk melihat?",
-        choices: [
-          { image: "🦷", label: "gigi" },
-          { image: "👀", label: "mata" },
-          { image: "☝️", label: "jari" }
-        ]
-      },
-      {
-        word: "sudu",
-        image: "🥄",
-        question: "Apakah alat yang boleh digunakan untuk menyuap makanan?",
-        choices: [
-          { image: "📚", label: "buku" },
-          { image: "🥄", label: "sudu" },
-          { image: "⚽", label: "bola" }
-        ]
-      },
-      {
-        word: "buku",
-        image: "📚",
-        question: "Apakah benda yang boleh dibaca?",
-        choices: [
-          { image: "📚", label: "buku" },
-          { image: "🍞", label: "roti" },
-          { image: "🛞", label: "roda" }
-        ]
-      },
-      {
-        word: "gigi",
-        image: "🦷",
-        question: "Apakah anggota badan yang membantu kita mengunyah makanan?",
-        choices: [
-          { image: "👀", label: "mata" },
-          { image: "🦷", label: "gigi" },
-          { image: "👕", label: "baju" }
-        ]
-      }
-    ]
-  },
-
-  {
-    title: "Cabaran Baca Sendiri",
-    badge: "🏆 MISI 4",
-    instruction:
-      "Baca perkataan sendiri dan pilih gambar yang sepadan. Audio hanya digunakan jika kamu memerlukannya.",
-    type: "independent",
-    questions: [
-      {
-        word: "baju",
-        image: "👕",
-        choices: [
-          { image: "👕", label: "baju" },
-          { image: "📚", label: "buku" },
-          { image: "🥛", label: "susu" }
-        ]
-      },
-      {
-        word: "roda",
-        image: "🛞",
-        choices: [
-          { image: "🍞", label: "roti" },
-          { image: "🛞", label: "roda" },
-          { image: "🐴", label: "kuda" }
-        ]
-      },
-      {
-        word: "jari",
-        image: "☝️",
-        choices: [
-          { image: "👀", label: "mata" },
-          { image: "🦷", label: "gigi" },
-          { image: "☝️", label: "jari" }
-        ]
-      },
-      {
-        word: "kuda",
-        image: "🐴",
-        choices: [
-          { image: "🐴", label: "kuda" },
-          { image: "⚽", label: "bola" },
-          { image: "🔵", label: "guli" }
-        ]
-      },
-      {
-        word: "susu",
-        image: "🥛",
-        choices: [
-          { image: "🍞", label: "roti" },
-          { image: "🥛", label: "susu" },
-          { image: "🥄", label: "sudu" }
-        ]
-      }
-    ]
-  }
-];
-
-let studentName = "";
-let selectedTheme = "hutan";
-
-let missionIndex = 0;
+let currentMission = 1;
 let questionIndex = 0;
-
-let score = 0;
-let correctAnswers = 0;
-let totalAnswered = 0;
-
-let selectedChoice = null;
-let chosenSyllables = [];
+let selectedPicture = null;
+let selectedSyllables = [];
 let answered = false;
-
-let activeRecordId = null;
-let wordAudioIds = {};
-
-let mediaRecorder = null;
-let recordingStream = null;
+let currentScore = 0;
+let totalQuestions = 0;
+let completedMissions = new Set();
+let missionScores = {};
+let studentName = "Murid";
+let recordingState = null;
+let recordingUrl = null;
+let recordingBlob = null;
 let recordingChunks = [];
-let recordingWord = null;
-let recordingMimeType = "";
+let isRecording = false;
+let recordedThisQuestion = false;
 
-let teacherLoggedIn = false;
-let recordingURLs = [];
+/* Perkataan dan gambar menggunakan emoji sebagai ilustrasi.
+   Tiada label perkataan dipaparkan di bawah pilihan gambar. */
 
+const missionData = {
+  1: {
+    title: "Kenal dan Baca",
+    description: "Baca perkataan yang dipaparkan, kemudian pilih gambar yang betul.",
+    questions: [
+      {
+        word: "sabun",
+        answer: "🧼",
+        options: ["🧼", "🧹", "👕"],
+        explanation: "Betul! Sabun digunakan untuk membersihkan badan dan tangan."
+      },
+      {
+        word: "sapu",
+        answer: "🧹",
+        options: ["🧺", "🧹", "🧼"],
+        explanation: "Betul! Penyapu digunakan untuk menyapu lantai."
+      },
+      {
+        word: "baju",
+        answer: "👕",
+        options: ["🧽", "👕", "🪥"],
+        explanation: "Betul! Baju perlu dijaga supaya bersih."
+      }
+    ]
+  },
 
-/* --------------------------------------------------
-   UTILITI ASAS
--------------------------------------------------- */
+  2: {
+    title: "Cantum dan Baca",
+    description: "Perhatikan gambar. Pilih suku kata yang betul untuk mencantumkan perkataan.",
+    questions: [
+      {
+        picture: "🧼",
+        clue: "Apakah nama benda ini?",
+        syllables: ["sa", "bun"],
+        choices: ["sa", "bu", "bun", "pu"],
+        answer: "sabun",
+        explanation: "Bagus! sa + bun membentuk perkataan sabun."
+      },
+      {
+        picture: "👕",
+        clue: "Apakah nama benda ini?",
+        syllables: ["ba", "ju"],
+        choices: ["ba", "ju", "bu", "su"],
+        answer: "baju",
+        explanation: "Bagus! ba + ju membentuk perkataan baju."
+      },
+      {
+        picture: "🧹",
+        clue: "Apakah nama benda ini?",
+        syllables: ["sa", "pu"],
+        choices: ["sa", "pu", "bu", "pi"],
+        answer: "sapu",
+        explanation: "Bagus! sa + pu membentuk perkataan sapu."
+      }
+    ]
+  },
 
-function createElement(tag, className = "", text = "") {
-  const element = document.createElement(tag);
+  3: {
+    title: "Baca dan Faham",
+    description: "Fahami soalan dan pilih gambar yang menjawab soalan tersebut.",
+    questions: [
+      {
+        question: "Apakah yang digunakan untuk mencuci tangan?",
+        answer: "🧼",
+        options: ["🧼", "👕", "🧹"],
+        explanation: "Betul! Sabun digunakan untuk mencuci tangan."
+      },
+      {
+        question: "Apakah yang digunakan untuk menyapu lantai?",
+        answer: "🧹",
+        options: ["🪥", "🧹", "🧺"],
+        explanation: "Betul! Penyapu digunakan untuk menyapu lantai."
+      },
+      {
+        question: "Apakah yang kita pakai pada badan?",
+        answer: "👕",
+        options: ["🧽", "🧼", "👕"],
+        explanation: "Betul! Baju dipakai pada badan."
+      }
+    ]
+  },
 
-  if (className) {
-    element.className = className;
+  4: {
+    title: "Cabaran Baca Sendiri",
+    description: "Baca perkataan dengan suara sendiri. Rakam dan dengar semula bacaan anda.",
+    questions: [
+      {
+        word: "sabun"
+      },
+      {
+        word: "baju"
+      },
+      {
+        word: "sapu"
+      }
+    ]
   }
+};
 
-  if (text !== undefined) {
-    element.textContent = text;
-  }
+/* Tukar tema */
+themeSelect.addEventListener("change", () => {
+  document.body.dataset.theme = themeSelect.value;
+});
 
-  return element;
-}
+/* Navigasi */
+$("#startBtn").addEventListener("click", () => {
+  studentName = $("#studentName").value.trim() || "Murid";
+  $("#studentGreeting").textContent = `Selamat belajar, ${studentName}!`;
+  showScreen("homeScreen");
+  updateHomeProgress();
+});
 
-function setMessage(id, message, type = "") {
-  const element = $(id);
+$("#homeLink").addEventListener("click", (event) => {
+  event.preventDefault();
+  goHome();
+});
 
-  if (!element) return;
+$("#backHomeBtn").addEventListener("click", goHome);
+$("#chooseMissionBtn").addEventListener("click", goHome);
+$("#resultHomeBtn").addEventListener("click", goHome);
 
-  element.textContent = message;
-  element.classList.remove("success", "error");
+document.querySelectorAll("[data-mission]").forEach((button) => {
+  button.addEventListener("click", () => {
+    studentName = $("#studentName").value.trim() || studentName;
+    $("#studentGreeting").textContent = `Selamat belajar, ${studentName}!`;
+    startMission(Number(button.dataset.mission));
+  });
+});
 
-  if (type) {
-    element.classList.add(type);
-  }
-}
+$("#retryBtn").addEventListener("click", () => {
+  startMission(currentMission);
+});
 
+checkBtn.addEventListener("click", handleCheck);
+nextBtn.addEventListener("click", handleNext);
+
+/* Paparan skrin */
 function showScreen(screenId) {
-  document.querySelectorAll(".screen").forEach((screen) => {
-    const active = screen.id === screenId;
-
-    screen.hidden = !active;
-    screen.classList.toggle("active", active);
+  [homeScreen, gameScreen, resultScreen].forEach((screen) => {
+    screen.classList.add("hidden");
   });
 
+  $(`#${screenId}`).classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function makeId() {
-  if (window.crypto && window.crypto.randomUUID) {
-    return window.crypto.randomUUID();
-  }
-
-  return "jk-" + Date.now() + "-" +
-    Math.random().toString(36).slice(2);
+function goHome() {
+  stopRecordingIfNeeded();
+  clearRecordingUrl();
+  showScreen("homeScreen");
+  updateHomeProgress();
 }
 
-function shuffle(items) {
-  const result = [...items];
-
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-
-  return result;
-}
-
-
-/* --------------------------------------------------
-   AUDIO SEBUTAN
--------------------------------------------------- */
-
-function speak(text) {
-  if (!("speechSynthesis" in window)) {
-    setMessage(
-      "gameMessage",
-      "Audio tidak disokong oleh pelayar ini. Teruskan membaca perkataan pada skrin."
-    );
-
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-
-  utterance.lang = "ms-MY";
-  utterance.rate = 0.78;
-  utterance.pitch = 1.05;
-
-  window.speechSynthesis.speak(utterance);
-}
-
-
-/* --------------------------------------------------
-   REKOD MURID PADA PERANTI
--------------------------------------------------- */
-
-function loadRecords() {
-  try {
-    const parsed = JSON.parse(
-      localStorage.getItem(RECORDS_KEY) || "[]"
-    );
-
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveRecords(records) {
-  try {
-    localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function saveCurrentRecord() {
-  if (!activeRecordId) return;
-
-  const records = loadRecords();
-
-  let record = records.find(
-    (item) => item.id === activeRecordId
-  );
-
-  const updatedRecord = {
-    id: activeRecordId,
-    name: studentName,
-    score,
-    correctAnswers,
-    totalAnswered,
-    totalQuestions: 20,
-    date: new Date().toISOString(),
-    theme: selectedTheme,
-    wordRecordings: { ...wordAudioIds }
-  };
-
-  if (record) {
-    Object.assign(record, updatedRecord);
-  } else {
-    records.push(updatedRecord);
-  }
-
-  saveRecords(records);
-}
-
-function savePlayer() {
-  try {
-    localStorage.setItem(
-      PLAYER_KEY,
-      JSON.stringify({
-        name: studentName,
-        theme: selectedTheme
-      })
-    );
-  } catch {
-    // Permainan boleh diteruskan jika simpanan gagal.
-  }
-}
-
-function restorePlayer() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(PLAYER_KEY) || "null"
-    );
-
-    if (saved && typeof saved === "object") {
-      if (typeof saved.name === "string" && $("studentName")) {
-        $("studentName").value = saved.name;
-      }
-
-      const validThemes = [
-        "hutan",
-        "space",
-        "garden",
-        "underwater"
-      ];
-
-      if (validThemes.includes(saved.theme)) {
-        selectedTheme = saved.theme;
-      }
-    }
-  } catch {
-    // Abaikan data yang tidak dapat dibaca.
-  }
-
-  applyTheme(selectedTheme);
-}
-
-
-/* --------------------------------------------------
-   TEMA
--------------------------------------------------- */
-
-function applyTheme(theme) {
-  const allowed = [
-    "hutan",
-    "space",
-    "garden",
-    "underwater"
-  ];
-
-  if (!allowed.includes(theme)) {
-    theme = "hutan";
-  }
-
-  selectedTheme = theme;
-  document.body.dataset.theme = theme;
-
-  if ($("themeSelect")) {
-    $("themeSelect").value = theme;
-  }
-
-  document.querySelectorAll(".theme-option").forEach((button) => {
-    const selected = button.dataset.theme === theme;
-
-    button.classList.toggle("selected", selected);
-    button.setAttribute("aria-pressed", String(selected));
-  });
-
-  savePlayer();
-}
-
-
-/* --------------------------------------------------
-   PANGKALAN DATA RAKAMAN AUDIO SETEMPAT
--------------------------------------------------- */
-
-function openAudioDB() {
-  return new Promise((resolve, reject) => {
-    if (!("indexedDB" in window)) {
-      reject(new Error("Simpanan rakaman tidak disokong."));
-      return;
-    }
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      const db = request.result;
-
-      if (!db.objectStoreNames.contains(DB_STORE)) {
-        db.createObjectStore(DB_STORE, { keyPath: "id" });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function saveAudio(id, blob) {
-  const db = await openAudioDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(DB_STORE, "readwrite");
-
-    transaction.objectStore(DB_STORE).put({
-      id,
-      blob,
-      savedAt: new Date().toISOString()
-    });
-
-    transaction.oncomplete = () => {
-      db.close();
-      resolve(true);
-    };
-
-    transaction.onerror = () => {
-      db.close();
-      reject(transaction.error);
-    };
-  });
-}
-
-async function getAudio(id) {
-  if (!id) return null;
-
-  const db = await openAudioDB();
-
-  return new Promise((resolve, reject) => {
-    const request = db
-      .transaction(DB_STORE, "readonly")
-      .objectStore(DB_STORE)
-      .get(id);
-
-    request.onsuccess = () => {
-      const result = request.result;
-
-      db.close();
-      resolve(result ? result.blob : null);
-    };
-
-    request.onerror = () => {
-      db.close();
-      reject(request.error);
-    };
-  });
-}
-
-
-/* --------------------------------------------------
-   MEMULAKAN PERMAINAN
--------------------------------------------------- */
-
-function startMission() {
-  const name = $("studentName").value.trim();
-
-  if (!name) {
-    setMessage(
-      "homeMessage",
-      "Masukkan nama atau kod murid dahulu ya!",
-      "error"
-    );
-
-    $("studentName").focus();
-    return;
-  }
-
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    setMessage(
-      "homeMessage",
-      "Selesaikan rakaman yang sedang berjalan dahulu.",
-      "error"
-    );
-
-    return;
-  }
-
-  studentName = name;
-
-  missionIndex = 0;
+/* Mulakan misi */
+function startMission(missionNumber) {
+  stopRecordingIfNeeded();
+  clearRecordingUrl();
+
+  currentMission = missionNumber;
   questionIndex = 0;
+  currentScore = 0;
+  totalQuestions = missionData[missionNumber].questions.length;
+  selectedPicture = null;
+  selectedSyllables = [];
+  answered = false;
+  recordedThisQuestion = false;
 
-  score = 0;
-  correctAnswers = 0;
-  totalAnswered = 0;
-
-  activeRecordId = makeId();
-  wordAudioIds = {};
-
-  savePlayer();
-  saveCurrentRecord();
-
-  $("playerLabel").textContent = "🌟 " + studentName;
-  $("scoreValue").textContent = "0";
-
-  setMessage("homeMessage", "");
+  $("#missionEyebrow").textContent = `MISI ${missionNumber}`;
+  $("#missionTitle").textContent = missionData[missionNumber].title;
+  $("#missionDescription").textContent = missionData[missionNumber].description;
+  $("#missionCount").textContent = `${missionNumber}/4`;
 
   showScreen("gameScreen");
   renderQuestion();
 }
 
-
-/* --------------------------------------------------
-   PAPARAN SOALAN
--------------------------------------------------- */
-
+/* Papar soalan mengikut misi */
 function renderQuestion() {
-  const mission = missions[missionIndex];
-  const item = mission.questions[questionIndex];
+  stopRecordingIfNeeded();
+  clearRecordingUrl();
 
-  selectedChoice = null;
-  chosenSyllables = [];
+  selectedPicture = null;
+  selectedSyllables = [];
   answered = false;
+  recordedThisQuestion = false;
 
-  $("gameTitle").textContent = mission.title;
-  $("missionBadge").textContent = mission.badge;
-  $("gameInstruction").textContent = mission.instruction;
+  feedback.className = "feedback hidden";
+  feedback.textContent = "";
+  checkBtn.classList.remove("hidden");
+  nextBtn.classList.add("hidden");
+  checkBtn.disabled = false;
 
-  $("gameStage").textContent =
-    `MISI ${missionIndex + 1} DARIPADA ${missions.length}`;
+  const question = missionData[currentMission].questions[questionIndex];
 
-  $("questionValue").textContent =
-    `${questionIndex + 1}/${mission.questions.length}`;
+  $("#questionProgressText").textContent =
+    `Soalan ${questionIndex + 1} daripada ${totalQuestions}`;
 
-  $("scoreValue").textContent = String(score);
+  $("#questionProgressBar").style.width =
+    `${(questionIndex / totalQuestions) * 100}%`;
 
-  const totalQuestions = missions.reduce(
-    (sum, current) => sum + current.questions.length,
-    0
-  );
-
-  const completedQuestions =
-    missionIndex * 5 + questionIndex;
-
-  $("progressBar").style.width =
-    `${(completedQuestions / totalQuestions) * 100}%`;
-
-  $("gameContent").replaceChildren();
-
-  setMessage("gameMessage", "");
-
-  $("checkAnswerBtn").hidden = false;
-  $("checkAnswerBtn").disabled = false;
-
-  $("nextQuestionBtn").hidden = true;
-
-  if (mission.type === "picture") {
-    renderPictureQuestion(item, false);
-  } else if (mission.type === "syllables") {
-    renderSyllableQuestion(item);
-  } else if (mission.type === "comprehension") {
-    renderPictureQuestion(item, true);
-  } else if (mission.type === "independent") {
-    renderPictureQuestion(item, false, true);
+  if (currentMission === 1) {
+    renderMissionOne(question);
+  } else if (currentMission === 2) {
+    renderMissionTwo(question);
+  } else if (currentMission === 3) {
+    renderMissionThree(question);
+  } else if (currentMission === 4) {
+    renderMissionFour(question);
   }
 }
 
+/* MISI 1: Perkataan dan pilihan gambar */
+function renderMissionOne(question) {
+  activityContent.innerHTML = `
+    <h2 class="activity-prompt">Baca perkataan ini.</h2>
+    <div class="reading-word">${question.word}</div>
+    <p class="activity-instruction">Pilih satu gambar yang sepadan dengan perkataan.</p>
+    <div class="picture-choices" id="pictureChoices">
+      ${question.options.map((emoji, index) => `
+        <button
+          type="button"
+          class="picture-choice"
+          data-choice="${escapeHTML(emoji)}"
+          aria-label="Pilihan gambar ${index + 1}">
+          <span class="picture-emoji" aria-hidden="true">${emoji}</span>
+        </button>
+      `).join("")}
+    </div>
+  `;
 
-/* --------------------------------------------------
-   BANTUAN AUDIO
--------------------------------------------------- */
-
-function createListenButton(text, label = "🔊 Dengar contoh sebutan") {
-  const button = createElement(
-    "button",
-    "secondary-button",
-    label
-  );
-
-  button.type = "button";
-
-  button.addEventListener("click", () => speak(text));
-
-  return button;
+  attachPictureChoiceEvents();
 }
 
+/* MISI 2: Gambar dan pilihan suku kata */
+function renderMissionTwo(question) {
+  activityContent.innerHTML = `
+    <h2 class="activity-prompt">Cantumkan suku kata.</h2>
+    <p class="activity-instruction">${question.clue}</p>
+    <div class="target-picture" role="img" aria-label="Gambar petunjuk">
+      ${question.picture}
+    </div>
 
-/* --------------------------------------------------
-   MISI 1, 3 DAN 4: MEMBACA DAN MEMAHAMI
--------------------------------------------------- */
+    <div class="syllable-workspace">
+      <div class="syllable-slots">
+        <div class="syllable-slot" id="slot0">?</div>
+        <span class="syllable-plus">+</span>
+        <div class="syllable-slot" id="slot1">?</div>
+      </div>
 
-function renderPictureQuestion(item, isComprehension = false, independent = false) {
-  const container = $("gameContent");
+      <p class="activity-instruction">Pilih suku kata mengikut urutan.</p>
 
-  if (isComprehension && item.question) {
-    const question = createElement(
-      "p",
-      "question-prompt",
-      item.question
-    );
+      <div class="syllable-buttons" id="syllableChoices">
+        ${question.choices.map((syllable) => `
+          <button
+            type="button"
+            class="syllable-button"
+            data-syllable="${escapeHTML(syllable)}">
+            ${syllable}
+          </button>
+        `).join("")}
+      </div>
 
-    question.style.textAlign = "center";
-    question.style.fontWeight = "900";
+      <div class="syllable-actions">
+        <button type="button" id="undoSyllableBtn" class="secondary-btn">
+          ↩ Buang Pilihan
+        </button>
+        <button type="button" id="resetSyllablesBtn" class="secondary-btn">
+          Ulang Semula
+        </button>
+      </div>
+    </div>
+  `;
 
-    container.append(question);
-  }
+  document.querySelectorAll("[data-syllable]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (answered || selectedSyllables.length >= 2) return;
 
-  const word = createElement(
-    "div",
-    "reading-word",
-    item.word
-  );
+      const syllable = button.dataset.syllable;
+      selectedSyllables.push(syllable);
+      button.classList.add("selected");
+      button.disabled = true;
 
-  word.setAttribute("aria-label", "Perkataan untuk dibaca");
+      updateSyllableSlots();
+    });
+  });
 
-  container.append(word);
+  $("#undoSyllableBtn").addEventListener("click", () => {
+    if (answered || selectedSyllables.length === 0) return;
 
-  const helpText = createElement(
-    "p",
-    "small-note",
-    independent
-      ? "Cuba baca sendiri dahulu. Gunakan audio jika memerlukan bantuan."
-      : "Baca perkataan dahulu. Kemudian pilih gambar yang betul."
-  );
+    selectedSyllables.pop();
+    updateSyllableButtons();
+    updateSyllableSlots();
+  });
 
-  helpText.style.textAlign = "center";
-  container.append(helpText);
+  $("#resetSyllablesBtn").addEventListener("click", () => {
+    if (answered) return;
+    selectedSyllables = [];
+    updateSyllableButtons();
+    updateSyllableSlots();
+  });
+}
 
-  const listen = createListenButton(
-    item.word,
-    "🔊 Dengar contoh sebutan"
-  );
+function updateSyllableSlots() {
+  $("#slot0").textContent = selectedSyllables[0] || "?";
+  $("#slot1").textContent = selectedSyllables[1] || "?";
+}
 
-  listen.style.display = "flex";
-  listen.style.margin = "12px auto";
+function updateSyllableButtons() {
+  document.querySelectorAll("[data-syllable]").forEach((button) => {
+    button.disabled = false;
+    button.classList.remove("selected");
+  });
 
-  container.append(listen);
+  selectedSyllables.forEach((syllable, index) => {
+    const matchingButtons = Array.from(
+      document.querySelectorAll("[data-syllable]")
+    ).filter((button) => button.dataset.syllable === syllable);
 
-  const choices = createElement("div", "picture-choices");
+    const button = matchingButtons.find((item) => !item.disabled);
 
-  const shuffledChoices = shuffle(item.choices);
+    if (button) {
+      button.disabled = true;
+      button.classList.add("selected");
+    }
+  });
+}
 
-  shuffledChoices.forEach((choice) => {
-    const button = createElement(
-      "button",
-      "picture-choice"
-    );
+/* MISI 3: Soalan dan gambar tanpa label perkataan */
+function renderMissionThree(question) {
+  activityContent.innerHTML = `
+    <h2 class="activity-prompt">${question.question}</h2>
+    <p class="activity-instruction">Pilih satu gambar sebagai jawapan.</p>
 
-    button.type = "button";
-    button.setAttribute(
-      "aria-label",
-      `Pilih gambar ${choice.label}`
-    );
+    <div class="picture-choices" id="pictureChoices">
+      ${question.options.map((emoji, index) => `
+        <button
+          type="button"
+          class="picture-choice"
+          data-choice="${escapeHTML(emoji)}"
+          aria-label="Pilihan gambar ${index + 1}">
+          <span class="picture-emoji" aria-hidden="true">${emoji}</span>
+        </button>
+      `).join("")}
+    </div>
+  `;
 
-    const image = createElement(
-      "span",
-      "choice-image",
-      choice.image
-    );
+  attachPictureChoiceEvents();
+}
 
-    const label = createElement(
-      "span",
-      "choice-label",
-      choice.label
-    );
-
-    button.append(image, label);
-
+/* Pilihan gambar untuk Misi 1 dan Misi 3 */
+function attachPictureChoiceEvents() {
+  document.querySelectorAll("[data-choice]").forEach((button) => {
     button.addEventListener("click", () => {
       if (answered) return;
 
-      selectedChoice = choice.label;
+      selectedPicture = button.dataset.choice;
 
-      choices.querySelectorAll("button").forEach((other) => {
-        other.classList.remove("selected");
+      document.querySelectorAll("[data-choice]").forEach((item) => {
+        item.classList.remove("selected");
       });
 
       button.classList.add("selected");
     });
-
-    choices.append(button);
   });
-
-  container.append(choices);
 }
 
+/* MISI 4: Bacaan lisan dan rakaman */
+function renderMissionFour(question) {
+  activityContent.innerHTML = `
+    <h2 class="activity-prompt">Baca perkataan dengan suara sendiri.</h2>
 
-/* --------------------------------------------------
-   MISI 2: CANTUM SUKU KATA
--------------------------------------------------- */
+    <div class="reading-word">${question.word}</div>
 
-function renderSyllableQuestion(item) {
-  const container = $("gameContent");
+    <div class="recording-panel">
+      <div class="recording-microphone" aria-hidden="true">🎙️</div>
+      <h3>Ruang Rakaman Suara</h3>
+      <p class="activity-instruction">
+        Sebut perkataan di atas dengan jelas. Tekan butang rakam untuk bermula.
+      </p>
 
-  const image = createElement(
-    "div",
-    "target-picture",
-    item.image
-  );
+      <div id="recordingStatus" class="recording-status" role="status" aria-live="polite">
+        Rakaman belum dimulakan.
+      </div>
 
-  container.append(image);
+      <div class="recording-buttons">
+        <button type="button" id="startRecordingBtn" class="record-btn">
+          🔴 Rakam Suara
+        </button>
+        <button type="button" id="stopRecordingBtn" class="record-btn stop" disabled>
+          ⏹ Berhenti
+        </button>
+        <button type="button" id="playRecordingBtn" class="record-btn playback" disabled>
+          ▶ Dengar Semula
+        </button>
+        <button type="button" id="downloadRecordingBtn" class="record-btn download" disabled>
+          ⬇ Muat Turun
+        </button>
+      </div>
 
-  const word = createElement(
-    "div",
-    "reading-word",
-    item.word
-  );
+      <audio id="recordedAudio" class="record-audio hidden" controls></audio>
 
-  container.append(word);
+      <p class="recording-note">
+        Benarkan akses mikrofon apabila diminta oleh pelayar.
+        Rakaman boleh didengar semula untuk membantu murid dan guru menyemak bacaan.
+      </p>
+    </div>
+  `;
 
-  const instruction = createElement(
-    "p",
-    "small-note",
-    "Baca suku kata pada butang. Tekan suku kata mengikut urutan untuk membentuk perkataan."
-  );
+  $("#startRecordingBtn").addEventListener("click", startRecording);
+  $("#stopRecordingBtn").addEventListener("click", stopRecording);
+  $("#playRecordingBtn").addEventListener("click", playRecording);
+  $("#downloadRecordingBtn").addEventListener("click", downloadRecording);
 
-  instruction.style.textAlign = "center";
-
-  container.append(instruction);
-
-  const syllableButtons = createElement(
-    "div",
-    "syllable-buttons"
-  );
-
-  const shuffled = shuffle(item.syllables);
-
-  shuffled.forEach((syllable, index) => {
-    const button = createElement(
-      "button",
-      "syllable-button",
-      syllable
-    );
-
-    button.type = "button";
-
-    button.addEventListener("click", () => {
-      if (answered || button.disabled) return;
-
-      chosenSyllables.push({
-        syllable,
-        button
-      });
-
-      button.disabled = true;
-      button.classList.add("chosen");
-
-      speak(syllable);
-
-      updateJoinedWord();
-    });
-
-    syllableButtons.append(button);
-  });
-
-  container.append(syllableButtons);
-
-  const joined = createElement(
-    "div",
-    "joined-word",
-    "Perkataan kamu: —"
-  );
-
-  joined.id = "joinedWord";
-
-  container.append(joined);
-
-  const controls = createElement("div", "game-controls");
-
-  const listenWord = createListenButton(
-    item.word,
-    "🔊 Dengar perkataan penuh"
-  );
-
-  const resetButton = createElement(
-    "button",
-    "secondary-button",
-    "↺ Cuba semula"
-  );
-
-  resetButton.type = "button";
-
-  resetButton.addEventListener("click", () => {
-    if (answered) return;
-    renderQuestion();
-  });
-
-  controls.append(listenWord, resetButton);
-
-  container.append(controls);
+  checkBtn.textContent = "Saya Sudah Membaca";
+  checkBtn.disabled = false;
 }
 
-function updateJoinedWord() {
-  const joined = $("joinedWord");
-
-  if (!joined) return;
-
-  const word = chosenSyllables
-    .map((item) => item.syllable)
-    .join("");
-
-  joined.textContent = "Perkataan kamu: " + (word || "—");
-}
-
-
-/* --------------------------------------------------
-   SEMAK JAWAPAN
--------------------------------------------------- */
-
-function checkAnswer() {
+/* Semak jawapan */
+function handleCheck() {
   if (answered) return;
 
-  const mission = missions[missionIndex];
-  const item = mission.questions[questionIndex];
-
-  let correct = false;
-
-  if (
-    mission.type === "picture" ||
-    mission.type === "comprehension" ||
-    mission.type === "independent"
-  ) {
-    if (!selectedChoice) {
-      setMessage(
-        "gameMessage",
-        "Pilih satu gambar dahulu ya.",
-        "error"
-      );
-
+  if (currentMission === 1 || currentMission === 3) {
+    if (!selectedPicture) {
+      showFeedback("Pilih satu gambar dahulu, ya!", "neutral");
       return;
     }
 
-    correct = selectedChoice === item.word;
-  } else if (mission.type === "syllables") {
-    if (chosenSyllables.length !== item.syllables.length) {
-      setMessage(
-        "gameMessage",
-        "Baca dan pilih semua suku kata dahulu.",
-        "error"
-      );
+    const question = missionData[currentMission].questions[questionIndex];
+    const correct = selectedPicture === question.answer;
 
-      return;
+    if (correct) {
+      currentScore++;
+      showFeedback(question.explanation, "success");
+    } else {
+      showFeedback("Belum tepat. Cuba perhatikan semula perkataan atau soalan.", "error");
     }
 
-    const formedWord = chosenSyllables
-      .map((entry) => entry.syllable)
-      .join("");
+    if (correct) {
+      markCorrectChoice(question.answer);
+    } else {
+      markIncorrectChoice(selectedPicture);
+    }
 
-    correct = formedWord === item.word;
+    finishQuestion();
+    return;
   }
 
-  answered = true;
-  totalAnswered++;
+  if (currentMission === 2) {
+    if (selectedSyllables.length < 2) {
+      showFeedback("Pilih dua suku kata dahulu.", "neutral");
+      return;
+    }
 
-  if (correct) {
-    score++;
-    correctAnswers++;
+    const question = missionData[2].questions[questionIndex];
+    const assembledWord = selectedSyllables.join("");
+    const correct = assembledWord === question.answer;
 
-    setMessage(
-      "gameMessage",
-      "Betul! Syabas, kamu berjaya membaca dan memahami perkataan ini! ⭐",
+    if (correct) {
+      currentScore++;
+      showFeedback(question.explanation, "success");
+    } else {
+      showFeedback("Belum tepat. Cuba semak susunan suku kata.", "error");
+    }
+
+    finishQuestion();
+    return;
+  }
+
+  if (currentMission === 4) {
+    if (!recordedThisQuestion) {
+      showFeedback("Rakam bacaan anda dahulu sebelum meneruskan.", "neutral");
+      return;
+    }
+
+    currentScore++;
+    showFeedback(
+      "Bagus! Anda telah merakam bacaan. Dengar semula rakaman untuk menyemak sebutan.",
       "success"
     );
-
-    speak("Betul! " + item.word);
-  } else {
-    setMessage(
-      "gameMessage",
-      "Belum tepat. Perhatikan perkataan dan cuba lagi pada soalan seterusnya.",
-      "error"
-    );
-
-    speak(item.word);
+    finishQuestion();
   }
-
-  $("scoreValue").textContent = String(score);
-  $("checkAnswerBtn").disabled = true;
-
-  saveCurrentRecord();
-  showNextButton();
 }
 
-
-/* --------------------------------------------------
-   NAVIGASI SOALAN
--------------------------------------------------- */
-
-function showNextButton() {
-  $("checkAnswerBtn").hidden = true;
-  $("nextQuestionBtn").hidden = false;
-
-  const lastQuestion =
-    questionIndex === missions[missionIndex].questions.length - 1;
-
-  const lastMission =
-    missionIndex === missions.length - 1;
-
-  $("nextQuestionBtn").textContent = lastQuestion
-    ? (lastMission ? "Lihat Keputusan 🏆" : "Misi Seterusnya →")
-    : "Soalan Seterusnya →";
+function markCorrectChoice(answer) {
+  document.querySelectorAll("[data-choice]").forEach((button) => {
+    if (button.dataset.choice === answer) {
+      button.classList.add("correct");
+    }
+  });
 }
 
-function nextQuestion() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    setMessage(
-      "gameMessage",
-      "Hentikan rakaman suara dahulu sebelum meneruskan.",
-      "error"
-    );
+function markIncorrectChoice(choice) {
+  document.querySelectorAll("[data-choice]").forEach((button) => {
+    if (button.dataset.choice === choice) {
+      button.classList.add("incorrect");
+    }
+  });
+}
 
-    return;
-  }
+function finishQuestion() {
+  answered = true;
+  checkBtn.classList.add("hidden");
+  nextBtn.classList.remove("hidden");
 
-  if (
-    questionIndex <
-    missions[missionIndex].questions.length - 1
-  ) {
+  document.querySelectorAll("[data-choice], [data-syllable]").forEach((button) => {
+    button.disabled = true;
+  });
+
+  $("#questionProgressBar").style.width =
+    `${((questionIndex + 1) / totalQuestions) * 100}%`;
+}
+
+function handleNext() {
+  if (!answered) return;
+
+  if (questionIndex < totalQuestions - 1) {
     questionIndex++;
     renderQuestion();
-    return;
+  } else {
+    finishMission();
   }
-
-  if (missionIndex < missions.length - 1) {
-    missionIndex++;
-    questionIndex = 0;
-    renderQuestion();
-    return;
-  }
-
-  finishMission();
 }
 
-
-/* --------------------------------------------------
-   KEPUTUSAN
--------------------------------------------------- */
+function showFeedback(message, type) {
+  feedback.textContent = message;
+  feedback.className = `feedback ${type}`;
+}
 
 function finishMission() {
-  saveCurrentRecord();
+  completedMissions.add(currentMission);
+  missionScores[currentMission] = currentScore;
 
-  $("resultStudentName").textContent =
-    "Syabas, " + studentName + "!";
+  $("#resultMessage").textContent =
+    currentMission === 4
+      ? `Tahniah, ${studentName}! Anda telah menyelesaikan cabaran bacaan dan rakaman.`
+      : `Tahniah, ${studentName}! Anda telah menamatkan misi ${currentMission}.`;
 
-  $("finalScore").textContent = score + " / 20";
+  $("#resultScore").textContent = `${currentScore}/${totalQuestions}`;
 
-  const feedback = score >= 17
-    ? "Cemerlang! Kamu menunjukkan kemahiran membaca dan memahami perkataan dengan sangat baik."
-    : score >= 12
-      ? "Bagus! Teruskan latihan membaca supaya kamu semakin yakin."
-      : "Terima kasih kerana mencuba. Kamu boleh berlatih semula dan meminta bantuan guru apabila perlu.";
+  $("#retryBtn").textContent = "Cuba Misi Ini Lagi 🔄";
 
-  $("resultFeedback").textContent = feedback;
-
+  updateHomeProgress();
   showScreen("resultScreen");
 }
 
+/* Kemajuan keseluruhan */
+function updateHomeProgress() {
+  const completed = completedMissions.size;
+  $("#homeProgressText").textContent = `${completed} daripada 4 misi selesai`;
+  $("#homeProgressBar").style.width = `${(completed / 4) * 100}%`;
 
-/* --------------------------------------------------
-   RAKAMAN SUARA MURID
--------------------------------------------------- */
+  document.querySelectorAll("[data-mission]").forEach((button) => {
+    const mission = Number(button.dataset.mission);
+    const oldBadge = button.querySelector(".completed-badge");
 
-async function startWordRecording(
-  word,
-  recordButton,
-  stopButton,
-  playButton,
-  message
-) {
-  if (
-    !navigator.mediaDevices?.getUserMedia ||
-    !window.MediaRecorder
-  ) {
-    message.textContent =
-      "Rakaman tidak disokong. Gunakan pelayar terkini melalui laman HTTPS.";
-    return;
-  }
+    if (oldBadge) oldBadge.remove();
 
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    message.textContent =
-      "Hentikan rakaman yang sedang berjalan dahulu.";
+    if (completedMissions.has(mission)) {
+      const badge = document.createElement("span");
+      badge.className = "completed-badge";
+      badge.textContent = "✓ Selesai";
+      badge.style.color = "var(--success)";
+      badge.style.fontWeight = "900";
+      badge.style.fontSize = "12px";
+      button.appendChild(badge);
+    }
+  });
+}
+
+/* Rakaman suara menggunakan MediaRecorder */
+async function startRecording() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia ||
+      typeof MediaRecorder === "undefined") {
+    setRecordingStatus(
+      "Pelayar ini tidak menyokong rakaman suara. Cuba Chrome atau Edge terkini melalui HTTPS.",
+      false
+    );
     return;
   }
 
   try {
-    recordingStream =
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+    clearRecordingUrl();
 
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     recordingChunks = [];
-    recordingWord = word;
 
     const options = {};
 
-    if (
-      MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-    ) {
+    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
       options.mimeType = "audio/webm;codecs=opus";
+    } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+      options.mimeType = "audio/webm";
     }
 
-    mediaRecorder = new MediaRecorder(
-      recordingStream,
-      options
-    );
+    recordingState = new MediaRecorder(stream, options);
 
-    recordingMimeType =
-      mediaRecorder.mimeType || "audio/webm";
-
-    mediaRecorder.addEventListener("dataavailable", (event) => {
+    recordingState.addEventListener("dataavailable", (event) => {
       if (event.data && event.data.size > 0) {
         recordingChunks.push(event.data);
       }
     });
 
-    mediaRecorder.addEventListener("stop", async () => {
-      const blob = new Blob(
-        recordingChunks,
-        { type: recordingMimeType }
-      );
+    recordingState.addEventListener("stop", () => {
+      recordingBlob = new Blob(recordingChunks, {
+        type: recordingState.mimeType || "audio/webm"
+      });
 
-      const audioId =
-        `${activeRecordId}::${recordingWord}`;
+      recordingUrl = URL.createObjectURL(recordingBlob);
 
-      try {
-        await saveAudio(audioId, blob);
+      const audio = $("#recordedAudio");
+      audio.src = recordingUrl;
+      audio.classList.remove("hidden");
 
-        wordAudioIds[recordingWord] = audioId;
+      $("#playRecordingBtn").disabled = false;
+      $("#downloadRecordingBtn").disabled = false;
 
-        message.textContent =
-          `Rakaman perkataan "${recordingWord}" telah disimpan pada peranti ini.`;
+      setRecordingStatus("Rakaman selesai. Anda boleh mendengar semula atau memuat turun rakaman.", false);
 
-        playButton.disabled = false;
-
-        saveCurrentRecord();
-      } catch {
-        message.textContent =
-          "Rakaman selesai tetapi gagal disimpan.";
-      }
-
-      if (recordingStream) {
-        recordingStream.getTracks().forEach(
-          (track) => track.stop()
-        );
-
-        recordingStream = null;
-      }
-
-      recordButton.disabled = false;
-      stopButton.disabled = true;
+      stream.getTracks().forEach((track) => track.stop());
     });
 
-    mediaRecorder.start();
+    recordingState.start();
+    isRecording = true;
+    recordedThisQuestion = false;
 
-    recordButton.disabled = true;
-    stopButton.disabled = false;
-    playButton.disabled = true;
+    $("#startRecordingBtn").disabled = true;
+    $("#stopRecordingBtn").disabled = false;
+    $("#playRecordingBtn").disabled = true;
+    $("#downloadRecordingBtn").disabled = true;
 
-    message.textContent =
-      `Sedang merakam perkataan "${word}".`;
-  } catch {
-    message.textContent =
-      "Mikrofon tidak dapat diakses. Semak kebenaran mikrofon pada pelayar.";
+    setRecordingStatus("Sedang merakam... Sebut perkataan dengan jelas.", true);
+  } catch (error) {
+    setRecordingStatus(
+      "Mikrofon tidak dapat diakses. Benarkan akses mikrofon pada pelayar dan cuba lagi.",
+      false
+    );
   }
 }
 
-function stopWordRecording(
-  stopButton,
-  recordButton,
-  playButton,
-  message
-) {
-  if (
-    mediaRecorder &&
-    mediaRecorder.state !== "inactive"
-  ) {
-    stopButton.disabled = true;
-    message.textContent = "Sedang menyimpan rakaman...";
-    mediaRecorder.stop();
+function stopRecording() {
+  if (recordingState && isRecording) {
+    recordingState.stop();
+    isRecording = false;
+    recordedThisQuestion = true;
+
+    $("#startRecordingBtn").disabled = false;
+    $("#stopRecordingBtn").disabled = true;
   }
 }
 
-function createRecordingPanel(word) {
-  const panel = createElement(
-    "section",
-    "recording-panel"
-  );
-
-  const label = createElement(
-    "strong",
-    "",
-    "🎙️ Rakam bacaan: " + word
-  );
-
-  const recordButton = createElement(
-    "button",
-    "primary-button",
-    "🔴 Mula Merakam"
-  );
-
-  const stopButton = createElement(
-    "button",
-    "secondary-button",
-    "⏹️ Hentikan Rakaman"
-  );
-
-  const playButton = createElement(
-    "button",
-    "secondary-button",
-    "▶️ Dengar Rakaman Saya"
-  );
-
-  const message = createElement("p", "");
-
-  message.setAttribute("aria-live", "polite");
-
-  stopButton.disabled = true;
-  playButton.disabled = !wordAudioIds[word];
-
-  recordButton.type = "button";
-  stopButton.type = "button";
-  playButton.type = "button";
-
-  recordButton.addEventListener("click", () => {
-    startWordRecording(
-      word,
-      recordButton,
-      stopButton,
-      playButton,
-      message
-    );
-  });
-
-  stopButton.addEventListener("click", () => {
-    stopWordRecording(
-      stopButton,
-      recordButton,
-      playButton,
-      message
-    );
-  });
-
-  playButton.addEventListener("click", async () => {
-    const audioId = wordAudioIds[word];
-
-    if (!audioId) return;
-
-    try {
-      const blob = await getAudio(audioId);
-
-      if (!blob) {
-        message.textContent =
-          "Rakaman tidak ditemui pada peranti ini.";
-        return;
-      }
-
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-
-      audio.addEventListener("ended", () => {
-        URL.revokeObjectURL(url);
-      });
-
-      audio.play().catch(() => {
-        message.textContent =
-          "Rakaman tidak dapat dimainkan.";
-      });
-    } catch {
-      message.textContent =
-        "Rakaman tidak dapat dibuka.";
-    }
-  });
-
-  panel.append(
-    label,
-    recordButton,
-    stopButton,
-    playButton,
-    message
-  );
-
-  return panel;
-}
-
-
-/* --------------------------------------------------
-   RUANG GURU
--------------------------------------------------- */
-
-function openTeacherArea() {
-  teacherLoggedIn = false;
-
-  $("teacherPassword").value = "";
-
-  $("teacherDashboard").hidden = true;
-
-  setMessage("teacherLoginMessage", "");
-
-  showScreen("teacherScreen");
-}
-
-function teacherLogin() {
-  const password = $("teacherPassword").value;
-
-  if (password !== TEACHER_PASSWORD) {
-    setMessage(
-      "teacherLoginMessage",
-      "Kata laluan tidak tepat. Cuba lagi.",
-      "error"
-    );
-
-    return;
+function stopRecordingIfNeeded() {
+  if (recordingState && isRecording) {
+    recordingState.stop();
+    isRecording = false;
   }
-
-  teacherLoggedIn = true;
-
-  $("teacherDashboard").hidden = false;
-
-  setMessage(
-    "teacherLoginMessage",
-    "Log masuk berjaya.",
-    "success"
-  );
-
-  renderTeacherRecords();
 }
 
-function teacherLogout() {
-  teacherLoggedIn = false;
+function playRecording() {
+  const audio = $("#recordedAudio");
 
-  $("teacherDashboard").hidden = true;
-  $("teacherPassword").value = "";
-
-  setMessage("teacherLoginMessage", "");
-
-  showScreen("homeScreen");
-}
-
-function renderTeacherRecords() {
-  if (!teacherLoggedIn) return;
-
-  const records = loadRecords().sort((a, b) => {
-    const scoreA = Number(a.score) || 0;
-    const scoreB = Number(b.score) || 0;
-
-    if (scoreA !== scoreB) {
-      return scoreB - scoreA;
-    }
-
-    return new Date(b.date) - new Date(a.date);
-  });
-
-  const list = $("recordsList");
-  list.replaceChildren();
-
-  $("recordSummary").textContent =
-    `Jumlah rekod yang disimpan pada peranti ini: ${records.length}`;
-
-  if (records.length === 0) {
-    list.append(
-      createElement(
-        "p",
-        "small-note",
-        "Belum ada rekod murid. Mainkan kit ini terlebih dahulu."
-      )
-    );
-
-    return;
+  if (audio && audio.src) {
+    audio.play().catch(() => {
+      setRecordingStatus("Rakaman tidak dapat dimainkan. Cuba tekan butang dengar semula.", false);
+    });
   }
-
-  records.forEach((record, index) => {
-    const card = createElement("article", "record-card");
-
-    const title = createElement(
-      "h3",
-      "",
-      `${index + 1}. ${record.name || "Murid"}`
-    );
-
-    const mark = createElement(
-      "p",
-      "",
-      `Markah: ${record.score || 0} / ${record.totalQuestions || 20}`
-    );
-
-    const percentage = Math.round(
-      ((Number(record.score) || 0) /
-        (Number(record.totalQuestions) || 20)) * 100
-    );
-
-    const percentText = createElement(
-      "p",
-      "",
-      `Pencapaian: ${percentage}%`
-    );
-
-    const answered = createElement(
-      "p",
-      "",
-      `Jawapan betul: ${record.correctAnswers || 0}`
-    );
-
-    const date = createElement(
-      "p",
-      "small-note",
-      "Tarikh: " + new Date(record.date).toLocaleString("ms-MY")
-    );
-
-    card.append(title, mark, percentText, answered, date);
-
-    const audioEntries = Object.entries(
-      record.wordRecordings || {}
-    );
-
-    if (audioEntries.length > 0) {
-      const audioHeading = createElement(
-        "strong",
-        "",
-        "🎙️ Rakaman bacaan"
-      );
-
-      card.append(audioHeading);
-
-      audioEntries.forEach(([word, audioId]) => {
-        const audioArea = createElement("div", "");
-
-        const wordLabel = createElement(
-          "p",
-          "",
-          "Perkataan: " + word
-        );
-
-        const playButton = createElement(
-          "button",
-          "secondary-button",
-          "▶️ Mainkan Rakaman"
-        );
-
-        playButton.type = "button";
-
-        playButton.addEventListener("click", async () => {
-          try {
-            const blob = await getAudio(audioId);
-
-            if (!blob) {
-              alert(
-                "Rakaman tidak ditemui pada peranti ini."
-              );
-              return;
-            }
-
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-
-            audio.addEventListener("ended", () => {
-              URL.revokeObjectURL(url);
-            });
-
-            await audio.play();
-          } catch {
-            alert("Rakaman tidak dapat dimainkan.");
-          }
-        });
-
-        audioArea.append(wordLabel, playButton);
-        card.append(audioArea);
-      });
-    } else {
-      card.append(
-        createElement(
-          "p",
-          "small-note",
-          "Tiada rakaman bacaan disimpan untuk rekod ini."
-        )
-      );
-    }
-
-    list.append(card);
-  });
 }
 
-function exportRecordsCSV() {
-  if (!teacherLoggedIn) return;
+function downloadRecording() {
+  if (!recordingBlob || !recordingUrl) return;
 
-  const records = loadRecords().sort(
-    (a, b) => (Number(b.score) || 0) - (Number(a.score) || 0)
-  );
-
-  if (records.length === 0) {
-    alert("Tiada rekod untuk dieksport.");
-    return;
-  }
-
-  const rows = [
-    [
-      "Nama Murid",
-      "Markah",
-      "Jumlah Soalan",
-      "Jawapan Betul",
-      "Peratus",
-      "Tarikh"
-    ]
-  ];
-
-  records.forEach((record) => {
-    const total = Number(record.totalQuestions) || 20;
-    const mark = Number(record.score) || 0;
-
-    rows.push([
-      record.name || "",
-      mark,
-      total,
-      Number(record.correctAnswers) || 0,
-      Math.round((mark / total) * 100) + "%",
-      new Date(record.date).toLocaleString("ms-MY")
-    ]);
-  });
-
-  const csv = rows.map((row) =>
-    row.map((cell) => {
-      let value = String(cell);
-
-      if (/^[=+\-@]/.test(value)) {
-        value = "'" + value;
-      }
-
-      return '"' + value.replace(/"/g, '""') + '"';
-    }).join(",")
-  ).join("\r\n");
-
-  const blob = new Blob(
-    ["\uFEFF" + csv],
-    { type: "text/csv;charset=utf-8;" }
-  );
-
-  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "rekod-jom-kenal.csv";
-
-  document.body.append(link);
+  link.href = recordingUrl;
+  link.download = `bacaan-${missionData[4].questions[questionIndex].word}.webm`;
+  document.body.appendChild(link);
   link.click();
   link.remove();
-
-  URL.revokeObjectURL(url);
 }
 
+function setRecordingStatus(message, recording) {
+  const status = $("#recordingStatus");
+  if (!status) return;
 
-/* --------------------------------------------------
-   BUTANG DAN PERMULAAN APLIKASI
--------------------------------------------------- */
+  status.textContent = message;
+  status.classList.toggle("is-recording", recording);
+}
 
-function goHome() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    alert("Hentikan rakaman suara dahulu sebelum keluar.");
-    return;
+function clearRecordingUrl() {
+  if (recordingUrl) {
+    URL.revokeObjectURL(recordingUrl);
   }
 
-  showScreen("homeScreen");
+  recordingUrl = null;
+  recordingBlob = null;
+  recordingChunks = [];
 }
 
-function replayMission() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    alert("Hentikan rakaman suara dahulu sebelum bermain semula.");
-    return;
-  }
+/* Lindungi teks nama atau kandungan dinamik daripada ditafsir sebagai HTML */
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    };
 
-  startMission();
-}
-
-function setupEvents() {
-  $("startBtn").addEventListener("click", startMission);
-
-  $("homeBtn").addEventListener("click", goHome);
-
-  $("checkAnswerBtn").addEventListener("click", checkAnswer);
-
-  $("nextQuestionBtn").addEventListener("click", nextQuestion);
-
-  $("replayBtn").addEventListener("click", replayMission);
-
-  $("resultHomeBtn").addEventListener("click", () => {
-    showScreen("homeScreen");
-  });
-
-  $("teacherOpenBtn").addEventListener("click", openTeacherArea);
-
-  $("teacherBackBtn").addEventListener("click", () => {
-    showScreen("homeScreen");
-  });
-
-  $("teacherLoginBtn").addEventListener("click", teacherLogin);
-
-  $("teacherPassword").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      teacherLogin();
-    }
-  });
-
-  $("refreshRecordsBtn").addEventListener(
-    "click",
-    renderTeacherRecords
-  );
-
-  $("exportRecordsBtn").addEventListener(
-    "click",
-    exportRecordsCSV
-  );
-
-  $("teacherLogoutBtn").addEventListener(
-    "click",
-    teacherLogout
-  );
-
-  $("themeSelect").addEventListener("change", (event) => {
-    applyTheme(event.target.value);
-  });
-
-  document.querySelectorAll(".theme-option").forEach((button) => {
-    button.addEventListener("click", () => {
-      applyTheme(button.dataset.theme);
-    });
-  });
-
-  $("studentName").addEventListener("input", () => {
-    setMessage("homeMessage", "");
+    return entities[character];
   });
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  setupEvents();
-  restorePlayer();
-});
+/* Paparan awal */
+updateHomeProgress();
