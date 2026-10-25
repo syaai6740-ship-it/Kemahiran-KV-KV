@@ -732,6 +732,9 @@ function updateSyllableAnswer() {
    yang melengkapkan ayat.
 ========================= */
 
+
+/* MISI 3: LENGKAPKAN AYAT BERGAMBAR */
+
 function renderMissionThree() {
   const item = SENTENCE_QUESTIONS[state.questionIndex];
 
@@ -744,9 +747,7 @@ function renderMissionThree() {
       SOALAN ${state.questionIndex + 1} DARIPADA 5
     </p>
 
-    <h3 class="text-center">
-      🖼️ Perhatikan gambar
-    </h3>
+    <h3 class="text-center">🖼️ Perhatikan gambar</h3>
 
     <div class="word-display" aria-label="Gambar petunjuk">
       ${item.image}
@@ -760,20 +761,6 @@ function renderMissionThree() {
       ${escapeHTML(item.question)}
     </p>
 
-    <div class="recording-panel">
-      <h3>🎤 Rakaman bacaan kamu</h3>
-      <p>
-        Baca ayat dengan suara yang jelas, kemudian dengar semula.
-      </p>
-      ${recordingControlsHTML()}
-    </div>
-
-    <hr>
-
-    <h3 class="text-center">
-      💡 Pilih jawapan
-    </h3>
-
     <div class="question-options">
       ${shuffle(item.options).map(option => `
         <button
@@ -786,8 +773,6 @@ function renderMissionThree() {
       `).join("")}
     </div>
   `;
-
-  bindRecordingControls();
 
   $("#missionContent")
     .querySelectorAll(".question-option")
