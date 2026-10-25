@@ -4,163 +4,162 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#39824c">
-  <title>Jom Kenal — Pengembaraan Dunia Kata</title>
+  <title>Jom Kenal: Pengembaraan Dunia Kata</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
 <body data-theme="hutan">
-  <div id="ambient" aria-hidden="true"></div>
+  <div class="background-decor" aria-hidden="true">
+    <span class="decor decor-one">🌿</span>
+    <span class="decor decor-two">⭐</span>
+    <span class="decor decor-three">🌸</span>
+    <span class="decor decor-four">🫧</span>
+    <span class="decor decor-five">🪐</span>
+    <span class="decor decor-six">🐠</span>
+  </div>
 
   <header class="topbar">
-    <a class="brand" href="#" aria-label="Jom Kenal">
+    <a class="brand" href="#" id="homeLink" aria-label="Kembali ke halaman utama">
       <span class="brand-icon">📚</span>
       <span>
         <strong>Jom Kenal</strong>
         <small>Pengembaraan Dunia Kata</small>
       </span>
     </a>
-    <button class="teacher-button" id="teacherButton" type="button">👩‍🏫 Ruang Guru</button>
+    <div class="theme-control">
+      <label for="themeSelect">Pilih tema</label>
+      <select id="themeSelect">
+        <option value="hutan">🌿 Hutan Hijau</option>
+        <option value="space">🪐 Angkasa Biru</option>
+        <option value="garden">🌸 Taman Ceria</option>
+        <option value="underwater">🐠 Dunia Bawah Laut</option>
+      </select>
+    </div>
   </header>
 
   <main class="main-container">
-    <section class="screen active" id="homeScreen">
+    <section id="homeScreen" class="screen">
       <div class="hero-card">
-        <span class="hero-decoration decoration-one" aria-hidden="true">🦋</span>
-        <span class="hero-decoration decoration-two" aria-hidden="true">🌳</span>
-        <span class="hero-decoration decoration-three" aria-hidden="true">⭐</span>
-        <div class="hero-content">
-          <span class="eyebrow">KIT DIGITAL PEMULIHAN BAHASA MELAYU</span>
-          <h1>Jom Kenal!</h1>
-          <h2>Pengembaraan Dunia Kata</h2>
-          <p>Teroka dunia yang menarik, baca perkataan dan selesaikan misi membaca kamu!</p>
-          <div class="hero-mascot" aria-hidden="true">🐻 📖 ✨</div>
+        <div class="hero-copy">
+          <span class="eyebrow">KIT DIGITAL BAHASA MELAYU</span>
+          <h1>Jom Kenal:<br><span>Pengembaraan Dunia Kata!</span></h1>
+          <p>Jom baca perkataan, cantum suku kata dan cabar diri membaca dengan suara sendiri.</p>
+
+          <div class="name-field">
+            <label for="studentName">Nama murid</label>
+            <input id="studentName" type="text" maxlength="60" placeholder="Masukkan nama murid">
+          </div>
+
+          <button id="startBtn" class="primary-btn">Mula Pengembaraan 🚀</button>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-circle">📖</div>
+          <span class="art-star star-a">⭐</span>
+          <span class="art-star star-b">✨</span>
+          <span class="art-star star-c">🌈</span>
         </div>
       </div>
 
-      <section class="panel">
-        <h2>🌈 Sediakan Pengembaraan</h2>
-        <label for="studentName">Nama murid</label>
-        <input id="studentName" type="text" maxlength="60" placeholder="Taip nama kamu">
-
-        <label for="missionSelect">Pilih misi</label>
-        <select id="missionSelect">
-          <option value="1">Misi 1 — Baca Perkataan, Pilih Gambar</option>
-          <option value="2">Misi 2 — Cantum Suku Kata</option>
-          <option value="3">Misi 3 — Baca dan Faham</option>
-          <option value="4">Misi 4 — Baca dengan Suara Saya</option>
-        </select>
-
-        <label>Pilih dunia kegemaran</label>
-        <div class="theme-preview">
-          <button class="theme-option selected" data-theme-choice="hutan" type="button">🌳 Hutan</button>
-          <button class="theme-option" data-theme-choice="space" type="button">🚀 Angkasa</button>
-          <button class="theme-option" data-theme-choice="garden" type="button">🌸 Taman</button>
-          <button class="theme-option" data-theme-choice="underwater" type="button">🐠 Laut</button>
+      <div class="section-heading">
+        <div>
+          <h2>Empat misi menanti!</h2>
+          <p>Pilih misi untuk mula belajar.</p>
         </div>
+      </div>
 
-        <button class="primary-button full-button" id="startBtn" type="button">🚀 Mula Pengembaraan!</button>
-        <p id="homeMessage" class="message" role="status" aria-live="polite"></p>
-        <p class="privacy-note">🔒 Rakaman suara diproses dalam pelayar. Rakaman tidak dihantar secara automatik kepada guru.</p>
-      </section>
+      <div class="mission-grid">
+        <button class="mission-card" data-mission="1">
+          <span class="mission-icon green">🔎</span>
+          <span class="mission-number">MISI 1</span>
+          <strong>Kenal dan Baca</strong>
+          <span>Kenal perkataan dan pilih gambar yang betul.</span>
+        </button>
+        <button class="mission-card" data-mission="2">
+          <span class="mission-icon purple">🧩</span>
+          <span class="mission-number">MISI 2</span>
+          <strong>Cantum dan Baca</strong>
+          <span>Cantumkan suku kata untuk membentuk perkataan.</span>
+        </button>
+        <button class="mission-card" data-mission="3">
+          <span class="mission-icon orange">💡</span>
+          <span class="mission-number">MISI 3</span>
+          <strong>Baca dan Faham</strong>
+          <span>Fahami soalan dan pilih gambar yang sesuai.</span>
+        </button>
+        <button class="mission-card" data-mission="4">
+          <span class="mission-icon blue">🎙️</span>
+          <span class="mission-number">MISI 4</span>
+          <strong>Cabaran Baca Sendiri</strong>
+          <span>Baca perkataan dan rakam suara sendiri.</span>
+        </button>
+      </div>
 
-      <section class="mission-overview">
-        <h2>Empat Misi Membaca</h2>
-        <div class="mission-grid">
-          <article class="mission-card">
-            <span aria-hidden="true">👀</span>
-            <h3>Misi 1</h3>
-            <p>Baca dan pilih</p>
-            <small>Baca perkataan, kemudian pilih gambar yang betul.</small>
-          </article>
-          <article class="mission-card">
-            <span aria-hidden="true">🧩</span>
-            <h3>Misi 2</h3>
-            <p>Cantum suku kata</p>
-            <small>Pilih suku kata untuk membentuk perkataan.</small>
-          </article>
-          <article class="mission-card">
-            <span aria-hidden="true">💡</span>
-            <h3>Misi 3</h3>
-            <p>Baca dan faham</p>
-            <small>Baca soalan dan pilih gambar yang sesuai.</small>
-          </article>
-          <article class="mission-card">
-            <span aria-hidden="true">🎙️</span>
-            <h3>Misi 4</h3>
-            <p>Baca dengan suara</p>
-            <small>Baca perkataan dan rakam suara sendiri.</small>
-          </article>
-        </div>
-      </section>
+      <div class="student-progress">
+        <span>🌟 Kemajuan pengembaraan</span>
+        <strong id="homeProgressText">0 daripada 4 misi selesai</strong>
+        <div class="progress-track"><div id="homeProgressBar" class="progress-fill"></div></div>
+      </div>
     </section>
 
-    <section class="screen" id="gameScreen">
+    <section id="gameScreen" class="screen hidden">
+      <button id="backHomeBtn" class="back-btn">← Halaman utama</button>
+
       <div class="game-header">
-        <button class="secondary-button" id="homeBtn" type="button">← Menu Utama</button>
-        <div class="player-label">👧🧒 Murid: <span id="playerName">Murid</span></div>
+        <div>
+          <span id="missionEyebrow" class="eyebrow">MISI 1</span>
+          <h1 id="missionTitle">Kenal dan Baca</h1>
+          <p id="missionDescription">Pilih gambar yang betul.</p>
+        </div>
+        <div class="mission-count">
+          <span>MISI</span>
+          <strong id="missionCount">1/4</strong>
+        </div>
       </div>
 
-      <section class="progress-panel">
+      <div class="progress-panel">
         <div class="progress-labels">
-          <span id="progressText">Soalan 1 daripada 5</span>
-          <span id="scoreText">Skor: 0</span>
+          <span>Kemajuan misi</span>
+          <strong id="questionProgressText">Soalan 1 daripada 3</strong>
         </div>
-        <div class="progress-track" role="progressbar" aria-label="Kemajuan misi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
-      </section>
+        <div class="progress-track"><div id="questionProgressBar" class="progress-fill"></div></div>
+      </div>
 
-      <section class="panel game-panel">
-        <span class="mission-badge" id="missionBadge">MISI 1</span>
-        <h1 id="gameTitle">Baca Perkataan, Pilih Gambar</h1>
-        <p id="gameInstruction" class="game-instruction">Baca perkataan. Kemudian pilih gambar yang betul.</p>
-
-        <div class="activity-prompt" id="activityPrompt"></div>
-        <div id="feedbackMessage" class="message" role="status" aria-live="polite"></div>
-
+      <div id="gamePanel" class="game-panel">
+        <div id="activityContent"></div>
+        <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
         <div class="game-controls">
-          <button class="secondary-button" id="checkBtn" type="button">Semak Jawapan</button>
-          <button class="primary-button" id="nextBtn" type="button" hidden>Soalan Seterusnya →</button>
+          <button id="checkBtn" class="primary-btn">Semak Jawapan</button>
+          <button id="nextBtn" class="primary-btn hidden">Soalan Seterusnya →</button>
         </div>
-      </section>
-    </section>
+      </div>
 
-    <section class="screen" id="resultScreen">
-      <div class="result-card">
-        <div class="result-mascot" aria-hidden="true">🏆🌟</div>
-        <h1>Syabas!</h1>
-        <p id="resultMessage">Kamu telah menyelesaikan misi.</p>
-        <div class="final-score-box">
-          <span>Skor kamu</span>
-          <strong id="finalScore">0 / 5</strong>
-          <span id="finalPercent">0%</span>
-        </div>
-        <p id="resultAdvice"></p>
-        <div class="result-actions">
-          <button class="primary-button" id="retryBtn" type="button">🔄 Cuba Lagi</button>
-          <button class="secondary-button" id="menuBtn" type="button">🏠 Menu Utama</button>
-        </div>
+      <div class="game-footer">
+        <span>🌈 Belajar sedikit demi sedikit!</span>
+        <span id="studentGreeting"></span>
       </div>
     </section>
 
-    <section class="screen" id="teacherScreen">
-      <section class="panel">
-        <div class="dashboard-heading">
-          <h2>👩‍🏫 Ruang Guru</h2>
-          <button class="secondary-button" id="closeTeacherBtn" type="button">Tutup</button>
+    <section id="resultScreen" class="screen hidden">
+      <div class="result-card">
+        <div class="result-illustration">🏆</div>
+        <span class="eyebrow">PENGEMBARA HEBAT</span>
+        <h1>Tahniah!</h1>
+        <p id="resultMessage">Anda telah melengkapkan misi ini.</p>
+        <div class="result-score">
+          <span>Jawapan betul</span>
+          <strong id="resultScore">0/0</strong>
         </div>
-        <p>Rakaman yang dimuat turun boleh dimainkan menggunakan pemain audio pada peranti guru. Rekod di bawah hanya disimpan sementara dalam sesi pelayar ini.</p>
-        <div id="recordsList" class="records-list">
-          <p class="small-note">Belum ada rekod bacaan.</p>
+        <div class="result-actions">
+          <button id="retryBtn" class="primary-btn">Cuba Lagi 🔄</button>
+          <button id="chooseMissionBtn" class="secondary-btn">Pilih Misi</button>
+          <button id="resultHomeBtn" class="secondary-btn">Halaman Utama</button>
         </div>
-        <button class="secondary-button" id="clearRecordsBtn" type="button">Padam Rekod Sesi Ini</button>
-      </section>
+      </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <p>Jom Kenal — Pengembaraan Dunia Kata</p>
-    <p>Kit digital bacaan Bahasa Melayu Pemulihan Khas Tahun 1</p>
+  <footer class="site-footer">
+    <p>Jom Kenal: Pengembaraan Dunia Kata · Bahasa Melayu Pemulihan Khas Tahun 1</p>
   </footer>
 </body>
 </html>
