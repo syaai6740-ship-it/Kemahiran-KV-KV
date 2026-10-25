@@ -1,1591 +1,1107 @@
 "use strict";
 
-/* =========================================================
-   JOM KENAL: PENGEMBARAAN DUNIA KATA
-   Bahasa Melayu Pemulihan Khas Tahun 1
+/*
+  PENGEMBARAAN DUNIA KATA!
+  Bahasa Melayu Pemulihan Khas Tahun 2
+  Fokus: suku kata KV + KV
 
-   Fungsi:
-   1. Empat misi bacaan
-   2. Pilihan tema
-   3. Semakan jawapan dan markah
-   4. Rakaman, main semula dan muat turun suara
-   5. Rekod pencapaian murid
-   6. Ruang guru dengan kata laluan 1234
-   7. Eksport rekod ke CSV
-   8. Penyimpanan rekod menggunakan localStorage
-   9. Penyimpanan rakaman menggunakan IndexedDB
-   ========================================================= */
+  Nota:
+  - Rekod disimpan dalam pelayar/peranti semasa.
+  - Kata laluan guru dalam kod ini untuk demonstrasi sahaja.
+  - Rakaman mikrofon memerlukan kebenaran pengguna dan HTTPS.
+*/
 
-(() => {
-  "use strict";
+const TEACHER_PASSWORD = "1234";
+const RECORDS_KEY = "pengembaraanDuniaKataRecordsV1";
+const THEME_KEY = "pengembaraanDuniaKataThemeV1";
 
-  /* =========================
-     1. DATA MISI
-     ========================= */
+const WORDS = {
+  baju: {
+    word: "baju",
+    syllables: ["ba", "ju"],
+    emoji: "👕",
+    meaning: "pakaian"
+  },
+  buku: {
+    word: "buku",
+    syllables: ["bu", "ku"],
+    emoji: "📘",
+    meaning: "bahan bacaan"
+  },
+  gigi: {
+    word: "gigi",
+    syllables: ["gi", "gi"],
+    emoji: "🦷",
+    meaning: "digunakan untuk mengunyah makanan"
+  },
+  sapu: {
+    word: "sapu",
+    syllables: ["sa", "pu"],
+    emoji: "🧹",
+    meaning: "alat untuk menyapu"
+  },
+  kuku: {
+    word: "kuku",
+    syllables: ["ku", "ku"],
+    emoji: "💅",
+    meaning: "bahagian keras pada hujung jari"
+  },
+  mata: {
+    word: "mata",
+    syllables: ["ma", "ta"],
+    emoji: "👀",
+    meaning: "digunakan untuk melihat"
+  },
+  topi: {
+    word: "topi",
+    syllables: ["to", "pi"],
+    emoji: "🧢",
+    meaning: "dipakai pada kepala"
+  },
+  meja: {
+    word: "meja",
+    syllables: ["me", "ja"],
+    emoji: "🪑",
+    meaning: "perabot untuk meletakkan barang"
+  },
+  roti: {
+    word: "roti",
+    syllables: ["ro", "ti"],
+    emoji: "🍞",
+    meaning: "makanan"
+  },
+  susu: {
+    word: "susu",
+    syllables: ["su", "su"],
+    emoji: "🥛",
+    meaning: "minuman"
+  }
+};
 
-  const MISSIONS = [
-    {
-      id: 1,
-      title: "Kenal dan Baca",
-      description: "Baca perkataan dan pilih gambar yang betul.",
-      questions: [
-        {
-          word: "sabun",
-          prompt: "Baca perkataan ini. Kemudian, pilih gambar yang betul.",
-          choices: [
-            { text: "Sabun", emoji: "🧼", value: "sabun" },
-            { text: "Baju", emoji: "👕", value: "baju" },
-            { text: "Sapu", emoji: "🧹", value: "sapu" }
-          ],
-          answer: "sabun"
-        },
-        {
-          word: "sapu",
-          prompt: "Perhatikan perkataan. Pilih gambar yang sepadan.",
-          choices: [
-            { text: "Baju", emoji: "👕", value: "baju" },
-            { text: "Sapu", emoji: "🧹", value: "sapu" },
-            { text: "Sabun", emoji: "🧼", value: "sabun" }
-          ],
-          answer: "sapu"
-        },
-        {
-          word: "baju",
-          prompt: "Baca perkataan dan pilih gambar yang betul.",
-          choices: [
-            { text: "Sapu", emoji: "🧹", value: "sapu" },
-            { text: "Sabun", emoji: "🧼", value: "sabun" },
-            { text: "Baju", emoji: "👕", value: "baju" }
-          ],
-          answer: "baju"
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Cantum dan Baca",
-      description: "Pilih suku kata untuk membentuk perkataan.",
-      questions: [
-        {
-          prompt: "Cantumkan suku kata untuk membentuk perkataan sabun.",
-          parts: ["sa", "bun", "ba", "ju"],
-          answerParts: ["sa", "bun"],
-          answer: "sabun",
-          emoji: "🧼"
-        },
-        {
-          prompt: "Cantumkan suku kata untuk membentuk perkataan sapu.",
-          parts: ["sa", "pu", "su", "ku"],
-          answerParts: ["sa", "pu"],
-          answer: "sapu",
-          emoji: "🧹"
-        },
-        {
-          prompt: "Cantumkan suku kata untuk membentuk perkataan baju.",
-          parts: ["ba", "ju", "bu", "ku"],
-          answerParts: ["ba", "ju"],
-          answer: "baju",
-          emoji: "👕"
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Baca dan Faham",
-      description: "Baca perkataan dan jawab soalan berdasarkan gambar.",
-      questions: [
-        {
-          word: "sabun",
-          prompt: "Apakah yang digunakan untuk mencuci tangan?",
-          choices: [
-            { text: "Sabun", emoji: "🧼", value: "sabun" },
-            { text: "Baju", emoji: "👕", value: "baju" },
-            { text: "Sapu", emoji: "🧹", value: "sapu" }
-          ],
-          answer: "sabun"
-        },
-        {
-          word: "sapu",
-          prompt: "Apakah alat yang digunakan untuk menyapu lantai?",
-          choices: [
-            { text: "Baju", emoji: "👕", value: "baju" },
-            { text: "Sapu", emoji: "🧹", value: "sapu" },
-            { text: "Sabun", emoji: "🧼", value: "sabun" }
-          ],
-          answer: "sapu"
-        },
-        {
-          word: "baju",
-          prompt: "Apakah yang kita pakai pada badan?",
-          choices: [
-            { text: "Sabun", emoji: "🧼", value: "sabun" },
-            { text: "Sapu", emoji: "🧹", value: "sapu" },
-            { text: "Baju", emoji: "👕", value: "baju" }
-          ],
-          answer: "baju"
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: "Cabaran Baca Sendiri",
-      description: "Baca perkataan dengan suara sendiri dan dengar semula rakaman.",
-      questions: [
-        {
-          word: "sabun",
-          prompt: "Sebut perkataan ini dengan jelas, kemudian rakam suara kamu.",
-          emoji: "🧼"
-        },
-        {
-          word: "sapu",
-          prompt: "Baca perkataan ini. Kemudian, rakam suara kamu.",
-          emoji: "🧹"
-        },
-        {
-          word: "baju",
-          prompt: "Baca perkataan ini dengan sebutan yang jelas.",
-          emoji: "👕"
-        }
-      ]
-    }
-  ];
+const MISSION_WORDS = {
+  1: ["baju", "buku", "gigi", "sapu", "kuku"],
+  2: ["baju", "buku", "gigi", "sapu", "kuku"],
+  3: ["mata", "topi", "roti", "buku", "susu"],
+  4: ["meja", "mata", "topi", "roti", "susu"]
+};
 
-  const STORAGE_KEYS = {
-    records: "jomKenal_studentRecords_v1",
-    theme: "jomKenal_selectedTheme_v1",
-    student: "jomKenal_studentName_v1"
+const MISSIONS = {
+  1: { title: "Kenal dan Baca", total: 5 },
+  2: { title: "Cantum dan Baca", total: 5 },
+  3: { title: "Baca dan Faham", total: 5 },
+  4: { title: "Cabaran Baca Sendiri", total: 5 }
+};
+
+const PASSAGES = [
+  {
+    text: "Ali memakai topi. Ali makan roti.",
+    question: "Apakah yang dipakai oleh Ali?",
+    options: ["topi", "baju", "sapu"],
+    answer: "topi"
+  },
+  {
+    text: "Mira minum susu. Mira membaca buku.",
+    question: "Apakah yang diminum oleh Mira?",
+    options: ["roti", "susu", "buku"],
+    answer: "susu"
+  },
+  {
+    text: "Ibu membeli baju. Baju itu untuk adik.",
+    question: "Apakah yang dibeli oleh ibu?",
+    options: ["baju", "meja", "topi"],
+    answer: "baju"
+  },
+  {
+    text: "Amin melihat mata patung. Amin memegang buku.",
+    question: "Apakah yang dipegang oleh Amin?",
+    options: ["susu", "buku", "roti"],
+    answer: "buku"
+  },
+  {
+    text: "Siti makan roti. Siti minum susu.",
+    question: "Apakah makanan yang dimakan oleh Siti?",
+    options: ["roti", "sapu", "meja"],
+    answer: "roti"
+  }
+];
+
+const state = {
+  studentName: "",
+  mission: 1,
+  questionIndex: 0,
+  score: 0,
+  answered: false,
+  selectedSyllables: [],
+  completedMissions: {},
+  currentSession: null,
+  recorder: null,
+  mediaStream: null,
+  audioChunks: [],
+  audioBlob: null,
+  audioUrl: null,
+  recording: false,
+  recordingStartedAt: null,
+  teacherLoggedIn: false,
+  questionScore: 0
+};
+
+const $ = (selector) => document.querySelector(selector);
+
+const homeScreen = $("#homeScreen");
+const missionScreen = $("#missionScreen");
+const teacherScreen = $("#teacherScreen");
+const missionContent = $("#missionContent");
+const missionFeedback = $("#missionFeedback");
+const nextQuestionButton = $("#nextQuestionButton");
+const progressBar = $("#progressBar");
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function shuffle(items) {
+  const result = [...items];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2800);
+}
+
+function showScreen(screen) {
+  [homeScreen, missionScreen, teacherScreen].forEach((item) => {
+    item.classList.remove("active");
+    item.hidden = true;
+  });
+
+  screen.hidden = false;
+  screen.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function getRecords() {
+  try {
+    const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+    return Array.isArray(records) ? records : [];
+  } catch (error) {
+    console.error("Rekod tidak dapat dibaca:", error);
+    return [];
+  }
+}
+
+function saveRecord(record) {
+  const records = getRecords();
+  records.push(record);
+
+  try {
+    localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+  } catch (error) {
+    console.error("Rekod tidak dapat disimpan:", error);
+    showToast("Storan penuh atau tidak tersedia. Eksport rekod dan semak rakaman.");
+  }
+}
+
+function updateTheme(theme) {
+  const allowedThemes = ["garden", "forest", "space", "ocean"];
+  const selectedTheme = allowedThemes.includes(theme) ? theme : "garden";
+
+  document.body.classList.remove(
+    "theme-garden",
+    "theme-forest",
+    "theme-space",
+    "theme-ocean"
+  );
+
+  document.body.classList.add(`theme-${selectedTheme}`);
+
+  try {
+    localStorage.setItem(THEME_KEY, selectedTheme);
+  } catch (_) {
+    // Tema masih boleh digunakan walaupun storan tidak tersedia.
+  }
+
+  const select = $("#themeSelect");
+  if (select) select.value = selectedTheme;
+}
+
+function showHomeMessage(message, isError = true) {
+  const element = $("#homeMessage");
+  element.textContent = message;
+  element.style.color = isError ? "var(--error)" : "var(--success)";
+}
+
+function startJourney() {
+  const name = $("#studentName").value.trim();
+
+  if (!name) {
+    showHomeMessage("Masukkan nama kamu dahulu sebelum memulakan pengembaraan.");
+    $("#studentName").focus();
+    return;
+  }
+
+  state.studentName = name;
+  state.completedMissions = {};
+  state.currentSession = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    studentName: name,
+    startedAt: new Date().toISOString(),
+    theme: $("#themeSelect").value,
+    missionResults: [],
+    recordings: []
   };
 
-  const TEACHER_PASSWORD = "1234";
-  const DB_NAME = "JomKenalAudioDB";
-  const DB_VERSION = 1;
-  const AUDIO_STORE = "recordings";
+  $("#activeStudent").textContent = name;
+  showHomeMessage("Hebat! Pengembaraan kamu bermula sekarang.", false);
+  showToast(`Selamat datang, ${name}!`);
+  showScreen(homeScreen);
+}
 
-  /* =========================
-     2. STATUS APLIKASI
-     ========================= */
-
-  let currentMission = null;
-  let currentQuestionIndex = 0;
-  let currentScore = 0;
-  let totalAnswered = 0;
-  let selectedAnswer = null;
-  let selectedParts = [];
-  let questionChecked = false;
-
-  let mediaRecorder = null;
-  let recordingChunks = [];
-  let currentAudioUrl = null;
-  let recordingStream = null;
-  let recordingStartedAt = null;
-
-  let dbPromise = null;
-  let currentSessionId = null;
-
-  /* =========================
-     3. FUNGSI BANTUAN
-     ========================= */
-
-  function getElement(id) {
-    return document.getElementById(id);
+function openMission(missionNumber) {
+  if (!state.studentName || !state.currentSession) {
+    showHomeMessage("Masukkan nama murid dan tekan Jom Mula dahulu.");
+    showScreen(homeScreen);
+    $("#studentName").focus();
+    return;
   }
 
-  function setText(id, text) {
-    const element = getElement(id);
-    if (element) element.textContent = text;
+  if (state.recording) {
+    showToast("Hentikan rakaman dahulu sebelum menukar misi.");
+    return;
   }
 
-  function showElement(element) {
-    if (element) element.hidden = false;
+  state.mission = Number(missionNumber);
+  state.questionIndex = 0;
+  state.score = 0;
+  state.answered = false;
+  state.selectedSyllables = [];
+  state.questionScore = 0;
+
+  $("#missionTitle").textContent = MISSIONS[state.mission].title;
+  $("#missionNumber").textContent = `MISI ${state.mission}`;
+  $("#scoreDisplay").textContent = "0";
+  $("#missionFeedback").textContent = "";
+  $("#missionFeedback").className = "feedback";
+
+  showScreen(missionScreen);
+  renderQuestion();
+}
+
+function updateProgress() {
+  const total = MISSIONS[state.mission].total;
+  const percent = ((state.questionIndex + (state.answered ? 1 : 0)) / total) * 100;
+  progressBar.style.width = `${Math.min(100, percent)}%`;
+}
+
+function getCurrentWord() {
+  const list = MISSION_WORDS[state.mission];
+  return WORDS[list[state.questionIndex]];
+}
+
+function renderQuestion() {
+  state.answered = false;
+  state.selectedSyllables = [];
+  state.questionScore = 0;
+
+  missionFeedback.textContent = "";
+  missionFeedback.className = "feedback";
+  nextQuestionButton.hidden = true;
+  nextQuestionButton.textContent = "Soalan seterusnya →";
+
+  const total = MISSIONS[state.mission].total;
+
+  if (state.questionIndex >= total) {
+    finishMission();
+    return;
   }
 
-  function hideElement(element) {
-    if (element) element.hidden = true;
-  }
+  updateProgress();
 
-  function escapeHTML(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
+  if (state.mission === 1) renderMissionOne();
+  if (state.mission === 2) renderMissionTwo();
+  if (state.mission === 3) renderMissionThree();
+  if (state.mission === 4) renderMissionFour();
+}
 
-  function getStudentName() {
-    const input = getElement("studentName");
-    const enteredName = input ? input.value.trim() : "";
-    return enteredName || "Murid";
-  }
+function renderMissionOne() {
+  const current = getCurrentWord();
+  const distractors = shuffle(
+    Object.keys(WORDS).filter((key) => key !== current.word)
+  ).slice(0, 3);
 
-  function getSavedStudentName() {
-    try {
-      return localStorage.getItem(STORAGE_KEYS.student) || "";
-    } catch {
-      return "";
-    }
-  }
+  const choices = shuffle([current.word, ...distractors]);
 
-  function saveStudentName(name) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.student, name);
-    } catch (error) {
-      console.warn("Nama murid tidak dapat disimpan:", error);
-    }
-  }
+  missionContent.innerHTML = `
+    <p class="instruction">Baca perkataan ini. Kemudian, pilih gambar yang betul.</p>
+    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
+    <div class="word-display">${escapeHTML(current.word)}</div>
+    <p class="text-center">Pilih gambar yang sepadan dengan perkataan.</p>
+    <div class="picture-grid">
+      ${choices.map((key) => `
+        <button
+          class="picture-option"
+          type="button"
+          data-answer="${escapeHTML(key)}"
+          aria-label="Pilih gambar"
+        >${WORDS[key].emoji}</button>
+      `).join("")}
+    </div>
+    <div class="action-row">
+      <button id="speakWordButton" class="secondary-button" type="button">
+        🔊 Dengar perkataan
+      </button>
+    </div>
+  `;
 
-  function getRecords() {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.records);
-      const records = stored ? JSON.parse(stored) : [];
-      return Array.isArray(records) ? records : [];
-    } catch (error) {
-      console.warn("Rekod tidak dapat dibaca:", error);
-      return [];
-    }
-  }
-
-  function saveRecords(records) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(records));
-      return true;
-    } catch (error) {
-      console.error("Rekod tidak dapat disimpan:", error);
-      alert(
-        "Rekod tidak dapat disimpan. Ruang storan pelayar mungkin penuh."
-      );
-      return false;
-    }
-  }
-
-  function formatDate(dateValue) {
-    const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return "-";
-
-    return date.toLocaleString("ms-MY", {
-      dateStyle: "medium",
-      timeStyle: "short"
+  missionContent.querySelectorAll(".picture-option").forEach((button) => {
+    button.addEventListener("click", () => {
+      checkAnswer(button.dataset.answer === current.word, button);
     });
-  }
+  });
 
-  function shuffle(array) {
-    const result = [...array];
+  $("#speakWordButton").addEventListener("click", () => speakText(current.word));
+}
 
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]];
-    }
+function renderMissionTwo() {
+  const current = getCurrentWord();
+  const syllablePool = ["ba", "ju", "bu", "ku", "gi", "sa", "pu", "ma", "ta", "to", "pi", "ro", "ti", "su", "me", "ja"];
+  const choices = shuffle([...new Set([...current.syllables, ...syllablePool])]).slice(0, 8);
 
-    return result;
-  }
+  // Pastikan kedua-dua suku kata jawapan sentiasa dipaparkan.
+  current.syllables.forEach((syllable) => {
+    if (!choices.includes(syllable)) choices.push(syllable);
+  });
 
-  /* =========================
-     4. PAPARAN SKRIN
-     ========================= */
+  missionContent.innerHTML = `
+    <p class="instruction">Pilih suku kata untuk membentuk perkataan.</p>
+    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
+    <div class="word-display">${current.emoji}</div>
+    <p class="text-center">Cantumkan suku kata untuk membentuk perkataan.</p>
+    <p class="text-center">Pilih suku kata mengikut turutan.</p>
+    <div id="syllableAnswer" class="syllable-display" aria-live="polite">
+      <span class="syllable-choice">?</span>
+      <span class="syllable-choice">?</span>
+    </div>
+    <p id="syllableHint" class="text-center">Suku kata yang dipilih akan muncul di sini.</p>
+    <div class="picture-grid">
+      ${choices.map((syllable, index) => `
+        <button
+          class="syllable-choice syllable-option"
+          type="button"
+          data-syllable="${escapeHTML(syllable)}"
+          data-index="${index}"
+        >${escapeHTML(syllable)}</button>
+      `).join("")}
+    </div>
+    <div class="action-row">
+      <button id="resetSyllables" class="secondary-button" type="button">↩️ Pilih semula</button>
+      <button id="checkSyllables" class="primary-button" type="button">Semak jawapan</button>
+      <button id="speakTargetButton" class="secondary-button" type="button">🔊 Dengar perkataan</button>
+    </div>
+  `;
 
-  function showScreen(screenId) {
-    const screenIds = ["homeScreen", "gameScreen", "resultScreen"];
+  missionContent.querySelectorAll(".syllable-option").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (state.answered || state.selectedSyllables.length >= 2) return;
 
-    screenIds.forEach((id) => {
-      const screen = getElement(id);
-      if (!screen) return;
-
-      screen.hidden = id !== screenId;
-      screen.classList.toggle("active", id === screenId);
-    });
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function goHome() {
-    stopRecordingIfNeeded();
-    showScreen("homeScreen");
-    updateHomeProgress();
-  }
-
-  /* =========================
-     5. PILIH TEMA
-     ========================= */
-
-  function applyTheme(theme) {
-    const validThemes = ["forest", "space", "garden", "ocean"];
-    const selectedTheme = validThemes.includes(theme) ? theme : "forest";
-
-    document.body.dataset.theme = selectedTheme;
-
-    document.documentElement.dataset.theme = selectedTheme;
-
-    const themeSelect = getElement("themeSelect");
-    if (themeSelect && themeSelect.value !== selectedTheme) {
-      themeSelect.value = selectedTheme;
-    }
-
-    try {
-      localStorage.setItem(STORAGE_KEYS.theme, selectedTheme);
-    } catch (error) {
-      console.warn("Tema tidak dapat disimpan:", error);
-    }
-  }
-
-  function initialiseTheme() {
-    let savedTheme = "forest";
-
-    try {
-      savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || "forest";
-    } catch (error) {
-      console.warn("Tema tersimpan tidak dapat dibaca:", error);
-    }
-
-    applyTheme(savedTheme);
-
-    const themeSelect = getElement("themeSelect");
-    if (themeSelect) {
-      themeSelect.addEventListener("change", () => {
-        applyTheme(themeSelect.value);
+      state.selectedSyllables.push({
+        syllable: button.dataset.syllable,
+        element: button
       });
-    }
-  }
 
-  /* =========================
-     6. MULAKAN MISI
-     ========================= */
-
-  function startMission(missionId) {
-    const mission = MISSIONS.find((item) => item.id === Number(missionId));
-
-    if (!mission) {
-      alert("Misi tidak ditemui. Sila pilih misi yang betul.");
-      return;
-    }
-
-    const studentName = getStudentName();
-    saveStudentName(studentName);
-
-    currentMission = mission;
-    currentQuestionIndex = 0;
-    currentScore = 0;
-    totalAnswered = 0;
-    selectedAnswer = null;
-    selectedParts = [];
-    questionChecked = false;
-    currentSessionId =
-      "session_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-
-    setText("studentGreeting", `Selamat datang, ${studentName}!`);
-    setText("missionEyebrow", `MISI ${mission.id}`);
-    setText("missionTitle", mission.title);
-    setText("missionDescription", mission.description);
-    setText("missionCount", `Misi ${mission.id} daripada ${MISSIONS.length}`);
-
-    showScreen("gameScreen");
-    renderQuestion();
-  }
-
-  /* =========================
-     7. PAPAR SOALAN
-     ========================= */
-
-  function renderQuestion() {
-    if (!currentMission) return;
-
-    const question = currentMission.questions[currentQuestionIndex];
-    const activityContent = getElement("activityContent");
-
-    if (!question || !activityContent) return;
-
-    selectedAnswer = null;
-    selectedParts = [];
-    questionChecked = false;
-
-    setText(
-      "questionProgressText",
-      `Soalan ${currentQuestionIndex + 1} daripada ${currentMission.questions.length}`
-    );
-
-    const progressBar = getElement("questionProgressBar");
-    if (progressBar) {
-      const percentage =
-        ((currentQuestionIndex + 1) / currentMission.questions.length) * 100;
-
-      progressBar.style.width = `${percentage}%`;
-      progressBar.setAttribute("aria-valuenow", String(percentage));
-    }
-
-    const scoreBadge = getElement("scoreBadge");
-    if (scoreBadge) {
-      scoreBadge.textContent = `Markah: ${currentScore}`;
-    }
-
-    const feedback = getElement("feedback");
-    if (feedback) {
-      feedback.textContent = "";
-      feedback.className = "feedback";
-      feedback.hidden = true;
-    }
-
-    const checkBtn = getElement("checkBtn");
-    const nextBtn = getElement("nextBtn");
-
-    if (checkBtn) {
-      checkBtn.disabled = false;
-      checkBtn.hidden = false;
-      checkBtn.textContent = "Semak Jawapan";
-    }
-
-    if (nextBtn) {
-      nextBtn.hidden = true;
-      nextBtn.disabled = false;
-    }
-
-    if (currentMission.id === 1) {
-      renderMissionOne(question, activityContent);
-    } else if (currentMission.id === 2) {
-      renderMissionTwo(question, activityContent);
-    } else if (currentMission.id === 3) {
-      renderMissionThree(question, activityContent);
-    } else if (currentMission.id === 4) {
-      renderMissionFour(question, activityContent);
-    }
-  }
-
-  /* =========================
-     8. MISI 1: KENAL DAN BACA
-     ========================= */
-
-  function renderMissionOne(question, container) {
-    const choices = shuffle(question.choices);
-
-    container.innerHTML = `
-      <section class="question-card">
-        <p class="question-prompt">${escapeHTML(question.prompt)}</p>
-
-        <div class="word-display" aria-label="Perkataan untuk dibaca">
-          ${escapeHTML(question.word)}
-        </div>
-
-        <p class="instruction">Pilih gambar yang sepadan dengan perkataan.</p>
-
-        <div class="picture-choices">
-          ${choices
-            .map(
-              (choice) => `
-                <button
-                  type="button"
-                  class="picture-choice"
-                  data-answer="${escapeHTML(choice.value)}"
-                  aria-pressed="false"
-                >
-                  <span class="choice-emoji" aria-hidden="true">
-                    ${choice.emoji}
-                  </span>
-                  <span class="choice-label">
-                    ${escapeHTML(choice.text)}
-                  </span>
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-      </section>
-    `;
-
-    attachPictureChoiceEvents();
-  }
-
-  /* =========================
-     9. MISI 2: CANTUM DAN BACA
-     ========================= */
-
-  function renderMissionTwo(question, container) {
-    const parts = shuffle(question.parts);
-
-    container.innerHTML = `
-      <section class="question-card">
-        <p class="question-prompt">${escapeHTML(question.prompt)}</p>
-
-        <div class="word-display">
-          ${question.emoji}
-        </div>
-
-        <p class="instruction">Pilih suku kata mengikut turutan.</p>
-
-        <div class="selected-parts" id="selectedParts" aria-live="polite">
-          <span class="empty-parts">Suku kata yang dipilih akan muncul di sini.</span>
-        </div>
-
-        <div class="syllable-choices">
-          ${parts
-            .map(
-              (part, index) => `
-                <button
-                  type="button"
-                  class="syllable-choice"
-                  data-part="${escapeHTML(part)}"
-                  data-index="${index}"
-                  aria-pressed="false"
-                >
-                  ${escapeHTML(part)}
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-
-        <button type="button" class="secondary-btn" id="resetPartsBtn">
-          Cuba Semula
-        </button>
-      </section>
-    `;
-
-    container.querySelectorAll(".syllable-choice").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (questionChecked || button.disabled) return;
-
-        const part = button.dataset.part;
-
-        selectedParts.push({
-          part,
-          button
-        });
-
-        button.disabled = true;
-        button.setAttribute("aria-pressed", "true");
-        button.classList.add("selected");
-
-        updateSelectedPartsDisplay();
-      });
-    });
-
-    const resetBtn = getElement("resetPartsBtn");
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        if (questionChecked) return;
-
-        selectedParts.forEach((item) => {
-          item.button.disabled = false;
-          item.button.classList.remove("selected");
-          item.button.setAttribute("aria-pressed", "false");
-        });
-
-        selectedParts = [];
-        updateSelectedPartsDisplay();
-      });
-    }
-
-    updateSelectedPartsDisplay();
-  }
-
-  function updateSelectedPartsDisplay() {
-    const display = getElement("selectedParts");
-    if (!display) return;
-
-    if (selectedParts.length === 0) {
-      display.innerHTML =
-        '<span class="empty-parts">Suku kata yang dipilih akan muncul di sini.</span>';
-      return;
-    }
-
-    display.innerHTML = selectedParts
-      .map(
-        (item) => `
-          <span class="selected-syllable">${escapeHTML(item.part)}</span>
-        `
-      )
-      .join("");
-  }
-
-  /* =========================
-     10. MISI 3: BACA DAN FAHAM
-     ========================= */
-
-  function renderMissionThree(question, container) {
-    const choices = shuffle(question.choices);
-
-    container.innerHTML = `
-      <section class="question-card">
-        <p class="question-prompt">${escapeHTML(question.prompt)}</p>
-
-        <div class="word-display">
-          ${escapeHTML(question.word)}
-        </div>
-
-        <div class="picture-choices">
-          ${choices
-            .map(
-              (choice) => `
-                <button
-                  type="button"
-                  class="picture-choice"
-                  data-answer="${escapeHTML(choice.value)}"
-                  aria-pressed="false"
-                >
-                  <span class="choice-emoji" aria-hidden="true">
-                    ${choice.emoji}
-                  </span>
-                  <span class="choice-label">
-                    ${escapeHTML(choice.text)}
-                  </span>
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-      </section>
-    `;
-
-    attachPictureChoiceEvents();
-  }
-
-  /* =========================
-     11. MISI 4: CABARAN BACA SENDIRI
-     ========================= */
-
-  function renderMissionFour(question, container) {
-    container.innerHTML = `
-      <section class="question-card">
-        <p class="question-prompt">${escapeHTML(question.prompt)}</p>
-
-        <div class="word-display">
-          <span aria-hidden="true">${question.emoji}</span>
-          <span>${escapeHTML(question.word)}</span>
-        </div>
-
-        <p class="instruction">
-          Baca perkataan di atas. Tekan butang rakam apabila bersedia.
-        </p>
-
-        <div class="recording-controls">
-          <button type="button" class="record-btn" id="recordBtn">
-            🎙️ Mula Rakam
-          </button>
-
-          <button type="button" class="secondary-btn" id="stopRecordBtn" disabled>
-            ⏹️ Hentikan Rakaman
-          </button>
-        </div>
-
-        <p id="recordingStatus" class="recording-status" aria-live="polite">
-          Belum ada rakaman untuk soalan ini.
-        </p>
-
-        <div id="audioPreviewContainer" class="audio-preview-container"></div>
-
-        <button type="button" class="secondary-btn" id="downloadAudioBtn" hidden>
-          ⬇️ Muat Turun Rakaman
-        </button>
-      </section>
-    `;
-
-    const recordBtn = getElement("recordBtn");
-    const stopRecordBtn = getElement("stopRecordBtn");
-
-    if (recordBtn) {
-      recordBtn.addEventListener("click", startRecording);
-    }
-
-    if (stopRecordBtn) {
-      stopRecordBtn.addEventListener("click", stopRecording);
-    }
-  }
-
-  /* =========================
-     12. PILIHAN GAMBAR
-     ========================= */
-
-  function attachPictureChoiceEvents() {
-    document.querySelectorAll(".picture-choice").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (questionChecked) return;
-
-        document.querySelectorAll(".picture-choice").forEach((choice) => {
-          choice.classList.remove("selected");
-          choice.setAttribute("aria-pressed", "false");
-        });
-
-        button.classList.add("selected");
-        button.setAttribute("aria-pressed", "true");
-        selectedAnswer = button.dataset.answer;
-      });
-    });
-  }
-
-  /* =========================
-     13. SEMAK JAWAPAN
-     ========================= */
-
-  function handleCheck() {
-    if (!currentMission || questionChecked) return;
-
-    const question = currentMission.questions[currentQuestionIndex];
-    let isCorrect = false;
-
-    if (currentMission.id === 1 || currentMission.id === 3) {
-      if (!selectedAnswer) {
-        showFeedback("Pilih satu jawapan dahulu.", "warning");
-        return;
-      }
-
-      isCorrect = selectedAnswer === question.answer;
-    }
-
-    if (currentMission.id === 2) {
-      if (selectedParts.length === 0) {
-        showFeedback("Pilih suku kata dahulu.", "warning");
-        return;
-      }
-
-      const submittedWord = selectedParts.map((item) => item.part).join("");
-      isCorrect = submittedWord === question.answer;
-    }
-
-    if (currentMission.id === 4) {
-      const audioExists = Boolean(getElement("audioPreview"));
-      const savedRecording = Boolean(
-        getElement("downloadAudioBtn") &&
-          !getElement("downloadAudioBtn").hidden
-      );
-
-      if (!audioExists && !savedRecording) {
-        showFeedback("Rakam suara kamu dahulu sebelum meneruskan.", "warning");
-        return;
-      }
-
-      // Misi bacaan kendiri diberi satu markah penyertaan apabila rakaman dibuat.
-      isCorrect = true;
-    }
-
-    questionChecked = true;
-    totalAnswered += 1;
-
-    if (isCorrect) {
-      currentScore += 1;
-      showFeedback(
-        currentMission.id === 4
-          ? "Bagus! Kamu sudah membuat rakaman bacaan."
-          : "Tahniah! Jawapan kamu betul.",
-        "success"
-      );
-    } else {
-      showFeedback(
-        `Belum tepat. Jawapan yang betul ialah "${question.answer}". Cuba ingat semula.`,
-        "error"
-      );
-    }
-
-    document.querySelectorAll(
-      ".picture-choice, .syllable-choice, #resetPartsBtn"
-    ).forEach((button) => {
       button.disabled = true;
+      button.classList.add("selected");
+      updateSyllableAnswer();
     });
+  });
 
-    const checkBtn = getElement("checkBtn");
-    const nextBtn = getElement("nextBtn");
+  $("#resetSyllables").addEventListener("click", () => {
+    if (state.answered) return;
+    state.selectedSyllables = [];
+    missionContent.querySelectorAll(".syllable-option").forEach((button) => {
+      button.disabled = false;
+      button.classList.remove("selected");
+    });
+    updateSyllableAnswer();
+  });
 
-    if (checkBtn) checkBtn.hidden = true;
-
-    if (nextBtn) {
-      nextBtn.hidden = false;
-      nextBtn.textContent =
-        currentQuestionIndex === currentMission.questions.length - 1
-          ? "Lihat Keputusan"
-          : "Soalan Seterusnya";
-    }
-
-    const scoreBadge = getElement("scoreBadge");
-    if (scoreBadge) {
-      scoreBadge.textContent = `Markah: ${currentScore}`;
-    }
-  }
-
-  function showFeedback(message, type) {
-    const feedback = getElement("feedback");
-    if (!feedback) {
-      if (type === "warning") alert(message);
+  $("#checkSyllables").addEventListener("click", () => {
+    if (state.selectedSyllables.length !== 2) {
+      showFeedback("Pilih dua suku kata dahulu.", false);
       return;
     }
 
-    feedback.textContent = message;
-    feedback.className = `feedback ${type}`;
-    feedback.hidden = false;
+    const answer = state.selectedSyllables.map((item) => item.syllable).join("");
+    checkAnswer(answer === current.word);
+  });
+
+  $("#speakTargetButton").addEventListener("click", () => speakText(current.word));
+  updateSyllableAnswer();
+}
+
+function updateSyllableAnswer() {
+  const answerBox = $("#syllableAnswer");
+  const chosen = state.selectedSyllables.map((item) => item.syllable);
+
+  answerBox.innerHTML = `
+    <span class="syllable-choice">${escapeHTML(chosen[0] || "?")}</span>
+    <span aria-hidden="true">+</span>
+    <span class="syllable-choice">${escapeHTML(chosen[1] || "?")}</span>
+  `;
+
+  const hint = $("#syllableHint");
+  if (hint) {
+    hint.textContent = chosen.length
+      ? `Suku kata dipilih: ${chosen.join(" + ")}`
+      : "Suku kata yang dipilih akan muncul di sini.";
+  }
+}
+
+function renderMissionThree() {
+  const passage = PASSAGES[state.questionIndex];
+
+  missionContent.innerHTML = `
+    <p class="instruction">Baca petikan, rakam suara dan jawab soalan pemahaman.</p>
+    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
+    <h3>📖 Baca petikan pendek ini</h3>
+    <div class="reading-passage">${highlightKnownWords(passage.text)}</div>
+    <div class="recording-panel">
+      <h3>🎤 Rakaman bacaan kamu</h3>
+      <p>Baca petikan dengan suara yang jelas. Kemudian, dengar semula rakaman kamu.</p>
+      <div class="action-row">
+        <button id="startRecording" class="primary-button" type="button">🔴 Mula rakam</button>
+        <button id="stopRecording" class="secondary-button" type="button" disabled>⏹️ Henti rakaman</button>
+        <button id="playSpeech" class="secondary-button" type="button" disabled>▶️ Dengar rakaman</button>
+      </div>
+      <p id="recordingStatus" class="recording-status" role="status">Belum ada rakaman.</p>
+      <audio id="audioPlayback" controls hidden></audio>
+      <button id="saveRecording" class="secondary-button" type="button" disabled>💾 Simpan rakaman untuk guru</button>
+    </div>
+    <hr>
+    <h3>💡 Soalan pemahaman</h3>
+    <p>${escapeHTML(passage.question)}</p>
+    <div id="comprehensionOptions">
+      ${passage.options.map((option) => `
+        <button class="question-option" type="button" data-answer="${escapeHTML(option)}">
+          ${WORDS[option] ? WORDS[option].emoji + " " : ""}${escapeHTML(option)}
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  bindComprehension(passage.answer);
+  bindRecordingControls();
+}
+
+function highlightKnownWords(text) {
+  return escapeHTML(text).replace(
+    /\b(topi|roti|susu|buku|baju|Mira|Ali|Amin|Siti|Siti|Mira|Amin)\b/gi,
+    "<strong>$1</strong>"
+  );
+}
+
+function renderMissionFour() {
+  const current = getCurrentWord();
+
+  missionContent.innerHTML = `
+    <p class="instruction">Cabaran terakhir! Baca perkataan sendiri dan rakam suara kamu.</p>
+    <p class="eyebrow">SOALAN ${state.questionIndex + 1} DARIPADA 5</p>
+    <div class="word-display">${escapeHTML(current.word)}</div>
+    <p class="text-center">Sebut perkataan dengan jelas. Kamu boleh mendengar contoh sebutan dahulu.</p>
+    <div class="action-row">
+      <button id="modelWordButton" class="secondary-button" type="button">
+        🔊 Dengar contoh
+      </button>
+    </div>
+    <div class="recording-panel">
+      <h3>🎤 Rakam bacaan kamu</h3>
+      <div class="action-row">
+        <button id="startRecording" class="primary-button" type="button">🔴 Mula rakam</button>
+        <button id="stopRecording" class="secondary-button" type="button" disabled>⏹️ Henti rakaman</button>
+        <button id="playSpeech" class="secondary-button" type="button" disabled>▶️ Dengar semula</button>
+      </div>
+      <p id="recordingStatus" class="recording-status" role="status">Belum ada rakaman.</p>
+      <audio id="audioPlayback" controls hidden></audio>
+      <button id="saveRecording" class="secondary-button" type="button" disabled>💾 Simpan rakaman untuk guru</button>
+    </div>
+    <div class="action-row">
+      <button id="selfCheckButton" class="primary-button" type="button">
+        ✅ Saya sudah membaca
+      </button>
+    </div>
+  `;
+
+  $("#modelWordButton").addEventListener("click", () => speakText(current.word));
+
+  $("#selfCheckButton").addEventListener("click", () => {
+    if (state.answered) return;
+
+    state.answered = true;
+    state.questionScore = 1;
+    state.score += 1;
+    $("#scoreDisplay").textContent = String(state.score);
+    showFeedback("Bagus! Kamu telah mencuba membaca sendiri. 🌟", true);
+    recordQuestionResult(current.word, "Bacaan kendiri", 1);
+    nextQuestionButton.hidden = false;
+    updateProgress();
+  });
+
+  bindRecordingControls();
+}
+
+function bindComprehension(correctAnswer) {
+  missionContent.querySelectorAll(".question-option").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (state.answered) return;
+
+      const correct = button.dataset.answer === correctAnswer;
+      missionContent.querySelectorAll(".question-option").forEach((item) => {
+        item.disabled = true;
+      });
+
+      checkAnswer(correct, button);
+    });
+  });
+}
+
+function checkAnswer(correct, selectedButton = null) {
+  if (state.answered) return;
+
+  state.answered = true;
+  const current = getCurrentWord();
+  const point = correct ? 1 : 0;
+
+  state.questionScore = point;
+  state.score += point;
+  $("#scoreDisplay").textContent = String(state.score);
+
+  if (selectedButton) {
+    selectedButton.style.borderColor = correct ? "#18794e" : "#b42318";
   }
 
-  /* =========================
-     14. SOALAN SETERUSNYA
-     ========================= */
+  showFeedback(
+    correct
+      ? "Syabas! Jawapan kamu betul! ⭐"
+      : "Belum tepat. Cuba ingat semula dan teruskan usaha! 💪",
+    correct
+  );
 
-  function handleNext() {
-    if (!currentMission || !questionChecked) return;
+  recordQuestionResult(
+    current ? current.word : "",
+    state.mission === 3 ? "Pemahaman" : state.mission === 2 ? "Cantum suku kata" : "Kenal gambar",
+    point
+  );
 
-    if (currentQuestionIndex < currentMission.questions.length - 1) {
-      currentQuestionIndex += 1;
-      renderQuestion();
-    } else {
-      finishMission();
-    }
+  nextQuestionButton.hidden = false;
+  updateProgress();
+}
+
+function showFeedback(message, correct) {
+  missionFeedback.textContent = message;
+  missionFeedback.className = `feedback ${correct ? "correct" : "incorrect"}`;
+}
+
+function recordQuestionResult(word, activity, points) {
+  if (!state.currentSession) return;
+
+  state.currentSession.missionResults.push({
+    mission: state.mission,
+    question: state.questionIndex + 1,
+    word,
+    activity,
+    points,
+    date: new Date().toISOString()
+  });
+}
+
+function finishMission() {
+  state.completedMissions[state.mission] = true;
+
+  const total = MISSIONS[state.mission].total;
+  const score = state.score;
+
+  missionContent.innerHTML = `
+    <div class="text-center">
+      <div class="welcome-illustration">🎉 🏆 🌟</div>
+      <h2>Tahniah, Pengembara Kata!</h2>
+      <p>Kamu telah menyelesaikan <strong>${escapeHTML(MISSIONS[state.mission].title)}</strong>.</p>
+      <div class="word-display">${score} / ${total}</div>
+      <p>Markah kamu untuk misi ini.</p>
+      <p>Teruskan berlatih membaca dengan yakin!</p>
+      <div class="action-row">
+        <button id="retryMissionButton" class="secondary-button" type="button">🔁 Cuba lagi</button>
+        <button id="finishMissionButton" class="primary-button" type="button">🏡 Pilih misi lain</button>
+      </div>
+      <p class="message">Ingat: markah ini menilai jawapan aktiviti, bukan ketepatan suara secara automatik.</p>
+    </div>
+  `;
+
+  missionFeedback.textContent = "";
+  nextQuestionButton.hidden = true;
+  progressBar.style.width = "100%";
+
+  $("#retryMissionButton").addEventListener("click", () => openMission(state.mission));
+  $("#finishMissionButton").addEventListener("click", () => {
+    saveSession();
+    showScreen(homeScreen);
+  });
+}
+
+function saveSession() {
+  if (!state.currentSession) return;
+
+  state.currentSession.completedAt = new Date().toISOString();
+  state.currentSession.completedMissions = Object.keys(state.completedMissions)
+    .map(Number);
+
+  // Simpan satu rekod sesi tanpa memasukkan audio berulang kali.
+  const session = {
+    ...state.currentSession,
+    recordings: state.currentSession.recordings.map((recording) => ({
+      ...recording,
+      audioData: undefined
+    }))
+  };
+
+  saveRecord(session);
+  state.currentSession = null;
+}
+
+function nextQuestion() {
+  if (!state.answered) return;
+
+  if (state.recording) {
+    showToast("Hentikan rakaman dahulu.");
+    return;
   }
 
-  /* =========================
-     15. SIMPAN KEPUTUSAN
-     ========================= */
+  state.questionIndex += 1;
+  renderQuestion();
+}
 
-  function finishMission() {
-    if (!currentMission) return;
-
-    stopRecordingIfNeeded();
-
-    const studentName = getStudentName();
-    const totalQuestions = currentMission.questions.length;
-    const percentage = Math.round((currentScore / totalQuestions) * 100);
-
-    const record = {
-      id: currentSessionId || `session_${Date.now()}`,
-      studentName,
-      missionId: currentMission.id,
-      missionTitle: currentMission.title,
-      score: currentScore,
-      totalQuestions,
-      percentage,
-      completedAt: new Date().toISOString()
-    };
-
-    const records = getRecords();
-    records.push(record);
-    saveRecords(records);
-
-    setText("resultMessage", getResultMessage(percentage));
-    setText("resultScore", `${currentScore} / ${totalQuestions}`);
-    setText("resultPercentage", `${percentage}%`);
-
-    showScreen("resultScreen");
-    updateHomeProgress();
+function speakText(text) {
+  if (!("speechSynthesis" in window)) {
+    showToast("Fungsi audio contoh tidak disokong oleh pelayar ini.");
+    return;
   }
 
-  function getResultMessage(percentage) {
-    if (percentage === 100) {
-      return "Hebat! Semua jawapan kamu betul. Teruskan usaha yang baik!";
-    }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ms-MY";
+  utterance.rate = 0.78;
+  utterance.pitch = 1.05;
+  window.speechSynthesis.speak(utterance);
+}
 
-    if (percentage >= 60) {
-      return "Bagus! Kamu semakin mahir membaca. Teruskan berlatih!";
-    }
+async function bindRecordingControls() {
+  const startButton = $("#startRecording");
+  const stopButton = $("#stopRecording");
+  const playButton = $("#playSpeech");
+  const saveButton = $("#saveRecording");
+  const status = $("#recordingStatus");
+  const audioElement = $("#audioPlayback");
 
-    return "Teruskan mencuba. Baca perkataan perlahan-lahan dan minta bantuan guru jika perlu.";
+  if (!startButton || !stopButton || !playButton || !saveButton || !status || !audioElement) {
+    return;
   }
 
-  function updateHomeProgress() {
-    const records = getRecords();
-    const studentName = getStudentName();
-
-    const studentRecords = records.filter(
-      (record) =>
-        String(record.studentName).toLowerCase() === studentName.toLowerCase()
-    );
-
-    const progressElement = getElement("homeProgress");
-    if (progressElement) {
-      const completedMissions = new Set(
-        studentRecords.map((record) => record.missionId)
-      ).size;
-
-      progressElement.textContent =
-        `Misi selesai: ${completedMissions} daripada ${MISSIONS.length}`;
-    }
-
-    const completedElement = getElement("completedMissions");
-    if (completedElement) {
-      completedElement.textContent = String(
-        new Set(studentRecords.map((record) => record.missionId)).size
-      );
-    }
-  }
-
-  /* =========================
-     16. RAKAMAN SUARA
-     ========================= */
-
-  async function startRecording() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showFeedback(
-        "Pelayar ini tidak menyokong rakaman suara. Cuba gunakan Chrome atau Edge melalui HTTPS.",
-        "error"
-      );
-      return;
-    }
-
-    if (!window.MediaRecorder) {
-      showFeedback("Fungsi rakaman tidak disokong oleh pelayar ini.", "error");
+  startButton.addEventListener("click", async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia ||
+        typeof MediaRecorder === "undefined") {
+      status.textContent = "Pelayar ini tidak menyokong rakaman suara. Cuba pelayar terkini melalui HTTPS.";
       return;
     }
 
     try {
-      recordingStream = await navigator.mediaDevices.getUserMedia({
-        audio: true
-      });
+      state.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      state.audioChunks = [];
+      state.audioBlob = null;
 
-      recordingChunks = [];
+      const preferredType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "";
 
-      let options = {};
-      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-        options.mimeType = "audio/webm;codecs=opus";
-      } else if (MediaRecorder.isTypeSupported("audio/webm")) {
-        options.mimeType = "audio/webm";
-      }
+      state.recorder = preferredType
+        ? new MediaRecorder(state.mediaStream, { mimeType: preferredType })
+        : new MediaRecorder(state.mediaStream);
 
-      mediaRecorder = new MediaRecorder(recordingStream, options);
-      recordingStartedAt = Date.now();
-
-      mediaRecorder.addEventListener("dataavailable", (event) => {
+      state.recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          recordingChunks.push(event.data);
+          state.audioChunks.push(event.data);
         }
-      });
+      };
 
-      mediaRecorder.addEventListener("stop", async () => {
-        const mimeType =
-          mediaRecorder && mediaRecorder.mimeType
-            ? mediaRecorder.mimeType
-            : "audio/webm";
+      state.recorder.onstop = () => {
+        state.audioBlob = new Blob(state.audioChunks, {
+          type: state.recorder.mimeType || "audio/webm"
+        });
 
-        const audioBlob = new Blob(recordingChunks, { type: mimeType });
+        if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+        state.audioUrl = URL.createObjectURL(state.audioBlob);
+        audioElement.src = state.audioUrl;
+        audioElement.hidden = false;
 
-        await handleRecordingReady(audioBlob);
+        playButton.disabled = false;
+        saveButton.disabled = false;
+        status.textContent = "Rakaman selesai. Dengar semula sebelum menyimpan.";
 
-        if (recordingStream) {
-          recordingStream.getTracks().forEach((track) => track.stop());
-          recordingStream = null;
+        if (state.mediaStream) {
+          state.mediaStream.getTracks().forEach((track) => track.stop());
+          state.mediaStream = null;
         }
-      });
 
-      mediaRecorder.start();
+        state.recording = false;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+      };
 
-      const recordBtn = getElement("recordBtn");
-      const stopBtn = getElement("stopRecordBtn");
-      const status = getElement("recordingStatus");
-
-      if (recordBtn) recordBtn.disabled = true;
-      if (stopBtn) stopBtn.disabled = false;
-      if (status) status.textContent = "Sedang merakam suara...";
-
-      showFeedback("Rakaman bermula. Baca perkataan dengan jelas.", "success");
+      state.recorder.start();
+      state.recording = true;
+      state.recordingStartedAt = Date.now();
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      playButton.disabled = true;
+      saveButton.disabled = true;
+      status.textContent = "🔴 Sedang merakam... Baca dengan jelas.";
     } catch (error) {
-      console.error("Ralat semasa memulakan rakaman:", error);
-
-      showFeedback(
-        "Mikrofon tidak dapat digunakan. Benarkan akses mikrofon pada pelayar dan cuba semula.",
-        "error"
-      );
-
-      if (recordingStream) {
-        recordingStream.getTracks().forEach((track) => track.stop());
-        recordingStream = null;
-      }
+      console.error(error);
+      status.textContent = "Rakaman tidak dapat dimulakan. Benarkan akses mikrofon pada pelayar.";
     }
-  }
+  });
 
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
+  stopButton.addEventListener("click", () => {
+    if (state.recorder && state.recorder.state !== "inactive") {
+      state.recorder.stop();
     }
+  });
 
-    const recordBtn = getElement("recordBtn");
-    const stopBtn = getElement("stopRecordBtn");
-
-    if (recordBtn) recordBtn.disabled = false;
-    if (stopBtn) stopBtn.disabled = true;
-  }
-
-  function stopRecordingIfNeeded() {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      try {
-        mediaRecorder.stop();
-      } catch (error) {
-        console.warn("Rakaman tidak dapat dihentikan:", error);
-      }
+  playButton.addEventListener("click", () => {
+    if (audioElement.src) {
+      audioElement.play().catch(() => {
+        status.textContent = "Tekan butang main pada pemain audio untuk mendengar rakaman.";
+      });
     }
+  });
 
-    if (recordingStream) {
-      recordingStream.getTracks().forEach((track) => track.stop());
-      recordingStream = null;
-    }
-  }
-
-  async function handleRecordingReady(audioBlob) {
-    if (!audioBlob || audioBlob.size === 0) {
-      showFeedback("Rakaman kosong. Sila cuba rakam sekali lagi.", "error");
+  saveButton.addEventListener("click", async () => {
+    if (!state.audioBlob || !state.currentSession) {
+      status.textContent = "Tiada rakaman untuk disimpan.";
       return;
     }
 
-    if (currentAudioUrl) {
-      URL.revokeObjectURL(currentAudioUrl);
+    const current = getCurrentWord();
+    const missionWord = current ? current.word : "";
+    const audioSize = state.audioBlob.size;
+
+    // Data URL membolehkan rakaman dimainkan semula pada peranti yang sama.
+    // Saiz rakaman dihadkan untuk mengelakkan storan pelayar cepat penuh.
+    if (audioSize > 2 * 1024 * 1024) {
+      status.textContent = "Rakaman melebihi 2 MB. Padam atau rakam semula dengan lebih ringkas.";
+      return;
     }
 
-    currentAudioUrl = URL.createObjectURL(audioBlob);
+    try {
+      const dataUrl = await blobToDataURL(state.audioBlob);
 
-    const container = getElement("audioPreviewContainer");
-    if (container) {
-      container.innerHTML = `
-        <p class="instruction">Dengar semula rakaman kamu:</p>
-        <audio id="audioPreview" controls preload="metadata">
-          <source src="${currentAudioUrl}" type="${escapeHTML(audioBlob.type)}">
-          Pelayar anda tidak menyokong audio.
-        </audio>
+      const recording = {
+        studentName: state.studentName,
+        mission: state.mission,
+        question: state.questionIndex + 1,
+        word: missionWord,
+        createdAt: new Date().toISOString(),
+        audioData: dataUrl
+      };
+
+      // Simpan metadata rakaman bersama sesi aktif.
+      state.currentSession.recordings.push(recording);
+
+      // Simpan salinan khusus rakaman untuk dipaparkan dalam papan guru.
+      saveRecord({
+        type: "recording",
+        studentName: recording.studentName,
+        mission: recording.mission,
+        question: recording.question,
+        word: recording.word,
+        createdAt: recording.createdAt,
+        audioData: recording.audioData
+      });
+
+      status.textContent = "Rakaman disimpan pada peranti ini. Guru boleh menyemaknya melalui papan guru.";
+      saveButton.disabled = true;
+      showToast("Rakaman berjaya disimpan pada peranti ini.");
+    } catch (error) {
+      console.error(error);
+      status.textContent = "Rakaman tidak dapat disimpan. Ruang storan mungkin tidak mencukupi.";
+    }
+  });
+}
+
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function openTeacherArea() {
+  if (state.recording) {
+    showToast("Hentikan rakaman dahulu sebelum membuka ruang guru.");
+    return;
+  }
+
+  $("#teacherPassword").value = "";
+  $("#loginMessage").textContent = "";
+  $("#teacherLogin").hidden = false;
+  $("#teacherDashboard").hidden = true;
+  showScreen(teacherScreen);
+}
+
+function teacherLogin() {
+  if ($("#teacherPassword").value !== TEACHER_PASSWORD) {
+    $("#loginMessage").textContent = "Kata laluan tidak tepat. Sila cuba lagi.";
+    return;
+  }
+
+  state.teacherLoggedIn = true;
+  $("#teacherLogin").hidden = true;
+  $("#teacherDashboard").hidden = false;
+  renderTeacherDashboard();
+}
+
+function teacherLogout() {
+  state.teacherLoggedIn = false;
+  $("#teacherPassword").value = "";
+  $("#teacherLogin").hidden = false;
+  $("#teacherDashboard").hidden = true;
+  showScreen(homeScreen);
+}
+
+function renderTeacherDashboard() {
+  if (!state.teacherLoggedIn) return;
+
+  const records = getRecords();
+  const sessions = records.filter((record) => !record.type);
+  const recordings = records.filter((record) => record.type === "recording");
+  const uniqueStudents = new Set(records.map((record) => record.studentName).filter(Boolean));
+
+  $("#totalStudents").textContent = String(uniqueStudents.size);
+  $("#totalActivities").textContent = String(
+    sessions.reduce((sum, session) => sum + (session.missionResults || []).length, 0)
+  );
+  $("#totalRecordings").textContent = String(recordings.length);
+
+  const container = $("#teacherRecords");
+
+  if (!records.length) {
+    container.innerHTML = "<p>Belum ada rekod pada peranti ini.</p>";
+    return;
+  }
+
+  container.innerHTML = records.slice().reverse().map((record, index) => {
+    if (record.type === "recording") {
+      return `
+        <article class="record-card">
+          <h4>🎤 Rakaman bacaan — ${escapeHTML(record.studentName || "Murid")}</h4>
+          <p><strong>Misi:</strong> ${escapeHTML(String(record.mission))}</p>
+          <p><strong>Perkataan:</strong> ${escapeHTML(record.word || "-")}</p>
+          <p><strong>Tarikh:</strong> ${escapeHTML(formatDate(record.createdAt))}</p>
+          ${
+            record.audioData
+              ? `<audio class="record-audio" controls preload="none" src="${record.audioData}"></audio>`
+              : "<p>Fail audio tiada dalam rekod ini.</p>"
+          }
+        </article>
       `;
     }
 
-    const downloadBtn = getElement("downloadAudioBtn");
-    if (downloadBtn) {
-      downloadBtn.hidden = false;
-      downloadBtn.onclick = () => downloadRecording(audioBlob);
-    }
+    const results = record.missionResults || [];
+    const totalPoints = results.reduce((sum, item) => sum + Number(item.points || 0), 0);
 
-    const elapsedSeconds = recordingStartedAt
-      ? Math.max(1, Math.round((Date.now() - recordingStartedAt) / 1000))
-      : 0;
-
-    const status = getElement("recordingStatus");
-    if (status) {
-      status.textContent =
-        `Rakaman siap (${elapsedSeconds} saat). Dengar semula sebelum meneruskan.`;
-    }
-
-    await saveAudioToDatabase(audioBlob, {
-      sessionId: currentSessionId,
-      studentName: getStudentName(),
-      missionId: currentMission ? currentMission.id : null,
-      missionTitle: currentMission ? currentMission.title : "",
-      word:
-        currentMission &&
-        currentMission.questions[currentQuestionIndex]
-          ? currentMission.questions[currentQuestionIndex].word
-          : "",
-      createdAt: new Date().toISOString()
-    });
-
-    showFeedback("Rakaman berjaya dibuat. Kamu boleh mendengarnya semula.", "success");
-  }
-
-  function downloadRecording(blob) {
-    const word =
-      currentMission &&
-      currentMission.questions[currentQuestionIndex]
-        ? currentMission.questions[currentQuestionIndex].word
-        : "bacaan";
-
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-
-    link.href = url;
-    link.download = `rakaman-${word}-${Date.now()}.webm`;
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  /* =========================
-     17. INDEXEDDB UNTUK AUDIO
-     ========================= */
-
-  function openAudioDatabase() {
-    if (!("indexedDB" in window)) {
-      return Promise.reject(new Error("IndexedDB tidak disokong."));
-    }
-
-    if (dbPromise) return dbPromise;
-
-    dbPromise = new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onupgradeneeded = () => {
-        const db = request.result;
-
-        if (!db.objectStoreNames.contains(AUDIO_STORE)) {
-          const store = db.createObjectStore(AUDIO_STORE, {
-            keyPath: "id"
-          });
-
-          store.createIndex("studentName", "studentName", {
-            unique: false
-          });
-
-          store.createIndex("createdAt", "createdAt", {
-            unique: false
-          });
-        }
-      };
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-
-    return dbPromise;
-  }
-
-  async function saveAudioToDatabase(blob, metadata) {
-    try {
-      const db = await openAudioDatabase();
-
-      const audioRecord = {
-        id: `${metadata.sessionId || Date.now()}_${metadata.word || "audio"}`,
-        blob,
-        ...metadata
-      };
-
-      await new Promise((resolve, reject) => {
-        const transaction = db.transaction(AUDIO_STORE, "readwrite");
-        transaction.objectStore(AUDIO_STORE).put(audioRecord);
-        transaction.oncomplete = resolve;
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
-      });
-    } catch (error) {
-      console.warn("Rakaman tidak dapat disimpan dalam IndexedDB:", error);
-      // Rakaman masih boleh didengar dan dimuat turun dalam sesi semasa.
-    }
-  }
-
-  async function getAllAudioRecords() {
-    const db = await openAudioDatabase();
-
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(AUDIO_STORE, "readonly");
-      const request = transaction.objectStore(AUDIO_STORE).getAll();
-
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  /* =========================
-     18. RUANG GURU
-     ========================= */
-
-  function createTeacherInterface() {
-    if (getElement("teacherPanel")) return;
-
-    const teacherPanel = document.createElement("section");
-    teacherPanel.id = "teacherPanel";
-    teacherPanel.hidden = true;
-    teacherPanel.className = "teacher-panel";
-
-    teacherPanel.innerHTML = `
-      <div class="teacher-panel-header">
-        <div>
-          <p class="teacher-eyebrow">PANEL PENGURUSAN</p>
-          <h2>Ruang Guru</h2>
-          <p>Rekod pencapaian dan rakaman bacaan murid.</p>
-        </div>
-        <button type="button" id="closeTeacherBtn" class="secondary-btn">
-          Tutup
-        </button>
-      </div>
-
-      <div class="teacher-actions">
-        <button type="button" id="refreshTeacherBtn" class="primary-btn">
-          Muat Semula Rekod
-        </button>
-        <button type="button" id="exportCsvBtn" class="secondary-btn">
-          Eksport CSV
-        </button>
-      </div>
-
-      <div id="teacherSummary" class="teacher-summary"></div>
-
-      <div class="teacher-table-wrap">
-        <table class="teacher-table">
-          <thead>
-            <tr>
-              <th>Nama Murid</th>
-              <th>Misi</th>
-              <th>Markah</th>
-              <th>Peratus</th>
-              <th>Tarikh</th>
-              <th>Rakaman</th>
-            </tr>
-          </thead>
-          <tbody id="teacherRecordsBody"></tbody>
-        </table>
-      </div>
-
-      <p id="teacherNotice" class="teacher-notice" aria-live="polite"></p>
+    return `
+      <article class="record-card">
+        <h4>📘 Rekod pembelajaran — ${escapeHTML(record.studentName || "Murid")}</h4>
+        <p><strong>Tarikh:</strong> ${escapeHTML(formatDate(record.startedAt))}</p>
+        <p><strong>Markah aktiviti yang direkodkan:</strong> ${totalPoints}</p>
+        <p><strong>Aktiviti dijawab:</strong> ${results.length}</p>
+        <p><strong>Misi selesai:</strong> ${escapeHTML((record.completedMissions || []).join(", ") || "-")}</p>
+        <details>
+          <summary>Lihat butiran jawapan</summary>
+          ${
+            results.length
+              ? `<ul>${results.map((item) => `
+                  <li>
+                    Misi ${escapeHTML(String(item.mission))}, soalan
+                    ${escapeHTML(String(item.question))} —
+                    ${escapeHTML(item.word || "-")}:
+                    ${Number(item.points) ? "Betul" : "Perlu bimbingan"}
+                  </li>
+                `).join("")}</ul>`
+              : "<p>Tiada butiran jawapan.</p>"
+          }
+        </details>
+      </article>
     `;
+  }).join("");
+}
 
-    document.body.appendChild(teacherPanel);
+function formatDate(value) {
+  if (!value) return "-";
 
-    const closeBtn = getElement("closeTeacherBtn");
-    const refreshBtn = getElement("refreshTeacherBtn");
-    const exportBtn = getElement("exportCsvBtn");
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
 
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        teacherPanel.hidden = true;
-      });
-    }
+  return date.toLocaleString("ms-MY", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  });
+}
 
-    if (refreshBtn) {
-      refreshBtn.addEventListener("click", renderTeacherRecords);
-    }
-
-    if (exportBtn) {
-      exportBtn.addEventListener("click", exportRecordsToCSV);
-    }
+function exportRecords() {
+  if (!state.teacherLoggedIn) {
+    showToast("Sila log masuk sebagai guru dahulu.");
+    return;
   }
 
-  function createTeacherEntryButton() {
-    if (getElement("teacherEntryBtn")) return;
+  const records = getRecords();
 
-    const button = document.createElement("button");
-    button.id = "teacherEntryBtn";
-    button.type = "button";
-    button.className = "teacher-entry-btn";
-    button.textContent = "👩‍🏫 Ruang Guru";
-
-    button.addEventListener("click", openTeacherPanel);
-
-    const target =
-      getElement("homeScreen") ||
-      document.querySelector("main") ||
-      document.body;
-
-    target.appendChild(button);
+  if (!records.length) {
+    showToast("Tiada rekod untuk dieksport.");
+    return;
   }
 
-  function openTeacherPanel() {
-    const password = window.prompt("Masukkan kata laluan guru:");
+  const rows = [
+    ["Jenis rekod", "Nama murid", "Tarikh", "Misi", "Soalan", "Perkataan", "Aktiviti", "Markah"]
+  ];
 
-    if (password === null) return;
-
-    if (password !== TEACHER_PASSWORD) {
-      alert("Kata laluan tidak betul.");
+  records.forEach((record) => {
+    if (record.type === "recording") {
+      rows.push([
+        "Rakaman suara",
+        record.studentName || "",
+        formatDate(record.createdAt),
+        record.mission || "",
+        record.question || "",
+        record.word || "",
+        "Rakaman bacaan",
+        ""
+      ]);
       return;
     }
 
-    createTeacherInterface();
-
-    const panel = getElement("teacherPanel");
-    if (panel) {
-      panel.hidden = false;
-      renderTeacherRecords();
-      panel.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
-
-  async function renderTeacherRecords() {
-    const recordsBody = getElement("teacherRecordsBody");
-    const summary = getElement("teacherSummary");
-    const notice = getElement("teacherNotice");
-
-    if (!recordsBody) return;
-
-    const records = getRecords();
-
-    if (summary) {
-      const students = new Set(records.map((record) => record.studentName));
-      const average =
-        records.length > 0
-          ? Math.round(
-              records.reduce(
-                (sum, record) => sum + Number(record.percentage || 0),
-                0
-              ) / records.length
-            )
-          : 0;
-
-      summary.innerHTML = `
-        <div class="teacher-stat">
-          <span class="teacher-stat-label">Jumlah rekod</span>
-          <strong>${records.length}</strong>
-        </div>
-        <div class="teacher-stat">
-          <span class="teacher-stat-label">Bilangan murid</span>
-          <strong>${students.size}</strong>
-        </div>
-        <div class="teacher-stat">
-          <span class="teacher-stat-label">Purata peratus</span>
-          <strong>${average}%</strong>
-        </div>
-      `;
-    }
-
-    if (records.length === 0) {
-      recordsBody.innerHTML = `
-        <tr>
-          <td colspan="6">Belum ada rekod pencapaian murid.</td>
-        </tr>
-      `;
-    } else {
-      const audioRecords = await getAudioRecordsSafely();
-
-      recordsBody.innerHTML = [...records]
-        .reverse()
-        .map((record) => {
-          const matchingAudio = audioRecords.filter(
-            (audio) =>
-              audio.studentName === record.studentName &&
-              Number(audio.missionId) === Number(record.missionId)
-          );
-
-          const audioCell =
-            matchingAudio.length > 0
-              ? matchingAudio
-                  .map(
-                    (audio) => `
-                      <button
-                        type="button"
-                        class="teacher-audio-btn"
-                        data-audio-id="${escapeHTML(audio.id)}"
-                      >
-                        ▶ Dengar ${escapeHTML(audio.word || "rakaman")}
-                      </button>
-                    `
-                  )
-                  .join("<br>")
-              : "—";
-
-          return `
-            <tr>
-              <td>${escapeHTML(record.studentName)}</td>
-              <td>${escapeHTML(record.missionTitle)}</td>
-              <td>${Number(record.score || 0)} / ${Number(record.totalQuestions || 0)}</td>
-              <td>${Number(record.percentage || 0)}%</td>
-              <td>${escapeHTML(formatDate(record.completedAt))}</td>
-              <td>${audioCell}</td>
-            </tr>
-          `;
-        })
-        .join("");
-    }
-
-    recordsBody.querySelectorAll(".teacher-audio-btn").forEach((button) => {
-      button.addEventListener("click", async () => {
-        await playSavedAudio(button.dataset.audioId);
-      });
+    (record.missionResults || []).forEach((item) => {
+      rows.push([
+        "Aktiviti",
+        record.studentName || "",
+        formatDate(item.date),
+        item.mission,
+        item.question,
+        item.word || "",
+        item.activity || "",
+        item.points
+      ]);
     });
+  });
 
-    if (notice) {
-      notice.textContent =
-        "Rekod disimpan dalam pelayar pada peranti ini. Gunakan peranti dan pelayar yang sama untuk melihat rekod tersebut.";
-    }
-  }
+  const csv = rows.map((row) =>
+    row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")
+  ).join("\r\n");
 
-  async function getAudioRecordsSafely() {
-    try {
-      return await getAllAudioRecords();
-    } catch (error) {
-      console.warn("Rekod audio tidak dapat dimuatkan:", error);
-      return [];
-    }
-  }
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "rekod-pengembaraan-dunia-kata.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
-  async function playSavedAudio(audioId) {
-    try {
-      const audioRecords = await getAllAudioRecords();
-      const record = audioRecords.find((item) => item.id === audioId);
+function clearRecords() {
+  if (!state.teacherLoggedIn) return;
 
-      if (!record || !record.blob) {
-        alert("Rakaman tidak ditemui.");
-        return;
-      }
+  const confirmed = window.confirm(
+    "Adakah anda pasti mahu memadam semua rekod dan rakaman pada peranti ini? Tindakan ini tidak boleh dibatalkan."
+  );
 
-      const url = URL.createObjectURL(record.blob);
-      const audioWindow = window.open("", "_blank");
+  if (!confirmed) return;
 
-      if (!audioWindow) {
-        URL.revokeObjectURL(url);
-        alert("Pelayar menyekat tetingkap baharu. Benarkan tetingkap pop timbul untuk memainkan rakaman.");
-        return;
-      }
+  localStorage.removeItem(RECORDS_KEY);
+  renderTeacherDashboard();
+  showToast("Rekod pada peranti ini telah dipadam.");
+}
 
-      audioWindow.document.title = "Rakaman Bacaan Murid";
-      audioWindow.document.body.style.fontFamily = "Arial, sans-serif";
-      audioWindow.document.body.style.padding = "24px";
+function attachEvents() {
+  $("#startButton").addEventListener("click", startJourney);
+  $("#themeSelect").addEventListener("change", (event) => updateTheme(event.target.value));
 
-      const heading = audioWindow.document.createElement("h2");
-      heading.textContent = `Rakaman: ${record.studentName || "Murid"}`;
+  document.querySelectorAll(".mission-preview").forEach((button) => {
+    button.addEventListener("click", () => openMission(button.dataset.mission));
+  });
 
-      const description = audioWindow.document.createElement("p");
-      description.textContent = `Perkataan: ${record.word || "Bacaan"}`;
-
-      const audio = audioWindow.document.createElement("audio");
-      audio.controls = true;
-      audio.autoplay = true;
-      audio.src = url;
-      audio.style.width = "100%";
-
-      audioWindow.document.body.append(heading, description, audio);
-    } catch (error) {
-      console.error("Rakaman tidak dapat dimainkan:", error);
-      alert("Rakaman tidak dapat dimainkan.");
-    }
-  }
-
-  /* =========================
-     19. EKSPORT CSV
-     ========================= */
-
-  function exportRecordsToCSV() {
-    const records = getRecords();
-
-    if (records.length === 0) {
-      alert("Belum ada rekod untuk dieksport.");
+  $("#homeButton").addEventListener("click", () => {
+    if (state.recording) {
+      showToast("Hentikan rakaman dahulu.");
       return;
     }
+    showScreen(homeScreen);
+  });
 
-    const headings = [
-      "Nama Murid",
-      "ID Misi",
-      "Nama Misi",
-      "Markah",
-      "Jumlah Soalan",
-      "Peratus",
-      "Tarikh"
-    ];
+  $("#backToMissions").addEventListener("click", () => {
+    if (state.recording) {
+      showToast("Hentikan rakaman dahulu.");
+      return;
+    }
+    showScreen(homeScreen);
+  });
 
-    const rows = records.map((record) => [
-      record.studentName,
-      record.missionId,
-      record.missionTitle,
-      record.score,
-      record.totalQuestions,
-      `${record.percentage}%`,
-      formatDate(record.completedAt)
-    ]);
+  nextQuestionButton.addEventListener("click", nextQuestion);
+  $("#teacherButton").addEventListener("click", openTeacherArea);
+  $("#teacherHomeButton").addEventListener("click", () => showScreen(homeScreen));
+  $("#loginButton").addEventListener("click", teacherLogin);
+  $("#teacherPassword").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") teacherLogin();
+  });
+  $("#teacherLogoutButton").addEventListener("click", teacherLogout);
+  $("#exportButton").addEventListener("click", exportRecords);
+  $("#clearRecordsButton").addEventListener("click", clearRecords);
 
-    const csvCell = (value) =>
-      `"${String(value ?? "").replace(/"/g, '""')}"`;
+  $("#studentName").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") startJourney();
+  });
+}
 
-    const csvContent = [
-      headings.map(csvCell).join(","),
-      ...rows.map((row) => row.map(csvCell).join(","))
-    ].join("\r\n");
+function initialise() {
+  attachEvents();
 
-    // BOM membantu Excel membaca aksara Bahasa Melayu dengan lebih baik.
-    const blob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;"
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = `rekod-jom-kenal-${new Date()
-      .toISOString()
-      .slice(0, 10)}.csv`;
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  try {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    updateTheme(savedTheme || "garden");
+  } catch (_) {
+    updateTheme("garden");
   }
 
-  /* =========================
-     20. BUTANG MULA MISI
-     ========================= */
+  showScreen(homeScreen);
+}
 
-  function bindMissionButtons() {
-    document.querySelectorAll("[data-mission]").forEach((button) => {
-      button.addEventListener("click", () => {
-        startMission(button.dataset.mission);
-      });
-    });
-
-    // Sokongan untuk butang yang menggunakan ID khusus.
-    document.querySelectorAll("[data-start-mission]").forEach((button) => {
-      button.addEventListener("click", () => {
-        startMission(button.dataset.startMission);
-      });
-    });
-  }
-
-  function bindNavigationButtons() {
-    const homeLink = getElement("homeLink");
-    const backHomeBtn = getElement("backHomeBtn");
-    const resultHomeBtn = getElement("resultHomeBtn");
-    const chooseMissionBtn = getElement("chooseMissionBtn");
-    const retryBtn = getElement("retryBtn");
-    const startBtn = getElement("startBtn");
-    const checkBtn = getElement("checkBtn");
-    const nextBtn = getElement("nextBtn");
-
-    if (homeLink) {
-      homeLink.addEventListener("click", (event) => {
-        event.preventDefault();
-        goHome();
-      });
-    }
-
-    if (backHomeBtn) {
-      backHomeBtn.addEventListener("click", goHome);
-    }
-
-    if (resultHomeBtn) {
-      resultHomeBtn.addEventListener("click", goHome);
-    }
-
-    if (chooseMissionBtn) {
-      chooseMissionBtn.addEventListener("click", goHome);
-    }
-
-    if (retryBtn) {
-      retryBtn.addEventListener("click", () => {
-        if (currentMission) startMission(currentMission.id);
-      });
-    }
-
-    if (startBtn) {
-      startBtn.addEventListener("click", () => {
-        const firstMission = getElement("firstMissionId");
-        const missionId = firstMission ? firstMission.value : 1;
-        startMission(missionId);
-      });
-    }
-
-    if (checkBtn) {
-      checkBtn.addEventListener("click", handleCheck);
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener("click", handleNext);
-    }
-  }
-
-  /* =========================
-     21. MULAKAN APLIKASI
-     ========================= */
-
-  function initialiseStudentName() {
-    const input = getElement("studentName");
-    if (!input) return;
-
-    input.value = getSavedStudentName();
-
-    input.addEventListener("change", () => {
-      saveStudentName(input.value.trim());
-      updateHomeProgress();
-    });
-  }
-
-  function initialiseApp() {
-    initialiseTheme();
-    initialiseStudentName();
-    bindNavigationButtons();
-    bindMissionButtons();
-
-    createTeacherInterface();
-    createTeacherEntryButton();
-
-    updateHomeProgress();
-    showScreen("homeScreen");
-
-    console.info("Jom Kenal berjaya dimulakan.");
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialiseApp);
-  } else {
-    initialiseApp();
-  }
-})();
+document.addEventListener("DOMContentLoaded", initialise);
