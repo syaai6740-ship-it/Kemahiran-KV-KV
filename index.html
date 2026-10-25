@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff3e8">
+  <title>Misi Bijak KV+KV</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Misi Bijak KV tambah KV, halaman utama">
+      <span class="brand-icon">🌈</span>
+      <span><strong>Misi Bijak</strong><small>KV + KV</small></span>
+    </a>
+    <div class="top-actions">
+      <label class="avatar-label" for="avatarSelect">Watak</label>
+      <select id="avatarSelect" aria-label="Pilih avatar">
+        <option value="🐰">Arnab 🐰</option>
+        <option value="🐻">Beruang 🐻</option>
+        <option value="🐱">Kucing 🐱</option>
+        <option value="🦊">Musang 🦊</option>
+        <option value="🐼">Panda 🐼</option>
+      </select>
+      <button id="themeButton" class="button button-light" type="button">🎨 Tema</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="homeView" class="view">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Jom belajar sambil bermain!</p>
+          <h1>Hai, kawan!<br>Jom jadi <span>Bijak KV+KV</span> ✨</h1>
+          <p>Dengar, cantum suku kata dan cari gambar yang betul.</p>
+          <button class="button button-primary" id="startButton" type="button">Mula misi 🚀</button>
+        </div>
+        <div class="hero-character" aria-hidden="true"><span id="heroAvatar">🐰</span><div class="speech-bubble">Saya sedia!</div></div>
+      </div>
+
+      <div class="progress-card">
+        <div><span class="section-kicker">KEMAJUAN HARI INI</span><h2>Usaha kamu hebat!</h2></div>
+        <div class="progress-number"><strong id="homeScore">0</strong><span>mata</span></div>
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        <p class="muted" id="progressMessage">Selesaikan aktiviti untuk mengumpul mata.</p>
+      </div>
+
+      <h2 class="section-title">Pilih permainan</h2>
+      <div class="game-grid">
+        <button class="game-card game-pink" data-game="speak" type="button">
+          <span class="game-emoji">🎧</span><span class="game-label">Misi 1</span><strong>Dengar, Sebut dan Rakam</strong><span class="game-description">Dengar perkataan dan cuba sebut.</span><span class="card-arrow">Jom cuba →</span>
+        </button>
+        <button class="game-card game-yellow" data-game="syllable" type="button">
+          <span class="game-emoji">🧩</span><span class="game-label">Misi 2</span><strong>Cantum Suku Kata</strong><span class="game-description">Cantum dua suku kata menjadi perkataan.</span><span class="card-arrow">Jom cuba →</span>
+        </button>
+        <button class="game-card game-blue" data-game="picture" type="button">
+          <span class="game-emoji">🖼️</span><span class="game-label">Misi 3</span><strong>Cari Gambar dan Jawab</strong><span class="game-description">Pilih gambar yang sepadan dengan perkataan.</span><span class="card-arrow">Jom cuba →</span>
+        </button>
+      </div>
+      <p class="prototype-note">Prototaip pembelajaran • Rekod dan rakaman dalam versi ini disimpan pada peranti ini sahaja.</p>
+    </section>
+
+    <section id="gameView" class="view hidden" aria-live="polite">
+      <div class="game-heading">
+        <button id="backButton" class="button button-light" type="button">← Menu utama</button>
+        <div><span id="gameKicker" class="section-kicker">MISI 1</span><h1 id="gameTitle">Dengar, Sebut dan Rakam</h1></div>
+        <div class="score-pill">⭐ <span id="gameScore">0</span></div>
+      </div>
+      <div id="gameContent" class="activity-panel"></div>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="teacherView" class="view hidden">
+      <div class="game-heading">
+        <button id="teacherBackButton" class="button button-light" type="button">← Menu utama</button>
+        <div><span class="section-kicker">RUANG GURU</span><h1>Ringkasan latihan</h1></div>
+      </div>
+      <div class="teacher-warning"><strong>Nota privasi:</strong> prototaip ini tidak mempunyai log masuk atau storan awan. Gunakan data rekaan untuk percubaan awal. Jangan masukkan nama penuh atau rakaman murid sebenar.</div>
+      <div class="teacher-stats">
+        <div class="stat-card"><span>Jumlah mata</span><strong id="teacherScore">0</strong></div>
+        <div class="stat-card"><span>Jawapan betul</span><strong id="teacherCorrect">0</strong></div>
+        <div class="stat-card"><span>Rakaman dalam sesi ini</span><strong id="teacherRecordings">0</strong></div>
+      </div>
+      <h2>Rekod aktiviti pada peranti ini</h2>
+      <div id="historyList" class="history-list"></div>
+      <button id="clearHistory" class="button button-danger" type="button">Padam rekod prototaip</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>🌟 Belajar sedikit demi sedikit, setiap hari.</span>
+    <button id="teacherButton" class="text-button" type="button">Ruang guru</button>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
