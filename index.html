@@ -1,96 +1,279 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fff3e8">
-  <title>Misi Bijak KV+KV</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8b5cf6">
+  <title>Jom Kenal! | Misi Membaca Ceria</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="Misi Bijak KV tambah KV, halaman utama">
-      <span class="brand-icon">🌈</span>
-      <span><strong>Misi Bijak</strong><small>KV + KV</small></span>
-    </a>
-    <div class="top-actions">
-      <label class="avatar-label" for="avatarSelect">Watak</label>
-      <select id="avatarSelect" aria-label="Pilih avatar">
-        <option value="🐰">Arnab 🐰</option>
-        <option value="🐻">Beruang 🐻</option>
-        <option value="🐱">Kucing 🐱</option>
-        <option value="🦊">Musang 🦊</option>
-        <option value="🐼">Panda 🐼</option>
-      </select>
-      <button id="themeButton" class="button button-light" type="button">🎨 Tema</button>
-    </div>
-  </header>
+  <div class="app-shell">
 
-  <main class="container">
-    <section id="homeView" class="view">
-      <div class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Jom belajar sambil bermain!</p>
-          <h1>Hai, kawan!<br>Jom jadi <span>Bijak KV+KV</span> ✨</h1>
-          <p>Dengar, cantum suku kata dan cari gambar yang betul.</p>
-          <button class="button button-primary" id="startButton" type="button">Mula misi 🚀</button>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Jom Kenal halaman utama">
+        <span class="brand-icon">🌈</span>
+        <span>
+          <strong>Jom Kenal!</strong>
+          <small>Misi Membaca Ceria</small>
+        </span>
+      </a>
+
+      <button id="teacherOpenBtn" class="teacher-button" type="button">
+        👩‍🏫 Guru
+      </button>
+    </header>
+
+    <main>
+      <!-- HALAMAN UTAMA -->
+      <section id="homeScreen" class="screen active">
+        <div class="hero-card">
+          <div class="hero-decoration" aria-hidden="true">
+            <span>⭐</span>
+            <span>🦋</span>
+            <span>🌼</span>
+            <span>☁️</span>
+          </div>
+
+          <p class="eyebrow">✨ SELAMAT DATANG, WIRA MEMBACA!</p>
+          <h1>Jom membaca<br><span>sambil bermain!</span></h1>
+          <p class="hero-description">
+            Kenali suku kata, cantumkan perkataan dan kumpulkan bintang
+            dalam tiga misi yang menyeronokkan.
+          </p>
+
+          <div class="mascot" aria-hidden="true">🦊📚</div>
         </div>
-        <div class="hero-character" aria-hidden="true"><span id="heroAvatar">🐰</span><div class="speech-bubble">Saya sedia!</div></div>
-      </div>
 
-      <div class="progress-card">
-        <div><span class="section-kicker">KEMAJUAN HARI INI</span><h2>Usaha kamu hebat!</h2></div>
-        <div class="progress-number"><strong id="homeScore">0</strong><span>mata</span></div>
-        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
-        <p class="muted" id="progressMessage">Selesaikan aktiviti untuk mengumpul mata.</p>
-      </div>
+        <div class="panel student-panel">
+          <h2>🌟 Siapa nama kamu?</h2>
+          <label for="studentName">Nama murid</label>
+          <input
+            id="studentName"
+            type="text"
+            maxlength="60"
+            placeholder="Taip nama kamu di sini..."
+            autocomplete="given-name"
+          >
 
-      <h2 class="section-title">Pilih permainan</h2>
-      <div class="game-grid">
-        <button class="game-card game-pink" data-game="speak" type="button">
-          <span class="game-emoji">🎧</span><span class="game-label">Misi 1</span><strong>Dengar, Sebut dan Rakam</strong><span class="game-description">Dengar perkataan dan cuba sebut.</span><span class="card-arrow">Jom cuba →</span>
-        </button>
-        <button class="game-card game-yellow" data-game="syllable" type="button">
-          <span class="game-emoji">🧩</span><span class="game-label">Misi 2</span><strong>Cantum Suku Kata</strong><span class="game-description">Cantum dua suku kata menjadi perkataan.</span><span class="card-arrow">Jom cuba →</span>
-        </button>
-        <button class="game-card game-blue" data-game="picture" type="button">
-          <span class="game-emoji">🖼️</span><span class="game-label">Misi 3</span><strong>Cari Gambar dan Jawab</strong><span class="game-description">Pilih gambar yang sepadan dengan perkataan.</span><span class="card-arrow">Jom cuba →</span>
-        </button>
-      </div>
-      <p class="prototype-note">Prototaip pembelajaran • Rekod dan rakaman dalam versi ini disimpan pada peranti ini sahaja.</p>
-    </section>
+          <h3>🎨 Pilih dunia pengembaraan</h3>
+          <div class="theme-grid">
+            <button class="theme-option selected" type="button"
+              data-theme="fantasy" aria-pressed="true">
+              <span class="theme-art">🧚‍♀️🏰</span>
+              <span>Dunia Fantasi</span>
+            </button>
 
-    <section id="gameView" class="view hidden" aria-live="polite">
-      <div class="game-heading">
-        <button id="backButton" class="button button-light" type="button">← Menu utama</button>
-        <div><span id="gameKicker" class="section-kicker">MISI 1</span><h1 id="gameTitle">Dengar, Sebut dan Rakam</h1></div>
-        <div class="score-pill">⭐ <span id="gameScore">0</span></div>
-      </div>
-      <div id="gameContent" class="activity-panel"></div>
-      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
-    </section>
+            <button class="theme-option" type="button"
+              data-theme="space" aria-pressed="false">
+              <span class="theme-art">🚀🪐</span>
+              <span>Angkasa Lepas</span>
+            </button>
 
-    <section id="teacherView" class="view hidden">
-      <div class="game-heading">
-        <button id="teacherBackButton" class="button button-light" type="button">← Menu utama</button>
-        <div><span class="section-kicker">RUANG GURU</span><h1>Ringkasan latihan</h1></div>
-      </div>
-      <div class="teacher-warning"><strong>Nota privasi:</strong> prototaip ini tidak mempunyai log masuk atau storan awan. Gunakan data rekaan untuk percubaan awal. Jangan masukkan nama penuh atau rakaman murid sebenar.</div>
-      <div class="teacher-stats">
-        <div class="stat-card"><span>Jumlah mata</span><strong id="teacherScore">0</strong></div>
-        <div class="stat-card"><span>Jawapan betul</span><strong id="teacherCorrect">0</strong></div>
-        <div class="stat-card"><span>Rakaman dalam sesi ini</span><strong id="teacherRecordings">0</strong></div>
-      </div>
-      <h2>Rekod aktiviti pada peranti ini</h2>
-      <div id="historyList" class="history-list"></div>
-      <button id="clearHistory" class="button button-danger" type="button">Padam rekod prototaip</button>
-    </section>
-  </main>
+            <button class="theme-option" type="button"
+              data-theme="garden" aria-pressed="false">
+              <span class="theme-art">🌳🌷</span>
+              <span>Taman Bunga</span>
+            </button>
 
-  <footer class="footer">
-    <span>🌟 Belajar sedikit demi sedikit, setiap hari.</span>
-    <button id="teacherButton" class="text-button" type="button">Ruang guru</button>
-  </footer>
+            <button class="theme-option" type="button"
+              data-theme="underwater" aria-pressed="false">
+              <span class="theme-art">🐠🫧</span>
+              <span>Alam Bawah Laut</span>
+            </button>
+          </div>
+
+          <button id="startMissionBtn" class="primary-button" type="button">
+            🚀 Mula Misi!
+          </button>
+          <p id="homeMessage" class="message" role="status"></p>
+        </div>
+
+        <div class="mission-preview">
+          <h2>🗺️ Tiga misi menanti kamu!</h2>
+          <div class="mission-grid">
+            <article class="mission-card mission-one">
+              <span class="mission-number">MISI 1</span>
+              <span class="mission-art">🖼️</span>
+              <h3>Kenal Perkataan</h3>
+              <p>Padankan perkataan dengan gambar.</p>
+            </article>
+
+            <article class="mission-card mission-two">
+              <span class="mission-number">MISI 2</span>
+              <span class="mission-art">🧩</span>
+              <h3>Cantum Suku Kata</h3>
+              <p>Cantumkan suku kata menjadi perkataan.</p>
+            </article>
+
+            <article class="mission-card mission-three">
+              <span class="mission-number">MISI 3</span>
+              <span class="mission-art">🎤</span>
+              <h3>Jom Baca!</h3>
+              <p>Baca perkataan dengan suara sendiri.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- RUANG PERMAINAN -->
+      <section id="gameScreen" class="screen" hidden>
+        <div class="game-topline">
+          <button id="homeBtn" class="secondary-button" type="button">
+            ← Menu Utama
+          </button>
+          <span id="playerLabel" class="player-label">👧 Murid</span>
+        </div>
+
+        <div class="game-heading">
+          <p id="gameStage" class="eyebrow">MISI 1 DARIPADA 3</p>
+          <h1 id="gameTitle">Kenal Perkataan</h1>
+          <p id="gameInstruction">Padankan perkataan dengan gambar.</p>
+        </div>
+
+        <div class="progress-track" aria-label="Kemajuan misi">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="score-strip">
+          <span>⭐ Bintang: <strong id="scoreValue">0</strong></span>
+          <span>📍 Soalan: <strong id="questionValue">1</strong></span>
+        </div>
+
+        <div id="gameContent" class="game-content">
+          <!-- Kandungan permainan akan dimasukkan oleh app.js -->
+        </div>
+
+        <p id="gameMessage" class="message" role="status"></p>
+
+        <div class="game-actions">
+          <button id="checkAnswerBtn" class="primary-button" type="button">
+            Semak Jawapan ✓
+          </button>
+          <button id="nextQuestionBtn" class="primary-button" type="button" hidden>
+            Seterusnya →
+          </button>
+        </div>
+      </section>
+
+      <!-- TAMAT PERMAINAN -->
+      <section id="resultScreen" class="screen" hidden>
+        <div class="result-card">
+          <div class="result-mascot" aria-hidden="true">🏆🦊🎉</div>
+          <p class="eyebrow">MISI SELESAI!</p>
+          <h1>Syabas, pembaca hebat!</h1>
+          <p id="resultStudentName">Kamu telah menamatkan misi.</p>
+
+          <div class="result-score">
+            <span>Jumlah bintang</span>
+            <strong id="finalScore">0</strong>
+            <span>⭐</span>
+          </div>
+
+          <div class="recording-panel">
+            <h2>🎤 Bacaan suara kamu</h2>
+            <p>
+              Jika rakaman suara tersedia pada peranti ini, rakaman boleh
+              disimpan untuk guru mendengarnya.
+            </p>
+            <button id="recordBtn" class="secondary-button" type="button">
+              🔴 Mula Rakaman
+            </button>
+            <button id="stopRecordBtn" class="secondary-button" type="button" disabled>
+              ⏹️ Hentikan Rakaman
+            </button>
+            <p id="recordingMessage" class="message" role="status"></p>
+          </div>
+
+          <button id="finishMissionBtn" class="primary-button" type="button">
+            🏡 Kembali ke Menu Utama
+          </button>
+        </div>
+      </section>
+
+      <!-- RUANG GURU -->
+      <section id="teacherScreen" class="screen" hidden>
+        <div class="game-topline">
+          <button id="teacherBackBtn" class="secondary-button" type="button">
+            ← Kembali
+          </button>
+        </div>
+
+        <div class="teacher-heading">
+          <span class="teacher-icon">👩‍🏫</span>
+          <p class="eyebrow">RUANG GURU</p>
+          <h1>Rekod Pembacaan Murid</h1>
+          <p>Semak skor dan dengar rakaman bacaan murid.</p>
+        </div>
+
+        <div id="teacherLoginPanel" class="panel">
+          <h2>🔐 Log masuk guru</h2>
+          <label for="teacherPassword">Kata laluan</label>
+          <input
+            id="teacherPassword"
+            type="password"
+            placeholder="Masukkan kata laluan"
+            autocomplete="current-password"
+          >
+          <button id="teacherLoginBtn" class="primary-button" type="button">
+            Log Masuk
+          </button>
+          <p id="teacherLoginMessage" class="message" role="status"></p>
+        </div>
+
+        <div id="teacherDashboard" class="panel" hidden>
+          <div class="dashboard-heading">
+            <h2>📊 Ringkasan pencapaian</h2>
+            <button id="logoutTeacherBtn" class="secondary-button" type="button">
+              Log Keluar
+            </button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <span>👧</span>
+              <p>Jumlah rekod</p>
+              <strong id="totalRecords">0</strong>
+            </article>
+            <article class="stat-card">
+              <span>🥇</span>
+              <p>Skor tertinggi</p>
+              <strong id="highestScore">—</strong>
+            </article>
+            <article class="stat-card">
+              <span>🌱</span>
+              <p>Skor terendah</p>
+              <strong id="lowestScore">—</strong>
+            </article>
+          </div>
+
+          <div class="records-heading">
+            <h2>📝 Rekod murid</h2>
+            <button id="refreshRecordsBtn" class="secondary-button" type="button">
+              ↻ Muat Semula
+            </button>
+          </div>
+
+          <p class="record-note">
+            Rekod akan dipaparkan mengikut skor tertinggi ke terendah.
+          </p>
+
+          <div id="studentRecords" class="student-records">
+            <p>Belum ada rekod murid.</p>
+          </div>
+
+          <p id="teacherMessage" class="message" role="status"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>🌈 Jom Kenal! — Belajar membaca dengan ceria.</p>
+      <small>Kit digital Bahasa Melayu Pemulihan Khas Tahun 1</small>
+    </footer>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
