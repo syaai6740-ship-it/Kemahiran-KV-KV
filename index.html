@@ -1,13 +1,16 @@
+```html
 <!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#39824c">
+  <meta name="description" content="Kit digital Bahasa Melayu Pemulihan Khas Tahun 1 untuk mengenal perkataan, mencantum suku kata dan berlatih membaca.">
   <title>Jom Kenal: Pengembaraan Dunia Kata</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
+
 <body data-theme="hutan">
   <div class="background-decor" aria-hidden="true">
     <span class="decor decor-one">🌿</span>
@@ -26,6 +29,7 @@
         <small>Pengembaraan Dunia Kata</small>
       </span>
     </a>
+
     <div class="theme-control">
       <label for="themeSelect">Pilih tema</label>
       <select id="themeSelect">
@@ -38,20 +42,39 @@
   </header>
 
   <main class="main-container">
+
+    <!-- HALAMAN UTAMA -->
     <section id="homeScreen" class="screen">
       <div class="hero-card">
         <div class="hero-copy">
           <span class="eyebrow">KIT DIGITAL BAHASA MELAYU</span>
-          <h1>Jom Kenal:<br><span>Pengembaraan Dunia Kata!</span></h1>
-          <p>Jom baca perkataan, cantum suku kata dan cabar diri membaca dengan suara sendiri.</p>
+
+          <h1>
+            Jom Kenal:<br>
+            <span>Pengembaraan Dunia Kata!</span>
+          </h1>
+
+          <p>
+            Jom baca perkataan, cantum suku kata dan cabar diri
+            membaca dengan suara sendiri.
+          </p>
 
           <div class="name-field">
             <label for="studentName">Nama murid</label>
-            <input id="studentName" type="text" maxlength="60" placeholder="Masukkan nama murid">
+            <input
+              id="studentName"
+              type="text"
+              maxlength="60"
+              placeholder="Masukkan nama murid"
+              autocomplete="given-name"
+            >
           </div>
 
-          <button id="startBtn" class="primary-btn">Mula Pengembaraan 🚀</button>
+          <button id="startBtn" class="primary-btn" type="button">
+            Mula Pengembaraan 🚀
+          </button>
         </div>
+
         <div class="hero-art" aria-hidden="true">
           <div class="art-circle">📖</div>
           <span class="art-star star-a">⭐</span>
@@ -68,25 +91,28 @@
       </div>
 
       <div class="mission-grid">
-        <button class="mission-card" data-mission="1">
+        <button class="mission-card" type="button" data-mission="1">
           <span class="mission-icon green">🔎</span>
           <span class="mission-number">MISI 1</span>
           <strong>Kenal dan Baca</strong>
           <span>Kenal perkataan dan pilih gambar yang betul.</span>
         </button>
-        <button class="mission-card" data-mission="2">
+
+        <button class="mission-card" type="button" data-mission="2">
           <span class="mission-icon purple">🧩</span>
           <span class="mission-number">MISI 2</span>
           <strong>Cantum dan Baca</strong>
           <span>Cantumkan suku kata untuk membentuk perkataan.</span>
         </button>
-        <button class="mission-card" data-mission="3">
+
+        <button class="mission-card" type="button" data-mission="3">
           <span class="mission-icon orange">💡</span>
           <span class="mission-number">MISI 3</span>
           <strong>Baca dan Faham</strong>
           <span>Fahami soalan dan pilih gambar yang sesuai.</span>
         </button>
-        <button class="mission-card" data-mission="4">
+
+        <button class="mission-card" type="button" data-mission="4">
           <span class="mission-icon blue">🎙️</span>
           <span class="mission-number">MISI 4</span>
           <strong>Cabaran Baca Sendiri</strong>
@@ -97,19 +123,36 @@
       <div class="student-progress">
         <span>🌟 Kemajuan pengembaraan</span>
         <strong id="homeProgressText">0 daripada 4 misi selesai</strong>
-        <div class="progress-track"><div id="homeProgressBar" class="progress-fill"></div></div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="Kemajuan misi murid"
+          aria-valuemin="0"
+          aria-valuemax="4"
+          aria-valuenow="0"
+        >
+          <div id="homeProgressBar" class="progress-fill"></div>
+        </div>
       </div>
+
+      <!-- Butang Ruang Guru dimasukkan oleh app.js -->
     </section>
 
-    <section id="gameScreen" class="screen hidden">
-      <button id="backHomeBtn" class="back-btn">← Halaman utama</button>
+    <!-- PAPARAN AKTIVITI -->
+    <section id="gameScreen" class="screen hidden" hidden>
+      <button id="backHomeBtn" class="back-btn" type="button">
+        ← Halaman utama
+      </button>
 
       <div class="game-header">
         <div>
           <span id="missionEyebrow" class="eyebrow">MISI 1</span>
           <h1 id="missionTitle">Kenal dan Baca</h1>
-          <p id="missionDescription">Pilih gambar yang betul.</p>
+          <p id="missionDescription">
+            Kenal perkataan dan pilih gambar yang betul.
+          </p>
         </div>
+
         <div class="mission-count">
           <span>MISI</span>
           <strong id="missionCount">1/4</strong>
@@ -121,15 +164,43 @@
           <span>Kemajuan misi</span>
           <strong id="questionProgressText">Soalan 1 daripada 3</strong>
         </div>
-        <div class="progress-track"><div id="questionProgressBar" class="progress-fill"></div></div>
+
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="Kemajuan soalan"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <div id="questionProgressBar" class="progress-fill"></div>
+        </div>
       </div>
 
       <div id="gamePanel" class="game-panel">
         <div id="activityContent"></div>
-        <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
+
+        <div
+          id="feedback"
+          class="feedback hidden"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+
         <div class="game-controls">
-          <button id="checkBtn" class="primary-btn">Semak Jawapan</button>
-          <button id="nextBtn" class="primary-btn hidden">Soalan Seterusnya →</button>
+          <button id="checkBtn" class="primary-btn" type="button">
+            Semak Jawapan
+          </button>
+
+          <button
+            id="nextBtn"
+            class="primary-btn hidden"
+            type="button"
+            hidden
+          >
+            Soalan Seterusnya →
+          </button>
         </div>
       </div>
 
@@ -139,27 +210,48 @@
       </div>
     </section>
 
-    <section id="resultScreen" class="screen hidden">
+    <!-- PAPARAN KEPUTUSAN -->
+    <section id="resultScreen" class="screen hidden" hidden>
       <div class="result-card">
-        <div class="result-illustration">🏆</div>
+        <div class="result-illustration" aria-hidden="true">🏆</div>
+
         <span class="eyebrow">PENGEMBARA HEBAT</span>
         <h1>Tahniah!</h1>
-        <p id="resultMessage">Anda telah melengkapkan misi ini.</p>
+
+        <p id="resultMessage">
+          Anda telah melengkapkan misi ini.
+        </p>
+
         <div class="result-score">
           <span>Jawapan betul</span>
           <strong id="resultScore">0/0</strong>
+          <span id="resultPercentage"></span>
         </div>
+
         <div class="result-actions">
-          <button id="retryBtn" class="primary-btn">Cuba Lagi 🔄</button>
-          <button id="chooseMissionBtn" class="secondary-btn">Pilih Misi</button>
-          <button id="resultHomeBtn" class="secondary-btn">Halaman Utama</button>
+          <button id="retryBtn" class="primary-btn" type="button">
+            Cuba Lagi 🔄
+          </button>
+
+          <button id="chooseMissionBtn" class="secondary-btn" type="button">
+            Pilih Misi
+          </button>
+
+          <button id="resultHomeBtn" class="secondary-btn" type="button">
+            Halaman Utama
+          </button>
         </div>
       </div>
     </section>
+
   </main>
 
   <footer class="site-footer">
-    <p>Jom Kenal: Pengembaraan Dunia Kata · Bahasa Melayu Pemulihan Khas Tahun 1</p>
+    <p>
+      Jom Kenal: Pengembaraan Dunia Kata ·
+      Bahasa Melayu Pemulihan Khas Tahun 1
+    </p>
   </footer>
 </body>
 </html>
+```
