@@ -1,8 +1,3 @@
-/* ==========================================
-   JOM KENAL! — LOGIK PERMAINAN
-   Bahasa Melayu Pemulihan Khas Tahun 1
-   ========================================== */
-
 "use strict";
 
 const TEACHER_PASSWORD = "1234";
@@ -25,9 +20,9 @@ const games = [
     title: "Cantum Suku Kata",
     instruction: "Dengar suku kata, kemudian cantumkannya menjadi perkataan.",
     words: [
-      { word: "sapu", syllables: ["sa", "pu"], image: "🧹" },
+      { word: "satu", syllables: ["sa", "tu"], image: "1️⃣" },
+      { word: "sudu", syllables: ["su", "du"], image: "🥄" },
       { word: "susu", syllables: ["su", "su"], image: "🥛" },
-      { word: "topi", syllables: ["to", "pi"], image: "🎩" },
       { word: "roda", syllables: ["ro", "da"], image: "🛞" },
       { word: "roti", syllables: ["ro", "ti"], image: "🍞" }
     ]
@@ -40,7 +35,7 @@ const games = [
       { word: "mata", image: "👀" },
       { word: "bola", image: "⚽" },
       { word: "baju", image: "👕" },
-      { word: "pipi", image: "😊" }
+      { word: "gigi", image: "🦷" }
     ]
   }
 ];
@@ -48,7 +43,7 @@ const games = [
 const $ = (id) => document.getElementById(id);
 
 let studentName = "";
-let selectedTheme = "fantasy";
+let selectedTheme = "hutan";
 let gameIndex = 0;
 let questionIndex = 0;
 let score = 0;
@@ -57,16 +52,14 @@ let selectedPicture = null;
 let chosenSyllables = [];
 let answered = false;
 let teacherLoggedIn = false;
+let activeRecordId = null;
 
 let mediaRecorder = null;
 let recordingStream = null;
 let recordingChunks = [];
-let recordedBlob = null;
-let recordingStarted = false;
-let recordingStopped = false;
-let recordingPromise = null;
-let activeRecordId = null;
+let recordingWord = null;
 let recordingMimeType = "";
+let wordAudioIds = {};
 
 const DB_NAME = "JomKenalAudioDB";
 const DB_VERSION = 1;
@@ -74,9 +67,9 @@ const DB_STORE = "recordings";
 
 function showScreen(screenId) {
   document.querySelectorAll(".screen").forEach((screen) => {
-    const isActive = screen.id === screenId;
-    screen.hidden = !isActive;
-    screen.classList.toggle("active", isActive);
+    const active = screen.id === screenId;
+    screen.hidden = !active;
+    screen.classList.toggle("active", active);
   });
 
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -87,8 +80,13 @@ function setMessage(id, message) {
   if (element) element.textContent = message;
 }
 
-function safeText(value) {
-  return String(value ?? "");
+function createElement(tag, className = "", text = "") {
+  const element = document.createElement(tag);
+
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+
+  return element;
 }
 
 function speak(text) {
@@ -109,8 +107,8 @@ function speak(text) {
 
 function loadRecords() {
   try {
-    const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-    return Array.isArray(records) ? records : [];
+    const data = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+    return Array.isArray(data) ? data : [];
   } catch {
     return [];
   }
@@ -128,7 +126,7 @@ function saveRecords(records) {
 function openAudioDB() {
   return new Promise((resolve, reject) => {
     if (!("indexedDB" in window)) {
-      reject(new Error("Pelayar tidak menyokong simpanan rakaman."));
+      reject(new Error("Simpanan rakaman tidak disokong."));
       return;
     }
 
@@ -152,6 +150,7 @@ async function saveAudio(id, blob) {
 
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(DB_STORE, "readwrite");
+
     transaction.objectStore(DB_STORE).put({
       id,
       blob,
@@ -171,6 +170,8 @@ async function saveAudio(id, blob) {
 }
 
 async function getAudio(id) {
+  if (!id) return null;
+
   const db = await openAudioDB();
 
   return new Promise((resolve, reject) => {
@@ -192,11 +193,12 @@ async function getAudio(id) {
 }
 
 function makeId() {
-  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+  if (window.crypto && window.crypto.randomUUID) {
     return window.crypto.randomUUID();
   }
 
-  return "jk-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+  return "jk-" + Date.now() + "-" +
+    Math.random().toString(36).slice(2);
 }
 
 function savePlayer() {
@@ -206,7 +208,7 @@ function savePlayer() {
       theme: selectedTheme
     }));
   } catch {
-    // Permainan masih boleh diteruskan jika simpanan tidak tersedia.
+    // Permainan masih boleh diteruskan.
   }
 }
 
@@ -215,12 +217,18 @@ function restorePlayer() {
     const saved = JSON.parse(localStorage.getItem(PLAYER_KEY) || "null");
 
     if (saved && typeof saved === "object") {
-      if (typeof saved.name === "string") {
+      if (typeof saved.name === "string" && $("studentName")) {
         $("studentName").value = saved.name;
       }
 
-      if (["fantasy", "space", "garden", "underwater"].includes(saved.theme)) {
-        selectedTheme = saved.theme;
+      const validThemes = [
+        "hutan", "space", "garden", "underwater", "fantasy"
+      ];
+
+      if (validThemes.includes(saved.theme)) {
+        selectedTheme = saved.theme === "fantasy"
+          ? "hutan"
+          : saved.theme;
       }
     }
   } catch {
@@ -235,10 +243,12 @@ function applyTheme(theme) {
   document.body.dataset.theme = theme;
 
   document.querySelectorAll(".theme-option").forEach((button) => {
-    const isSelected = button.dataset.theme === theme;
-    button.classList.toggle("selected", isSelected);
-    button.setAttribute("aria-pressed", String(isSelected));
+    const selected = button.dataset.theme === theme;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
   });
+
+  savePlayer();
 }
 
 function startMission() {
@@ -250,17 +260,20 @@ function startMission() {
     return;
   }
 
-  studentName = name;
-  savePlayer();
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    setMessage("homeMessage", "Tunggu rakaman sebelumnya selesai dahulu.");
+    return;
+  }
 
+  studentName = name;
   gameIndex = 0;
   questionIndex = 0;
   score = 0;
   correctAnswers = 0;
   activeRecordId = makeId();
-  recordedBlob = null;
-  recordingStarted = false;
-  recordingStopped = false;
+  wordAudioIds = {};
+
+  savePlayer();
 
   $("playerLabel").textContent = "🌟 " + studentName;
   $("scoreValue").textContent = "0";
@@ -282,9 +295,9 @@ function renderQuestion() {
   $("gameStage").textContent = `MISI ${gameIndex + 1} DARIPADA ${games.length}`;
   $("questionValue").textContent = `${questionIndex + 1}/${game.words.length}`;
   $("scoreValue").textContent = score;
+
   $("progressBar").style.width =
-    `${((gameIndex * game.words.length + questionIndex) /
-      (games.length * game.words.length)) * 100}%`;
+    `${((gameIndex * 5 + questionIndex) / 15) * 100}%`;
 
   $("gameContent").replaceChildren();
   setMessage("gameMessage", "");
@@ -298,15 +311,6 @@ function renderQuestion() {
   if (gameIndex === 2) renderReadingQuestion(item);
 }
 
-function createElement(tag, className, text) {
-  const element = document.createElement(tag);
-
-  if (className) element.className = className;
-  if (text !== undefined) element.textContent = text;
-
-  return element;
-}
-
 function renderPictureQuestion(item) {
   const container = $("gameContent");
 
@@ -316,11 +320,13 @@ function renderPictureQuestion(item) {
   const picture = createElement("div", "target-picture", "🔎");
   picture.style.fontSize = "3rem";
 
-  const wordButton = createElement("button", "primary-button", "🔊 Dengar perkataan: " + item.word);
-  wordButton.type = "button";
-  wordButton.addEventListener("click", () => speak(item.word));
+  const listen = createElement(
+    "button", "primary-button", "🔊 Dengar perkataan: " + item.word
+  );
+  listen.type = "button";
+  listen.addEventListener("click", () => speak(item.word));
 
-  prompt.append(picture, wordButton);
+  prompt.append(picture, listen);
   container.append(prompt);
 
   const choices = createElement("div", "picture-choices");
@@ -332,8 +338,6 @@ function renderPictureQuestion(item) {
     button.type = "button";
     button.style.cssText =
       "min-height:115px;font-size:3rem;border:3px solid #e5dcf8;border-radius:20px;background:#fff8fd;";
-
-    button.setAttribute("aria-label", "Pilih gambar " + emoji);
 
     button.addEventListener("click", () => {
       if (answered) return;
@@ -359,13 +363,14 @@ function renderSyllableQuestion(item) {
   const container = $("gameContent");
 
   const image = createElement("div", "target-picture", item.image);
-  image.style.cssText = "font-size:4rem;text-align:center;margin-bottom:10px;";
+  image.style.cssText =
+    "font-size:4rem;text-align:center;margin-bottom:10px;";
   container.append(image);
 
   const instruction = createElement(
     "p",
     "",
-    "Tekan setiap suku kata untuk mendengar bunyinya. Pilih mengikut urutan."
+    "Dengar suku kata, kemudian tekan mengikut urutan untuk membentuk perkataan."
   );
   instruction.style.cssText = "text-align:center;line-height:1.6;";
   container.append(instruction);
@@ -376,17 +381,16 @@ function renderSyllableQuestion(item) {
 
   const shuffled = [...item.syllables].sort(() => Math.random() - 0.5);
 
-  shuffled.forEach((syllable, index) => {
+  shuffled.forEach((syllable) => {
     const button = createElement("button", "syllable-button", syllable);
     button.type = "button";
     button.style.cssText =
       "min-width:90px;min-height:75px;border:3px solid #d8c7ff;border-radius:18px;background:#f5f0ff;color:#352653;font-size:1.6rem;font-weight:900;";
 
     button.addEventListener("click", () => {
-      speak(syllable);
-
       if (answered || chosenSyllables.length >= item.syllables.length) return;
 
+      speak(syllable);
       chosenSyllables.push(syllable);
       button.disabled = true;
       button.style.background = "#dff8e8";
@@ -402,22 +406,23 @@ function renderSyllableQuestion(item) {
   joined.id = "joinedWord";
   joined.style.cssText =
     "text-align:center;font-size:1.35rem;font-weight:900;padding:15px;background:#fff2c9;border-radius:16px;";
-
   container.append(joined);
 
   const actions = createElement("div", "syllable-actions");
   actions.style.cssText =
     "display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:15px;";
 
-  const listenButton = createElement("button", "secondary-button", "🔊 Dengar perkataan penuh");
-  listenButton.type = "button";
-  listenButton.addEventListener("click", () => speak(item.word));
+  const listen = createElement(
+    "button", "secondary-button", "🔊 Dengar perkataan penuh"
+  );
+  listen.type = "button";
+  listen.addEventListener("click", () => speak(item.word));
 
-  const resetButton = createElement("button", "secondary-button", "↺ Cuba semula");
-  resetButton.type = "button";
-  resetButton.addEventListener("click", () => renderQuestion());
+  const reset = createElement("button", "secondary-button", "↺ Cuba semula");
+  reset.type = "button";
+  reset.addEventListener("click", renderQuestion);
 
-  actions.append(listenButton, resetButton);
+  actions.append(listen, reset);
   container.append(actions);
 }
 
@@ -434,7 +439,8 @@ function renderReadingQuestion(item) {
   const container = $("gameContent");
 
   const image = createElement("div", "target-picture", item.image);
-  image.style.cssText = "font-size:5rem;text-align:center;margin:10px 0;";
+  image.style.cssText =
+    "font-size:5rem;text-align:center;margin:10px 0;";
   container.append(image);
 
   const word = createElement("div", "reading-word", item.word);
@@ -442,7 +448,9 @@ function renderReadingQuestion(item) {
     "font-size:2.7rem;font-weight:900;text-align:center;letter-spacing:2px;margin:18px 0;";
   container.append(word);
 
-  const listen = createElement("button", "secondary-button", "🔊 Dengar contoh sebutan");
+  const listen = createElement(
+    "button", "secondary-button", "🔊 Dengar contoh sebutan"
+  );
   listen.type = "button";
   listen.style.display = "block";
   listen.style.margin = "12px auto";
@@ -450,21 +458,77 @@ function renderReadingQuestion(item) {
   container.append(listen);
 
   const note = createElement(
-    "p",
-    "",
-    "Baca perkataan ini dengan jelas. Kemudian tekan “Saya sudah membaca”."
+    "p", "",
+    "Dengar perkataan, baca dengan jelas, kemudian rakam bacaan kamu."
   );
   note.style.cssText = "text-align:center;line-height:1.6;";
   container.append(note);
 
-  const readButton = createElement("button", "primary-button", "📖 Saya sudah membaca");
+  const recordingPanel = createElement("section", "word-recording-panel");
+  recordingPanel.style.cssText =
+    "display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;margin:16px 0;border:2px solid #d8c7ff;border-radius:18px;";
+
+  const label = createElement("strong", "", "🎙️ Rakaman perkataan: " + item.word);
+  const recordButton = createElement("button", "primary-button", "🔴 Mula merakam");
+  const stopButton = createElement("button", "secondary-button", "⏹️ Hentikan rakaman");
+  const playButton = createElement("button", "secondary-button", "▶️ Dengar rakaman saya");
+  const message = createElement("p", "", "");
+  message.setAttribute("aria-live", "polite");
+
+  recordButton.type = stopButton.type = playButton.type = "button";
+  stopButton.disabled = true;
+  playButton.disabled = !wordAudioIds[item.word];
+
+  recordButton.addEventListener("click", () =>
+    startWordRecording(item.word, recordButton, stopButton, playButton, message)
+  );
+
+  stopButton.addEventListener("click", () =>
+    stopWordRecording(stopButton, recordButton, playButton, message)
+  );
+
+  playButton.addEventListener("click", async () => {
+    const audioId = wordAudioIds[item.word];
+    if (!audioId) return;
+
+    try {
+      const blob = await getAudio(audioId);
+
+      if (!blob) {
+        message.textContent = "Rakaman tidak ditemui pada peranti ini.";
+        return;
+      }
+
+      const audio = new Audio(URL.createObjectURL(blob));
+      audio.play().catch(() => {
+        message.textContent = "Rakaman tidak dapat dimainkan.";
+      });
+    } catch {
+      message.textContent = "Rakaman tidak dapat dibuka.";
+    }
+  });
+
+  recordingPanel.append(
+    label, recordButton, stopButton, playButton, message
+  );
+  container.append(recordingPanel);
+
+  const readButton = createElement(
+    "button", "primary-button", "📖 Saya sudah membaca"
+  );
   readButton.type = "button";
+
   readButton.addEventListener("click", () => {
     if (answered) return;
 
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      setMessage("gameMessage", "Hentikan rakaman dahulu sebelum meneruskan.");
+      return;
+    }
+
     answered = true;
-    score += 1;
-    correctAnswers += 1;
+    score++;
+    correctAnswers++;
     $("scoreValue").textContent = score;
     setMessage("gameMessage", "Bagus! Kamu telah mencuba membaca. ⭐");
     speak("Bagus! " + item.word);
@@ -474,11 +538,83 @@ function renderReadingQuestion(item) {
   container.append(readButton);
 }
 
+async function startWordRecording(word, recordButton, stopButton, playButton, message) {
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    message.textContent =
+      "Rakaman tidak disokong. Gunakan pelayar terkini melalui laman HTTPS.";
+    return;
+  }
+
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    message.textContent = "Hentikan rakaman yang sedang berjalan dahulu.";
+    return;
+  }
+
+  try {
+    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recordingChunks = [];
+    recordingWord = word;
+
+    const options = {};
+    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+      options.mimeType = "audio/webm;codecs=opus";
+    }
+
+    mediaRecorder = new MediaRecorder(recordingStream, options);
+    recordingMimeType = mediaRecorder.mimeType || "audio/webm";
+
+    mediaRecorder.addEventListener("dataavailable", (event) => {
+      if (event.data?.size) recordingChunks.push(event.data);
+    });
+
+    mediaRecorder.addEventListener("stop", async () => {
+      const blob = new Blob(recordingChunks, { type: recordingMimeType });
+      const audioId = `${activeRecordId}::${recordingWord}`;
+
+      try {
+        await saveAudio(audioId, blob);
+        wordAudioIds[recordingWord] = audioId;
+        message.textContent = `Rakaman untuk “${recordingWord}” telah disimpan pada peranti ini.`;
+        playButton.disabled = false;
+      } catch {
+        message.textContent = "Rakaman selesai tetapi gagal disimpan.";
+      }
+
+      if (recordingStream) {
+        recordingStream.getTracks().forEach((track) => track.stop());
+        recordingStream = null;
+      }
+
+      recordButton.disabled = false;
+      stopButton.disabled = true;
+      saveCurrentWordRecordings();
+    });
+
+    mediaRecorder.start();
+
+    recordButton.disabled = true;
+    stopButton.disabled = false;
+    playButton.disabled = true;
+    message.textContent = `Sedang merakam perkataan “${word}”.`;
+  } catch {
+    message.textContent =
+      "Mikrofon tidak dapat diakses. Semak kebenaran mikrofon pada pelayar.";
+  }
+}
+
+function stopWordRecording(stopButton, recordButton, playButton, message) {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    stopButton.disabled = true;
+    message.textContent = "Sedang menyimpan rakaman...";
+    mediaRecorder.stop();
+  }
+}
+
 function checkAnswer() {
   if (answered) return;
 
   const item = games[gameIndex].words[questionIndex];
-  let isCorrect = false;
+  let correct = false;
 
   if (gameIndex === 0) {
     if (selectedPicture === null) {
@@ -486,25 +622,25 @@ function checkAnswer() {
       return;
     }
 
-    isCorrect = selectedPicture === item.image;
+    correct = selectedPicture === item.image;
   } else if (gameIndex === 1) {
     if (chosenSyllables.length !== item.syllables.length) {
       setMessage("gameMessage", "Tekan semua suku kata mengikut urutan. 😊");
       return;
     }
 
-    isCorrect = chosenSyllables.join("") === item.word;
+    correct = chosenSyllables.join("") === item.word;
   }
 
   answered = true;
 
-  if (isCorrect) {
-    score += 1;
-    correctAnswers += 1;
+  if (correct) {
+    score++;
+    correctAnswers++;
     setMessage("gameMessage", "Betul! Syabas, hebatnya kamu! ⭐");
     speak("Betul! " + item.word);
   } else {
-    setMessage("gameMessage", "Belum tepat. Dengar sebutan dan cuba ingat perkataan ini.");
+    setMessage("gameMessage", "Belum tepat. Dengar sebutan dan cuba lagi.");
     speak(item.word);
   }
 
@@ -517,23 +653,28 @@ function showNextButton() {
   $("checkAnswerBtn").hidden = true;
   $("nextQuestionBtn").hidden = false;
 
-  const isLastQuestion = questionIndex === games[gameIndex].words.length - 1;
-  const isLastGame = gameIndex === games.length - 1;
+  const lastQuestion = questionIndex === games[gameIndex].words.length - 1;
+  const lastGame = gameIndex === games.length - 1;
 
-  $("nextQuestionBtn").textContent = isLastQuestion
-    ? (isLastGame ? "Lihat Keputusan 🏆" : "Misi Seterusnya →")
+  $("nextQuestionBtn").textContent = lastQuestion
+    ? (lastGame ? "Lihat Keputusan 🏆" : "Misi Seterusnya →")
     : "Soalan Seterusnya →";
 }
 
 function nextQuestion() {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    setMessage("gameMessage", "Hentikan rakaman dahulu sebelum meneruskan.");
+    return;
+  }
+
   if (questionIndex < games[gameIndex].words.length - 1) {
-    questionIndex += 1;
+    questionIndex++;
     renderQuestion();
     return;
   }
 
   if (gameIndex < games.length - 1) {
-    gameIndex += 1;
+    gameIndex++;
     questionIndex = 0;
     renderQuestion();
     return;
@@ -542,13 +683,39 @@ function nextQuestion() {
   finishMission();
 }
 
+function saveCurrentWordRecordings() {
+  const records = loadRecords();
+  const existing = records.find((record) => record.id === activeRecordId);
+
+  const record = {
+    id: activeRecordId,
+    name: studentName,
+    score,
+    correctAnswers,
+    date: new Date().toISOString(),
+    theme: selectedTheme,
+    wordRecordings: { ...wordAudioIds }
+  };
+
+  if (existing) {
+    Object.assign(existing, record);
+  } else {
+    records.push(record);
+  }
+
+  saveRecords(records);
+}
+
 function finishMission() {
+  saveCurrentWordRecordings();
+
   $("resultStudentName").textContent = "Syabas, " + studentName + "!";
   $("finalScore").textContent = score + " / 15";
 
-  showScreen("resultScreen");
-  setMessage("recordingMessage", "Rakaman suara pilihan. Benarkan akses mikrofon apabila diminta.");
+  const oldPanel = $("recordingMessage")?.parentElement;
+  if (oldPanel) oldPanel.hidden = true;
 
+  showScreen("resultScreen");
   savePlayer();
 }
 
@@ -589,11 +756,9 @@ async function renderTeacherRecords() {
   list.replaceChildren();
 
   $("totalRecords").textContent = records.length;
-
   $("highestScore").textContent = records.length
     ? `${records[0].score}/15`
     : "—";
-
   $("lowestScore").textContent = records.length
     ? `${records[records.length - 1].score}/15`
     : "—";
@@ -606,170 +771,69 @@ async function renderTeacherRecords() {
   for (const record of records) {
     const card = createElement("article", "student-record");
     const details = createElement("div", "student-record-details");
-    const heading = createElement("h3", "", record.name);
+    const heading = createElement("h3", "", record.name || "Murid");
     const date = record.date
       ? new Date(record.date).toLocaleString("ms-MY")
       : "Tarikh tidak tersedia";
 
-    const info = createElement(
-      "p",
-      "",
-      `${date} · Skor: ${record.score}/15 · Jawapan betul: ${record.correctAnswers}/15`
+    details.append(
+      heading,
+      createElement(
+        "p", "",
+        `${date} · Skor: ${record.score}/15 · Jawapan betul: ${record.correctAnswers}/15`
+      )
     );
 
-    details.append(heading, info);
+    const recordings = record.wordRecordings || {};
+    const words = games[2].words;
 
-    if (record.audioId) {
-      const audioLabel = createElement("p", "", "🎤 Rakaman bacaan:");
-      details.append(audioLabel);
+    const section = createElement("div", "recorded-words");
+    section.append(createElement("h4", "", "Rakaman bacaan Misi 3"));
 
-      try {
-        const blob = await getAudio(record.audioId);
+    for (const item of words) {
+      const wordRow = createElement("div", "recorded-word-row");
+      wordRow.style.cssText =
+        "padding:10px;margin:8px 0;border-radius:12px;background:#f7f3ff;";
 
-        if (blob) {
-          const audio = document.createElement("audio");
-          audio.controls = true;
-          audio.preload = "none";
-          audio.src = URL.createObjectURL(blob);
-          details.append(audio);
-        } else {
-          details.append(createElement("p", "", "Rakaman tidak ditemui pada peranti ini."));
-        }
-      } catch {
-        details.append(createElement("p", "", "Rakaman tidak dapat dibuka."));
-      }
-    } else {
-      details.append(createElement("p", "", "Tiada rakaman suara disimpan."));
-    }
+      wordRow.append(createElement("strong", "", item.word));
 
-    const scoreBadge = createElement("div", "record-score", `${record.score}/15`);
-    card.append(details, scoreBadge);
-    list.append(card);
-  }
-}
+      const audioId = recordings[item.word];
 
-async function startRecording() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia ||
-      !window.MediaRecorder) {
-    setMessage(
-      "recordingMessage",
-      "Rakaman tidak disokong. Cuba pelayar terkini melalui laman HTTPS."
-    );
-    return;
-  }
-
-  try {
-    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    recordingChunks = [];
-    recordedBlob = null;
-    recordingStarted = true;
-    recordingStopped = false;
-
-    const options = {};
-
-    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-      options.mimeType = "audio/webm;codecs=opus";
-    }
-
-    mediaRecorder = new MediaRecorder(recordingStream, options);
-    recordingMimeType = mediaRecorder.mimeType || "audio/webm";
-
-    recordingPromise = new Promise((resolve) => {
-      mediaRecorder.addEventListener("dataavailable", (event) => {
-        if (event.data && event.data.size > 0) {
-          recordingChunks.push(event.data);
-        }
-      });
-
-      mediaRecorder.addEventListener("stop", async () => {
-        recordedBlob = new Blob(recordingChunks, {
-          type: recordingMimeType
-        });
-
-        recordingStopped = true;
-        recordingStream.getTracks().forEach((track) => track.stop());
-        recordingStream = null;
-
+      if (audioId) {
         try {
-          await saveAudio(activeRecordId, recordedBlob);
-          setMessage(
-            "recordingMessage",
-            "Rakaman disimpan pada peranti ini. Tekan butang Seterusnya untuk menamatkan."
-          );
+          const blob = await getAudio(audioId);
+
+          if (blob) {
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.preload = "none";
+            audio.src = URL.createObjectURL(blob);
+            wordRow.append(audio);
+          } else {
+            wordRow.append(createElement("p", "", "Rakaman tiada pada peranti ini."));
+          }
         } catch {
-          setMessage(
-            "recordingMessage",
-            "Rakaman selesai tetapi tidak dapat disimpan. Ruang simpanan mungkin tidak tersedia."
-          );
+          wordRow.append(createElement("p", "", "Rakaman tidak dapat dibuka."));
         }
+      } else {
+        wordRow.append(createElement("p", "", "Belum ada rakaman."));
+      }
 
-        resolve(recordedBlob);
-      });
-    });
-
-    mediaRecorder.start();
-
-    $("recordBtn").disabled = true;
-    $("stopRecordBtn").disabled = false;
-    setMessage("recordingMessage", "Sedang merakam. Baca perkataan yang dipaparkan dengan jelas.");
-  } catch {
-    setMessage(
-      "recordingMessage",
-      "Mikrofon tidak dapat diakses. Semak kebenaran mikrofon pada pelayar."
-    );
-  }
-}
-
-async function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-    $("stopRecordBtn").disabled = true;
-
-    if (recordingPromise) {
-      await recordingPromise;
+      section.append(wordRow);
     }
 
-    $("recordBtn").disabled = false;
-  }
-}
+    details.append(section);
 
-async function saveFinalRecord() {
-  if (recordingStarted && !recordingStopped && mediaRecorder &&
-      mediaRecorder.state !== "inactive") {
-    await stopRecording();
-  }
-
-  const records = loadRecords();
-
-  const record = {
-    id: activeRecordId || makeId(),
-    name: studentName,
-    score,
-    correctAnswers,
-    date: new Date().toISOString(),
-    theme: selectedTheme,
-    audioId: recordedBlob ? activeRecordId : null
-  };
-
-  const existingIndex = records.findIndex((item) => item.id === record.id);
-
-  if (existingIndex >= 0) {
-    records[existingIndex] = record;
-  } else {
-    records.push(record);
-  }
-
-  if (!saveRecords(records)) {
-    setMessage(
-      "recordingMessage",
-      "Rekod tidak dapat disimpan. Semak ruang simpanan pelayar."
-    );
+    const badge = createElement("div", "record-score", `${record.score}/15`);
+    card.append(details, badge);
+    list.append(card);
   }
 }
 
 function returnHome() {
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    stopRecording();
+    setMessage("gameMessage", "Hentikan rakaman dahulu.");
+    return;
   }
 
   showScreen("homeScreen");
@@ -786,15 +850,10 @@ function bindEvents() {
   $("checkAnswerBtn").addEventListener("click", checkAnswer);
   $("nextQuestionBtn").addEventListener("click", nextQuestion);
 
-  $("finishMissionBtn").addEventListener("click", async () => {
-    await saveFinalRecord();
-    $("recordBtn").disabled = false;
-    $("stopRecordBtn").disabled = true;
+  $("finishMissionBtn").addEventListener("click", () => {
+    saveCurrentWordRecordings();
     showScreen("homeScreen");
   });
-
-  $("recordBtn").addEventListener("click", startRecording);
-  $("stopRecordBtn").addEventListener("click", stopRecording);
 
   $("refreshRecordsBtn").addEventListener("click", renderTeacherRecords);
 
@@ -805,7 +864,6 @@ function bindEvents() {
   document.querySelectorAll(".theme-option").forEach((button) => {
     button.addEventListener("click", () => {
       applyTheme(button.dataset.theme);
-      savePlayer();
     });
   });
 }
