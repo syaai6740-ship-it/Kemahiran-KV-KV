@@ -746,5 +746,6 @@ function escapeHTML(value) {
     return entities[character];
   });
 }
+
 /* Paparan awal */
 updateHomeProgress();
